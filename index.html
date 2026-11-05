@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Principals</title><link rel="icon" href="data:,"><link rel="stylesheet" href="pages/style.css">
+<style>.join{max-width:420px;margin:8vh auto}.join input{width:100%;margin:6px 0 12px}.join button{width:100%}</style>
+</head><body><div class="wrap"><div class="join card">
+<h1>Principals</h1>
+<p class="mute">You will be dealt a firm and a seat.</p>
+<label>Game code<input id="code" autocapitalize="characters" autocomplete="off" maxlength="6"></label>
+<label>Your name<input id="name" autocomplete="name" maxlength="40"></label>
+<button class="primary" id="go">Join</button>
+<p class="err" id="err"></p>
+</div></div>
+<script type="module">
+import { openStore, params, savedSeat, saveSeat } from './pages/store.js';
+const $ = id => document.getElementById(id);
+const g = (params().get('g') || '').toUpperCase();
+if (g) $('code').value = g;
+const keep = params().get('local') === '1' ? '&local=1' : '';
+const seat = g && savedSeat(g);
+if (seat) location.replace('play.html?g=' + g + keep);
+$('go').onclick = async () => {
+  $('err').textContent = '';
+  const code = $('code').value.trim().toUpperCase(), name = $('name').value.trim();
+  if (!code || !name) { $('err').textContent = 'Enter the code and your name.'; return; }
+  try {
+    const store = await openStore();
+    const r = await store.join(code, name, (savedSeat(code) || {}).token);
+    saveSeat(code, { seatId: r.seatId, token: r.token, name });
+    location.href = 'play.html?g=' + code + keep;
+  } catch (e) { $('err').textContent = /no such game|No game/i.test(e.message) ? 'No game with that code.' : e.message; }
+};
+$('name').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
+</script></body></html>

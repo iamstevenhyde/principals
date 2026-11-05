@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Principals Host</title><link rel="icon" href="data:,"><link rel="stylesheet" href="pages/style.css">
+<style>.ctl button{min-width:120px}.seatlist{columns:3;font-size:.85rem}@media(max-width:700px){.seatlist{columns:1}}</style>
+</head><body><div class="wrap" id="app"><h1>Principals: host</h1><p class="mute">Loading.</p></div>
+<script type="module">
+import { openStore, params, hostToken, saveHostToken, pageMode } from './pages/store.js';
+import { Host } from './pages/host.js';
+import { esc, fmtClock } from './pages/render.js';
+const app = document.getElementById('app');
+const store = await openStore();
+let code = params().get('g'), host = null, lastHtml = '';
+const q = (u) => u + (pageMode() === 'local' && params().get('local') === '1' ? '&local=1' : '');
+
+async function newGame() {
+  const s = await store.createSession();
+  saveHostToken(s.code, s.hostToken);
+  location.search = '?g=' + s.code + (params().get('local') === '1' ? '&local=1' : '');
+}
+if (!code) {
+  app.innerHTML = `<h1>Principals: host</h1><div class="card"><p>Mode: <b>${pageMode()}</b>. ${pageMode() === 'local' ? 'Everything stays in this browser. Open player tabs from the lobby.' : 'Live on Supabase.'}</p><button class="primary" id="new">New game</button></div>`;
+  document.getElementById('new').onclick = newGame;
+} else {
+  const tok = hostToken(code);
+  if (!tok) app.innerHTML = '<p class="err">This browser does not hold the host token for ' + esc(code) + '. Open it from the browser that created the game.</p>';
+  else {
+    host = new Host(store, code, tok);
+    await host.load({ boardCount: 4 });
+    host.start();
+    host.onChange(render);
+    render(host.state);
+  }
+}
+
+function render(st) {
+  const ae = document.activeElement; if (ae && ae.id && ae.id.startsWith('tm_')) return;   // don't wipe a timer edit
+  const P = st, t = Date.now();
+  const left = st.clock ? (st.clock.paused ? st.clock.remaining : Math.max(0, st.clock.endsAt - t)) : null;
+  const base = location.href.split('admin.html')[0];
+  const joinUrl = base + 'index.html?g=' + st.code;
+  const boards = Object.values(st.boards);
+  const suits = Object.entries(st.streetActions[st.round] || {}).filter(([, a]) => a.type === 'file');
+  const ov = st.suitOverrides[st.round] || {};
+  const focus = document.activeElement && document.activeElement.id;
+  const html = `
+  <div class="row"><h1 style="flex:1">Principals: host <span class="pill">${esc(st.code)}</span></h1><span class="clock" id="hclk"></span></div>
+  <div class="card row ctl">
+    <b>Phase:</b> ${esc(st.phase)} ${st.round ? 'round ' + st.round : ''} <span class="mute">(rounds ${st.schedule.join(', ')})</span>
+    <a href="${q('projector.html?g=' + st.code)}" target="_blank">Open projector</a>
+    <a href="${q('index.html?g=' + st.code)}" target="_blank">Join link</a>
+  </div>
+  ${st.phase === 'lobby' ? `<div class="card"><h2>Lobby</h2>
+    <p>${st.players.length} joined. Join at <code>${esc(joinUrl)}</code></p>
+    <div class="row"><label>Boards <select id="nb">${[1, 2, 3, 4, 5].map(n => `<option ${n === st.settings.boardCount ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <span class="mute small">18 to 22 students: 3. 23 to 27: 4. 28 to 35: 5.</span></div>
+    <div class="row" style="margin-top:8px"><button class="primary" id="start">Start game</button>
+    ${pageMode() === 'local' ? '<button id="bots">Add 5 simulated players</button><button id="tabs">Open 3 player tabs</button>' : ''}</div>
+    <p class="seatlist">${st.players.map(p => esc(p.name)).join('<br>')}</p></div>` : `
+  <div class="card row ctl">
+    <button class="primary" id="adv">${st.phase === 'shock' ? 'Start the clock' : st.phase === 'play' ? 'End round now' : st.phase === 'outside' ? (st.schedule.indexOf(st.round) === st.schedule.length - 1 ? 'Reveal' : 'Next round') : 'Done'}</button>
+    <button id="pause">${st.clock && st.clock.paused ? 'Resume' : 'Pause'}</button>
+    <button id="add30">+30 s</button><button id="add60">+60 s</button>
+    <label class="row small"><input type="checkbox" id="auto" ${st.settings.autoAdvance ? 'checked' : ''}> auto-advance</label>
+    <button id="skip2" ${st.round >= 2 || !st.schedule.includes(2) ? 'disabled' : ''}>Skip round 2</button>
+    ${pageMode() === 'local' ? '<button id="bots">Add 5 simulated players</button>' : ''}
+  </div>`}
+  <div class="card row small"><b>Timers (s)</b>
+    ${['shock', 'play', 'outside'].map(k => `<label>${k} <input id="tm_${k}" type="number" min="5" style="width:80px" value="${st.settings.timers[k]}"></label>`).join('')}
+    <button id="savetm">Save timers</button></div>
+  ${suits.length ? `<div class="card"><h2>Suits this round</h2>${suits.map(([sid, a]) => `<div class="row">${esc(st.seats[sid].name)}: ${esc(a.kind)} suit on ${esc(st.boards[a.target].content.name)}
+     ${['auto', 'win', 'lose'].map(v => `<button data-suit="${sid}" data-v="${v}" class="${(ov[sid] || 'auto') === v ? 'sel' : ''}">${v}</button>`).join('')}</div>`).join('')}</div>` : ''}
+  ${boards.length ? `<div class="card"><h2>Boards</h2>${boards.map(b => { const h = b.hist[st.round] || {}; return `<div class="row small" style="border-top:1px solid var(--line);padding:6px 0"><b style="min-width:140px">${esc(b.content.name)}</b>
+     stock ${b.stock[b.stock.length - 1]} ${b.failed ? '<b class="err">FAILED</b>' : ''} | passed ${(h.passed || []).length} | disclosure ${esc(b.disclosure || 'undecided')} | chair ${esc((st.seats[b.chair] || {}).name || '-')}
+     | ${Object.values(st.seats).filter(s => s.kind === 'director' && s.board === b.id).map(s => esc(s.name)).join(', ')}</div>`; }).join('')}
+     <p class="small mute">Street: ${Object.values(st.seats).filter(s => s.kind === 'street').map(s => esc(s.name) + ' (' + esc(s.label) + ')').join(', ')}</p></div>` : ''}
+  ${st.phase === 'reveal' ? '<div class="card"><p>The reveal is on the projector.</p></div>' : ''}
+  <p class="small mute">Keep this tab open: it runs the game. ${host.lastError ? '<span class="err">' + esc(host.lastError) + '</span>' : ''}</p>`;
+  const paint = () => { const c = document.getElementById('hclk'); if (c) c.textContent = fmtClock(left); };
+  if (html === lastHtml) { paint(); return; }
+  lastHtml = html; app.innerHTML = html; paint();
+  const on = (id, f) => { const el = document.getElementById(id); if (el) el.onclick = f; };
+  on('start', () => host.act({ type: 'start' }));
+  on('adv', () => host.act({ type: st.phase === 'outside' && st.schedule.indexOf(st.round) === st.schedule.length - 1 ? 'reveal' : 'advance' }));
+  on('pause', () => host.act({ type: st.clock && st.clock.paused ? 'resume' : 'pause' }));
+  on('add30', () => host.act({ type: 'add_time', secs: 30 })); on('add60', () => host.act({ type: 'add_time', secs: 60 }));
+  on('skip2', () => host.act({ type: 'skip_round2' }));
+  on('bots', () => { host.addBots(5); render(host.state); });
+  on('tabs', () => { for (let i = 0; i < 3; i++) window.open(q('index.html?g=' + st.code), '_blank'); });
+  on('savetm', () => host.act({ type: 'set_timers', timers: Object.fromEntries(['shock', 'play', 'outside'].map(k => [k, Number(document.getElementById('tm_' + k).value) || st.settings.timers[k]])) }));
+  const auto = document.getElementById('auto'); if (auto) auto.onchange = () => host.act({ type: 'auto', on: auto.checked });
+  const nb = document.getElementById('nb'); if (nb) nb.onchange = () => host.act({ type: 'set_boards', n: Number(nb.value) });
+  document.querySelectorAll('[data-suit]').forEach(b => b.onclick = () => host.act({ type: 'suit_override', seat: b.dataset.suit, value: b.dataset.v === 'auto' ? null : b.dataset.v }));
+  if (focus && focus.startsWith('tm_')) { const el = document.getElementById(focus); if (el) el.focus(); }
+}
+</script></body></html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Principals</title><link rel="icon" href="data:,"><link rel="stylesheet" href="pages/style.css">
+<style>
+.hdr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.hdr h1{flex:1;font-size:1.3rem}
+.chatin{display:flex;gap:6px}.chatin input{flex:1}
+details summary{cursor:pointer;font-weight:600;padding:4px 0}
+.opts{display:grid;gap:6px}.opt{border:1px solid var(--line);border-radius:10px;padding:8px}
+.opt b{display:block}.tgt{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tgt button{text-align:left;min-height:64px}
+.notice{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:10px;z-index:9}
+</style></head><body><div class="wrap">
+<div class="play"><main id="main"><p class="mute">Loading.</p></main>
+<aside class="card chatbox" id="chat"><div class="tabs" id="tabs"></div><div class="msgs" id="msgs"></div>
+<div class="chatin"><input id="msg" maxlength="400" placeholder="Message" autocomplete="off"><button class="primary" id="send">Send</button></div></aside></div>
+<div id="note"></div></div>
+<script type="module">
+import { openStore, params, savedSeat } from './pages/store.js';
+import { esc, fmtClock, spark, dial, arrowsLabeled, COLORS } from './pages/render.js';
+const code = (params().get('g') || '').toUpperCase();
+const keep = params().get('local') === '1' ? '&local=1' : '';
+const seat = savedSeat(code);
+if (!seat) location.replace('index.html?g=' + code + keep);
+const store = await openStore();
+const $ = id => document.getElementById(id);
+let V = null, P = null, got = 0, ch = 'board', seen = {}, lastMain = '';
+const send = async a => { try { await store.submit(code, seat.token, a); setTimeout(load, 300); } catch (e) { flash(e.message); } };
+const flash = m => { $('note').innerHTML = `<div class="notice">${esc(m)}</div>`; setTimeout(() => $('note').innerHTML = '', 3500); };
+async function load() {
+  try { const r = await store.seatView(code, seat.token); V = r.view; P = r.public; got = Date.now(); render(); }
+  catch (e) { $('main').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }
+}
+store.subscribe(code, load); load();
+setInterval(() => { const el = $('clk'); if (el && P && P.clockLeft != null && !P.paused) el.textContent = fmtClock(Math.max(0, P.clockLeft - (Date.now() - got))); }, 250);
+let lastNotice = '';
+const faceColor = s => COLORS[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
+const face = n => `<span class="face" style="background:${faceColor(n)}">${esc(n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase())}</span>`;
+const PH = { lobby: 'Waiting for the host', shock: 'New round', play: 'Board in session', outside: 'The outside view', reveal: 'Reveal' };
+
+function render() {
+  if (!V) { $('main').innerHTML = '<div class="card"><h2>You are in.</h2><p class="mute">Waiting for the host to start.</p></div>'; return; }
+  if (V.notice && V.notice !== lastNotice) { flash(V.notice); } lastNotice = V.notice || '';
+  const head = `<div class="hdr"><h1>${V.board ? esc(V.board.name) : V.street ? 'The Street' : 'Principals'}</h1><span class="pill">${esc(PH[P.phase] || P.phase)}${P.round ? ' . round ' + P.round : ''}</span><span class="clock" id="clk"></span></div>`;
+  let html;
+  if (P.phase === 'lobby' || V.me.kind === 'waiting') html = head + `<div class="card"><h2>Hi ${esc(V.me.name)}.</h2><p class="mute">Waiting for the host to start. You will be dealt a firm and a seat.</p></div>`;
+  else if (V.director) html = head + director();
+  else if (V.street) html = head + street();
+  else html = head;
+  if (html !== lastMain) {
+    const y = scrollY, main = $('main');
+    const open = [...main.querySelectorAll('details')].map(d => d.open);
+    const vals = Object.fromEntries([...main.querySelectorAll('select[id]')].map(s => [s.id, s.value]));
+    const radio = (main.querySelector('input[name=sk]:checked') || {}).value;
+    main.innerHTML = html; lastMain = html;
+    main.querySelectorAll('details').forEach((d, i) => { if (open[i]) d.open = true; });
+    for (const [id, v] of Object.entries(vals)) { const s = $(id); if (s && [...s.options].some(o => o.value === v)) s.value = v; }
+    if (radio) { const r = main.querySelector('input[name=sk][value=' + radio + ']'); if (r) r.checked = true; }
+    scrollTo(0, y); wire();
+  }
+  const el = $('clk'); if (el) el.textContent = fmtClock(P.clockLeft);
+  renderChat();
+}
+
+function shockCard() { return P.shock ? `<div class="card"><h2>${esc(P.shock.title)}</h2><p>${esc(P.shock.text)}</p>${P.shock.board_text ? `<p class="mute">${esc(P.shock.board_text)}</p>` : ''}</div>` : ''; }
+function myTicker() {
+  const b = P.boards.find(x => x.id === V.board.id); if (!b) return '';
+  const i = P.boards.indexOf(b);
+  return `<div class="card"><div class="row"><b style="flex:1">Your stock</b><b>${b.stock[b.stock.length - 1].toFixed(1)}</b></div>${spark(b.stock, 300, 50, COLORS[i % COLORS.length])}<div class="dials">${dial('Payout', b.dials.payout)}${dial('Wages', b.dials.wages)}${dial('Price', b.dials.price)}</div></div>`;
+}
+function director() {
+  const d = V.director, b = V.board, open = b.votes.find(v => v.open), chair = d.chair, play = P.phase === 'play';
+  const name = id => (b.directors.find(x => x.id === id) || { name: 'A director who left' }).name;
+  if (P.phase === 'reveal') return revealMine();
+  const card = `<div class="card secret"><div class="row">${face(V.me.name)}<div style="flex:1"><b>${esc(d.card.name || d.seatLabel)}</b> <span class="mute">${esc(d.seatLabel)}${d.card.title && d.card.title !== d.seatLabel ? ', ' + esc(d.card.title) : ''}</span>${chair ? ' <span class="pill" style="border-color:var(--accent)">Chair</span>' : ''}<br><span class="small mute">Played by you. Home: ${esc(d.card.home || '')}</span></div></div>
+    <p><b>You lose:</b> ${esc(d.exposure)}</p><p><b>Your secret:</b> ${esc(d.secret)}</p>
+    ${d.prior.length ? `<p class="small mute">You resigned from ${d.prior.map(p => esc(p.board)).join(', ')}.</p>` : ''}</div>`;
+  const chips = `<div class="card">${b.directors.map(x => `<span class="director-chip ${x.chair ? 'chair' : ''}">${face(x.name)} ${esc(x.name)} <span class="mute">${esc(x.seatLabel)}</span>${x.chair ? ' . Chair' : ''}</span>`).join('')}</div>`;
+  const visitor = b.visitor ? `<div class="card" style="border-color:var(--warn)">The <b>${esc(b.visitor.label)}</b> is sitting at your table.${b.visitor.out ? ' Sent out.' : chair && play ? ' <button data-a="exec">Executive session</button>' : ''}</div>` : '';
+  const labels = b.labels || {};
+  const voteBox = open ? (() => {
+    const what = open.kind === 'disclosure' ? 'Disclosure: tell, spin, or bury?' : (title(open.target)) + (open.nominee ? ': make ' + esc(name(open.nominee)) + ' Chair' : '');
+    const opts = open.kind === 'disclosure' ? ['tell', 'spin', 'bury'] : ['yes', 'no'];
+    return `<div class="vote"><h2>Vote: ${what}</h2><div class="ballots">${opts.map(o => `<button data-ballot="${o}" data-vote="${open.id}" class="${open.mine === o ? 'sel primary' : ''}">${o.toUpperCase()}</button>`).join('')}</div>
+      <p class="small mute">${open.voted.length} of ${b.directors.length} voted: ${open.voted.map(n => esc(name(n))).join(', ')}</p>${chair ? '<button data-a="close">Close the vote</button>' : ''}</div>`;
+  })() : '';
+  const budget = b.mustSave
+    ? `<div class="card"><div class="budget"><b>Spend</b><div class="bar"><i style="width:${Math.min(100, (b.budget - b.room) / Math.max(1, b.budget) * 100)}%"></i></div><span>$${b.room}M left of $${b.budget}M</span></div>
+       <div class="budget" style="margin-top:6px"><b>Savings</b><div class="bar"><i style="width:${Math.max(0, Math.min(100, b.saved / b.mustSave * 100))}%;background:var(--warn)"></i></div><span>$${Math.max(0, b.saved)}M of $${b.mustSave}M target</span></div></div>`
+    : `<div class="card"><div class="budget"><b>Budget</b><div class="bar"><i style="width:${Math.max(0, Math.min(100, b.room / Math.max(1, b.budget) * 100))}%"></i></div><span>$${b.room}M of $${b.budget}M</span></div></div>`;
+  const mot = m => `<div class="motion ${m.passed ? 'passed' : ''}"><div><b class="t">${esc(m.title)}</b><br><span class="small mute">${esc(m.motive || '')}</span><br>${arrowsLabeled(m.effects, labels)}</div>
+     <div style="text-align:right"><span class="cost">${m.cost_m < 0 ? 'saves $' + (-m.cost_m) : '$' + m.cost_m}M</span><br>${chair && play && !m.passed && !open && m.fits ? `<button data-callm="${m.id}">Call vote</button>` : !m.fits && !m.passed ? '<span class="small mute">over budget</span>' : ''}</div></div>`;
+  const motions = `<div class="card"><h2>Motions</h2>${b.motions.map(mot).join('')}</div>`;
+  const is = b.issue;
+  const disc = is ? `<div class="card issue"><h2>The company issue</h2><p>${esc(is.text)}</p><div class="opts">
+     ${['tell', 'spin', 'bury'].map(k => `<div class="opt ${b.disclosure === k ? 'sel' : ''}"><b>${k.toUpperCase()}</b>${esc(is[k] || '')}</div>`).join('')}</div>
+     <p class="small">${b.decided ? 'Board decided: <b>' + esc(b.disclosure.toUpperCase()) + '</b>' : 'Not decided yet. If nobody decides, last round\'s call stands.'}</p>
+     ${chair && play && !open ? '<button class="primary" data-a="calld">Call the disclosure vote</button>' : ''}</div>` : '';
+  const standing = `<details class="card"><summary>Standing motions</summary>${b.standing.filter(m => m.available).map(m => `<div class="motion ${m.passed ? 'passed' : ''}"><div><b class="t">${esc(m.title)}</b><br><span class="small mute">${esc(m.motive || '')}</span><br>${arrowsLabeled(m.effects, labels)}</div><div style="text-align:right"><span class="cost">$${m.cost_m}M</span><br>
+     ${m.anyone && play && !open ? `<select id="nom">${b.directors.filter(x => !x.chair).map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select><button data-chairout="${m.id}">Call vote</button>` : chair && play && !open && !m.passed && m.fits ? `<button data-callm="${m.id}">Call vote</button>` : ''}</div></div>`).join('')}
+     ${b.suitPending ? '<p class="err">A suit has been filed against this board.</p>' : ''}</details>`;
+  const past = b.votes.filter(v => !v.open);
+  const history = past.length ? `<details class="card"><summary>Votes so far (${past.length})</summary>${past.slice().reverse().map(v => `<p class="small"><b>${v.kind === 'disclosure' ? 'Disclosure' : title(v.target)}</b>: ${esc(v.result)}<br>${Object.entries(v.ballots || {}).map(([id, c]) => esc(name(id)) + ' ' + esc(c)).join(' . ')}</p>`).join('')}</details>` : '';
+  const acts = `<details class="card"><summary>On your own</summary>
+     <div class="row"><select id="leakto">${b.street.map(s => `<option value="${s.id}">${esc(s.label)}: ${esc(s.name)}</option>`).join('')}</select><select id="leakfact"><option value="issue">the issue</option><option value="disclosure">how we voted</option></select><button data-a="leak" ${d.leaked || !b.street.length ? 'disabled' : ''}>Leak</button></div>
+     <div class="row" style="margin-top:8px"><button data-a="sell" ${d.sold || !play ? 'disabled' : ''}>Sell your shares</button><button data-a="resign" ${d.canResign ? '' : 'disabled'}>Resign from this board</button></div></details>`;
+  const failed = b.failed ? '<div class="card"><h2 class="err">This firm has failed.</h2></div>' : '';
+  return failed + (P.phase === 'shock' ? shockCard() : '') + voteBox + visitor + card + budget + disc + motions + standing + history + chips + acts + myTicker();
+}
+function title(id) { const m = [...V.board.motions, ...V.board.standing].find(x => x.id === id); return m ? esc(m.title) : 'Motion'; }
+function revealMine() {
+  const s = V.director.score || {};
+  return `<div class="card"><h2>Your result</h2>
+    <p>Secret: <b class="${s.secret ? 'met' : 'unmet'}">${s.secret ? 'met' : 'missed'}</b>. Exposure: <b class="${s.exposureFired ? 'fired' : 'safe'}">${s.exposureFired ? 'fired' : 'safe'}</b>. Your home community ranked this board ${s.homeRank} of ${P.boards.length}.</p>
+    <p class="clock">${s.total ?? ''} points</p><p class="mute">The full reveal is on the projector.</p></div>`;
+}
+function street() {
+  const s = V.street, play = ['shock', 'play'].includes(P.phase);
+  if (P.phase === 'reveal') return `<div class="card"><h2>Your result</h2><p class="clock">${s.score ?? ''} points</p><p>${s.history.filter(h => h.hit === true).length} true, ${s.history.filter(h => h.hit === false).length} false.</p></div>`;
+  const verb = { campaign: 'Campaign against', story: 'Run a story: they buried it', inspect: 'Inspect', short: 'Short', file: 'Sue' }[s.actionType] || 'Act on';
+  const visiting = s.visiting ? `<div class="card" style="border-color:var(--warn)"><h2>You attend a board this round</h2>${s.visiting.canPick ? `<div class="tgt">${P.boards.map(b => `<button data-visit="${b.id}" ${s.visiting.seen.includes(b.id) ? 'disabled' : ''} class="${s.visiting.board === b.id ? 'sel' : ''}">${esc(b.name)}</button>`).join('')}</div><p class="small mute">Pick one before the clock starts, or one is picked for you.</p>` : `<p>Go sit with <b>${esc((P.boards.find(b => b.id === s.visiting.board) || {}).name || '')}</b>.${s.visiting.out ? ' They sent you out.' : ''}</p>`}</div>` : '';
+  const kind = s.actionType === 'file' ? `<div class="row"><label><input type="radio" name="sk" value="dodge" checked> Dodge-style suit (wages high or payout low)</label><label><input type="radio" name="sk" value="harm"> Harm suit (a caught burial)</label></div>` : '';
+  const cards = P.boards.map((b, i) => { const st = b.statements[b.statements.length - 1]; return `<button data-tgt="${b.id}" class="${s.action && s.action.target === b.id ? 'sel' : ''}" ${play ? '' : 'disabled'}><b>${esc(b.name)}</b> ${b.stock[b.stock.length - 1].toFixed(1)}${spark(b.stock, 140, 30, COLORS[i % COLORS.length])}<span class="small mute">${st ? esc(st.text) : ''}</span></button>`; }).join('');
+  return (P.phase === 'shock' ? shockCard() : '') + visiting + `<div class="card secret"><div class="row">${face(V.me.name)}<div style="flex:1"><b>${esc(s.label)}</b><br><span class="small mute">${esc(s.actionText)}</span></div>${dial('Credibility', Math.round(s.cred * 4))}</div>
+    <p><b>Your secret:</b> ${esc(s.secret)}</p>${s.consulted ? `<p class="small">Your firm consults for <b>${esc(s.consulted)}</b>.</p>` : ''}${s.weak ? '<p class="err small">Low credibility: this round your action works at half strength.</p>' : ''}</div>
+    <div class="card"><h2>${verb}</h2>${kind}<div class="tgt">${cards}</div><p class="small mute">${s.action ? 'Locked in: ' + esc((P.boards.find(b => b.id === s.action.target) || {}).name) + '. You can change it until the boards lock.' : 'One action per round.'}</p></div>
+    ${s.leaks.length ? `<div class="card"><h2>Tips you received</h2>${s.leaks.map(l => `<p class="small">Round ${l.round}: ${esc(l.fact)}</p>`).join('')}</div>` : ''}
+    <details class="card"><summary>Tip another Street member</summary><div class="row"><select id="tipto">${s.members.filter(m => m.id !== V.me.id).map(m => `<option value="${m.id}">${esc(m.label)}: ${esc(m.name)}</option>`).join('')}</select><select id="tipb">${P.boards.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('')}</select><button data-a="tip">Send tip</button></div></details>
+    <div class="card"><h2>Wire</h2>${P.feed.slice().reverse().slice(0, 10).map(f => `<p class="small"><b>R${f.round}</b> ${esc(f.text)}</p>`).join('')}</div>`;
+}
+function wire() {
+  const q = s => document.querySelectorAll(s);
+  q('[data-ballot]').forEach(b => b.onclick = () => send({ type: 'ballot', vote: b.dataset.vote, choice: b.dataset.ballot }));
+  q('[data-callm]').forEach(b => b.onclick = () => send({ type: 'open_vote', kind: 'motion', target: b.dataset.callm }));
+  q('[data-chairout]').forEach(b => b.onclick = () => send({ type: 'open_vote', kind: 'motion', target: b.dataset.chairout, nominee: $('nom').value }));
+  q('[data-tgt]').forEach(b => b.onclick = () => { const k = document.querySelector('input[name=sk]:checked'); send({ type: 'street_action', target: b.dataset.tgt, kind: k ? k.value : null }); });
+  q('[data-visit]').forEach(b => b.onclick = () => send({ type: 'visit_board', board: b.dataset.visit }));
+  q('[data-a]').forEach(b => b.onclick = () => {
+    const a = b.dataset.a;
+    if (a === 'close') send({ type: 'close_vote' });
+    if (a === 'calld') send({ type: 'open_vote', kind: 'disclosure' });
+    if (a === 'exec') send({ type: 'exec_session' });
+    if (a === 'leak') send({ type: 'leak', to: $('leakto').value, fact: $('leakfact').value });
+    if (a === 'sell' && confirm('Sell your shares now?')) send({ type: 'sell' });
+    if (a === 'resign' && confirm('Resign from this board? You move to another board with a new secret.')) send({ type: 'resign' });
+    if (a === 'tip') send({ type: 'street_leak', to: $('tipto').value, board: $('tipb').value });
+  });
+}
+// ---------- chat ----------
+function channels() {
+  if (V && V.director) return [{ id: 'board', label: 'Board' }, ...V.board.directors.filter(x => x.id !== V.me.id).map(x => ({ id: 'dm:' + x.id, label: x.name, key: 'dm:' + [V.me.id, x.id].sort().join('|') }))];
+  if (V && V.street) return [{ id: 'street', label: 'Street' }];
+  return [];
+}
+const keyOf = c => (c.id === 'board' ? 'board:' + V.board.id : c.key || c.id);
+function renderChat() {
+  const cs = channels();
+  if (!cs.length) { $('chat').style.display = 'none'; return; } $('chat').style.display = '';
+  if (!cs.find(c => c.id === ch)) ch = cs[0].id;
+  const msgs = V.chat || [];
+  const cur = cs.find(c => c.id === ch), k = keyOf(cur);
+  const count = kk => msgs.filter(m => m.ch === kk).length;
+  seen[k] = count(k);
+  $('tabs').innerHTML = cs.map(c => `<button data-ch="${c.id}" class="${c.id === ch ? 'sel' : ''}">${esc(c.label)}${count(keyOf(c)) > (seen[keyOf(c)] || 0) ? '<span class="dot"></span>' : ''}</button>`).join('');
+  document.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => { ch = b.dataset.ch; renderChat(); });
+  const box = $('msgs'), atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  const html = msgs.filter(m => m.ch === k).map(m => `<div class="msg ${m.from === V.me.id ? 'me' : ''}"><b>${esc(m.name)}</b>${esc(m.text)}</div>`).join('') || '<p class="small mute">No messages yet.</p>';
+  if (box.dataset.h !== html) { box.innerHTML = html; box.dataset.h = html; if (atBottom) box.scrollTop = box.scrollHeight; }
+}
+$('send').onclick = () => { const t = $('msg').value.trim(); if (!t) return; $('msg').value = ''; send({ type: 'chat', ch, text: t }); };
+$('msg').onkeydown = e => { if (e.key === 'Enter') $('send').click(); };
+</script></body></html>
