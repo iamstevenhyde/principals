@@ -1,0 +1,561 @@
+{
+  "id": "thread_and_co",
+  "name": "Thread & Co.",
+  "industry": "Apparel brand",
+  "from_week": "10",
+  "blurb": "A mid-priced apparel brand with 900 stores and a web shop. Everything is made at 40 supplier factories in Karvan and two other countries, and the biggest Karvan factory employs 2,000 people. Founder Elodie Marchetti started with one denim line and holds 26% of the vote.",
+  "communities": [
+    {
+      "key": "shareholders",
+      "label": "Shareholders"
+    },
+    {
+      "key": "workers",
+      "label": "Supplier factory workers"
+    },
+    {
+      "key": "customers",
+      "label": "Shoppers"
+    },
+    {
+      "key": "home",
+      "id": "karvan",
+      "label": "Supplier country (Karvan)"
+    },
+    {
+      "key": "public",
+      "label": "The public"
+    }
+  ],
+  "directors": [
+    {
+      "seat": "attorney",
+      "name": "Dominic Aldrich",
+      "title": "Attorney",
+      "home": "The state bar",
+      "exposure": {
+        "text": "Disbarred if the board is caught burying while he sits on it.",
+        "trigger": {
+          "type": "disclosure_caught",
+          "choice": "bury"
+        }
+      },
+      "secrets": [
+        {
+          "id": "attorney_A",
+          "text": "Never be on a board that's caught burying.",
+          "check": {
+            "type": "not",
+            "of": {
+              "type": "disclosure_caught",
+              "choice": "bury"
+            }
+          }
+        },
+        {
+          "id": "attorney_B",
+          "text": "Your firm does Thread & Co.'s trademark work by the hour. Suits end in settlements, and settlements end the billing, so no suit gets settled.",
+          "check": {
+            "type": "not",
+            "of": {
+              "type": "motion_passed",
+              "id": "settle_suit"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "seat": "labor",
+      "name": "Nasrin Haque",
+      "title": "Labor director",
+      "home": "Garment Workers Federation (supplier side)",
+      "exposure": {
+        "text": "Loses the next vote if the board squeezes factory prices, delays payment, or moves orders away from union factories.",
+        "trigger": {
+          "type": "tag_passed",
+          "tag": "factory_squeeze"
+        }
+      },
+      "secrets": [
+        {
+          "id": "labor_A",
+          "text": "A supplier wage floor passes before the game ends.",
+          "check": {
+            "type": "motion_passed",
+            "id": "wage_floor"
+          }
+        },
+        {
+          "id": "labor_B",
+          "text": "You were granted stock options last year. The stock must end above where it started.",
+          "check": {
+            "type": "stock_end_above_start"
+          }
+        }
+      ]
+    },
+    {
+      "seat": "fund",
+      "name": "Teodor Brandt",
+      "title": "Fund partner",
+      "home": "Brightwater Capital (owns 8%)",
+      "exposure": {
+        "text": "Investors pull money from his fund if the stock ends below where it started.",
+        "trigger": {
+          "type": "stock_end_below_start"
+        }
+      },
+      "secrets": [
+        {
+          "id": "fund_A",
+          "text": "Pass a buyback or dividend of $30M or more in any round. After that you may resign.",
+          "check": {
+            "type": "payout_m_gte",
+            "value": 30
+          }
+        },
+        {
+          "id": "fund_B",
+          "text": "Your fund quietly owns a rival fast-fashion brand. Thread & Co.'s stock must finish in the bottom half.",
+          "check": {
+            "type": "stock_rank_bottom_half"
+          }
+        }
+      ]
+    },
+    {
+      "seat": "founder_friend",
+      "name": "Camille Roux",
+      "title": "Founder's friend",
+      "home": "Elodie Marchetti, the founder (first design partner)",
+      "exposure": {
+        "text": "Loses the seat if the board ever votes against something Elodie wants.",
+        "trigger": {
+          "type": "founder_motion_failed"
+        }
+      },
+      "secrets": [
+        {
+          "id": "founder_friend_A",
+          "text": "Elodie approved the 'recycled' label. Make sure the board never votes Tell on it.",
+          "check": {
+            "type": "not",
+            "of": {
+              "type": "disclosure_choice",
+              "round": 1,
+              "choice": "tell"
+            }
+          }
+        },
+        {
+          "id": "founder_friend_B",
+          "text": "You run the AI design tool. It must be deployed in round 2.",
+          "check": {
+            "type": "motion_passed_any",
+            "ids": [
+              "design_full",
+              "design_retrain"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "seat": "community",
+      "name": "Rahel Tesfaye",
+      "title": "Community seat (Trade representative)",
+      "home": "Karvan Export Council",
+      "exposure": {
+        "text": "Loses standing at home if a Karvan factory closes or the board moves orders out of the country.",
+        "trigger": {
+          "type": "any",
+          "of": [
+            {
+              "type": "motion_passed",
+              "id": "delay_pay"
+            },
+            {
+              "type": "motion_passed",
+              "id": "shift_orders"
+            }
+          ]
+        }
+      },
+      "secrets": [
+        {
+          "id": "community_A",
+          "text": "Either the factory safety fund or the supplier wage floor passes.",
+          "check": {
+            "type": "motion_passed_any",
+            "ids": [
+              "factory_safety",
+              "wage_floor"
+            ]
+          }
+        },
+        {
+          "id": "community_B",
+          "text": "Your cousin owns the largest Karvan factory. The five-year supplier deal must pass, even though it leaves the smaller factories out.",
+          "check": {
+            "type": "motion_passed",
+            "id": "supplier_contract"
+          }
+        }
+      ]
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "budget_m": 50,
+      "motions": [
+        {
+          "id": "buyback",
+          "title": "Stock buyback",
+          "cost_m": 30,
+          "motive": "Hand the cash back to the owners, and the market will notice tonight.",
+          "effects": {
+            "shareholders": 2,
+            "workers": 0,
+            "customers": 0,
+            "home": 0,
+            "public": 0
+          },
+          "flags": {
+            "payout_m": 30,
+            "tags": [
+              "payout"
+            ]
+          }
+        },
+        {
+          "id": "wage_floor",
+          "title": "Set a wage floor in supplier contracts",
+          "cost_m": 14,
+          "motive": "A minimum wage written into every factory contract.",
+          "effects": {
+            "shareholders": -1,
+            "workers": 2,
+            "customers": -1,
+            "home": 1,
+            "public": 0
+          },
+          "flags": {
+            "lag_payback": {
+              "shareholders": 2
+            }
+          }
+        },
+        {
+          "id": "factory_safety",
+          "title": "Fund fire doors and sprinklers",
+          "cost_m": 18,
+          "motive": "The older factories are overdue for them.",
+          "effects": {
+            "shareholders": -1,
+            "workers": 2,
+            "customers": 0,
+            "home": 1,
+            "public": 0
+          }
+        },
+        {
+          "id": "supplier_contract",
+          "title": "Five-year deal with the biggest factory",
+          "cost_m": 12,
+          "motive": "Steady orders for them and steady supply for us.",
+          "effects": {
+            "shareholders": 1,
+            "workers": 1,
+            "customers": 0,
+            "home": 1,
+            "public": 0
+          }
+        },
+        {
+          "id": "price_cut",
+          "title": "Cut prices on the basics",
+          "cost_m": 10,
+          "motive": "Shoppers notice what a T-shirt costs.",
+          "effects": {
+            "shareholders": -1,
+            "workers": 0,
+            "customers": 2,
+            "home": 0,
+            "public": 0
+          }
+        },
+        {
+          "id": "push_recycled",
+          "title": "Push the recycled line in stores",
+          "cost_m": 8,
+          "motive": "Our greenest line should be on the front table.",
+          "effects": {
+            "shareholders": 1,
+            "workers": 0,
+            "customers": 1,
+            "home": 0,
+            "public": 0
+          },
+          "flags": {
+            "if_found": {
+              "public": -1
+            },
+            "raises_detect": 0.1
+          }
+        }
+      ],
+      "issue": {
+        "id": "fake_recycled",
+        "text": "The 'recycled' line is mostly virgin polyester. A supplier swapped the material two seasons ago to hit cost targets and the labels never changed.",
+        "tell": "Relabel the line and offer returns; small stock dip now.",
+        "spin": "\"Our materials strategy continues to evolve.\"",
+        "bury": "Say nothing. If the Auditor or Reporter finds it, the stock drops hard and the Attorney is exposed. If the recycled line was pushed this round, the odds of someone testing it go up.",
+        "detect_base": {
+          "spin": 0.5,
+          "bury": 0.7
+        }
+      }
+    },
+    {
+      "round": 2,
+      "budget_m": 35,
+      "motions": [
+        {
+          "id": "design_full",
+          "title": "AI tools in design and factories, cut 20% of supplier jobs",
+          "cost_m": 8,
+          "motive": "Every brand will do this, and waiting just makes us the slow one.",
+          "effects": {
+            "shareholders": 2,
+            "workers": -2,
+            "customers": 0,
+            "home": -1,
+            "public": 0
+          },
+          "flags": {
+            "staff_cut_pct": 20,
+            "founder_wants": true
+          }
+        },
+        {
+          "id": "design_retrain",
+          "title": "Roll out the tools and fund retraining at suppliers",
+          "cost_m": 22,
+          "motive": "Use the tools and keep the people who know the product.",
+          "effects": {
+            "shareholders": 1,
+            "workers": 1,
+            "customers": 0,
+            "home": 0,
+            "public": 0
+          },
+          "flags": {
+            "founder_wants": true
+          }
+        },
+        {
+          "id": "design_inhouse",
+          "title": "Use the design tool in-house only",
+          "cost_m": 5,
+          "motive": "Our own studio, our own files. Nobody else is affected.",
+          "effects": {
+            "shareholders": 1,
+            "workers": 0,
+            "customers": 0,
+            "home": 0,
+            "public": 0
+          }
+        },
+        {
+          "id": "hold_off",
+          "title": "Hold off on the AI tools this season",
+          "cost_m": 0,
+          "motive": "Wait and see what breaks at other brands first.",
+          "effects": {
+            "shareholders": -1,
+            "workers": 1,
+            "customers": 0,
+            "home": 0,
+            "public": 0
+          }
+        },
+        {
+          "id": "designer_fund",
+          "title": "License fund for independent designers",
+          "cost_m": 7,
+          "motive": "Pay designers whose work shaped the tool.",
+          "effects": {
+            "shareholders": -1,
+            "workers": 0,
+            "customers": 0,
+            "home": 0,
+            "public": 1
+          },
+          "flags": {
+            "resolves_issue": "partial"
+          }
+        },
+        {
+          "id": "license_tool",
+          "title": "License the design tool to other brands",
+          "cost_m": -10,
+          "motive": "We built it. Others will pay to use it.",
+          "effects": {
+            "shareholders": 1,
+            "workers": 0,
+            "customers": 0,
+            "home": 0,
+            "public": 0
+          },
+          "flags": {
+            "if_found": {
+              "public": -2
+            }
+          }
+        }
+      ],
+      "issue": {
+        "id": "copied_prints",
+        "text": "The AI design tool produced a spring print that matches an independent designer's portfolio almost line for line. Her work was in its training set. She hasn't noticed yet.",
+        "tell": "Contact her and pay a license; small stock dip now.",
+        "spin": "\"Our designs are original creations assisted by technology.\"",
+        "bury": "Say nothing and ship the line. If the license motion passed this round, the tool gets used more widely and the Reporter's odds of finding it go up.",
+        "detect_base": {
+          "spin": 0.5,
+          "bury": 0.7
+        }
+      }
+    },
+    {
+      "round": 3,
+      "budget_m": 8,
+      "must_save_m": 26,
+      "brief": "Find $26M in savings this round. Only $8M to spend on anything new.",
+      "motions": [
+        {
+          "id": "delay_pay",
+          "title": "Delay payment to the Karvan factory another quarter",
+          "cost_m": -14,
+          "motive": "It's in the contract terms. The factory will wait.",
+          "effects": {
+            "shareholders": 1,
+            "workers": -2,
+            "customers": 0,
+            "home": -3,
+            "public": 0
+          },
+          "flags": {
+            "tags": [
+              "factory_squeeze"
+            ],
+            "reveal_effects": {
+              "home": -1
+            }
+          }
+        },
+        {
+          "id": "squeeze_price",
+          "title": "Cut factory prices 10% on next season's orders",
+          "cost_m": -10,
+          "motive": "They need the orders more than we need the price.",
+          "effects": {
+            "shareholders": 1,
+            "workers": -2,
+            "customers": 0,
+            "home": -2,
+            "public": 0
+          },
+          "flags": {
+            "tags": [
+              "factory_squeeze"
+            ]
+          }
+        },
+        {
+          "id": "shift_orders",
+          "title": "Move orders to a cheaper country",
+          "cost_m": -12,
+          "motive": "Same clothes, lower cost.",
+          "effects": {
+            "shareholders": 1,
+            "workers": -3,
+            "customers": 0,
+            "home": -3,
+            "public": 0
+          },
+          "flags": {
+            "tags": [
+              "factory_squeeze"
+            ]
+          }
+        },
+        {
+          "id": "raise_prices",
+          "title": "Raise prices 8% across the line",
+          "cost_m": -9,
+          "motive": "Shoppers will grumble and pay.",
+          "effects": {
+            "shareholders": 1,
+            "workers": 0,
+            "customers": -2,
+            "home": 0,
+            "public": 0
+          }
+        },
+        {
+          "id": "cut_marketing",
+          "title": "Cut the marketing budget",
+          "cost_m": -8,
+          "motive": "Fewer ads, fewer events.",
+          "effects": {
+            "shareholders": -1,
+            "workers": 0,
+            "customers": 0,
+            "home": 0,
+            "public": 0
+          }
+        },
+        {
+          "id": "exec_pay",
+          "title": "Executives take a 50% pay cut",
+          "cost_m": -3,
+          "motive": "Leaders go first.",
+          "effects": {
+            "shareholders": 0,
+            "workers": 1,
+            "customers": 0,
+            "home": 0,
+            "public": 1
+          }
+        },
+        {
+          "id": "pay_factory",
+          "title": "Pay the factory in full now",
+          "cost_m": 8,
+          "motive": "The invoice is due and the factory has payroll to meet.",
+          "effects": {
+            "shareholders": -2,
+            "workers": 2,
+            "customers": 0,
+            "home": 3,
+            "public": 0
+          }
+        }
+      ],
+      "issue": {
+        "id": "unpaid_factory",
+        "text": "Thread & Co. owes the largest Karvan factory $18M in unpaid invoices. Another quarter without payment will probably close it and put 2,000 people out of work.",
+        "tell": "Tell the factory, the press, and shoppers what the board decided.",
+        "spin": "\"We are working closely with our supplier partners on payment timing.\"",
+        "bury": "Say nothing.",
+        "detect_base": {
+          "spin": 0.5,
+          "bury": 0.7
+        }
+      }
+    }
+  ],
+  "design_note": "Savings that fire no exposure are raise_prices 9 + cut_marketing 8 + exec_pay 3 = 20, below 26; delay_pay, squeeze_price and shift_orders fire Nasrin (delay_pay and shift_orders fire Rahel too), so every legal package fires someone."
+}

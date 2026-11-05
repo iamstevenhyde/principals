@@ -1,0 +1,169 @@
+{
+  "priority": [
+    "activist",
+    "reporter",
+    "auditor",
+    "short_seller",
+    "plaintiffs_lawyer"
+  ],
+  "seats": [
+    {
+      "seat": "activist",
+      "name": "Activist",
+      "action": {
+        "id": "campaign",
+        "label": "Campaign",
+        "text": "Target board's stock drops; next round its payout is pushed up one step.",
+        "effect": {
+          "target_stock": -1,
+          "next_round_payout_step": 1
+        }
+      },
+      "scoring": {
+        "rule": "Scores on the target's payout rising the next round.",
+        "per_payout_raised": 2,
+        "per_payout_not_raised": 0
+      },
+      "secret": {
+        "id": "activist_exit",
+        "text": "You want a quick exit, not reform. Make at least one target raise its payout.",
+        "check": {
+          "type": "street_target_payout_raised",
+          "min": 1
+        }
+      }
+    },
+    {
+      "seat": "reporter",
+      "name": "Reporter",
+      "action": {
+        "id": "story",
+        "label": "Story",
+        "text": "Name a board and claim it buried or spun its issue.",
+        "effect": {
+          "claim": "buried_or_spun"
+        }
+      },
+      "scoring": {
+        "rule": "Scores on stories that are true at the reveal.",
+        "per_true_hit": 3,
+        "per_false_hit": -2
+      },
+      "secret": {
+        "id": "reporter_beat",
+        "text": "You need a story every round or you lose the beat.",
+        "check": {
+          "type": "street_acted_every_round",
+          "action": "story"
+        }
+      }
+    },
+    {
+      "seat": "auditor",
+      "name": "Auditor",
+      "action": {
+        "id": "inspect",
+        "label": "Inspect",
+        "text": "Chance to catch Spin (50%) or Bury (70%) on the target board.",
+        "effect": {
+          "detect": {
+            "spin": 0.5,
+            "bury": 0.7
+          }
+        }
+      },
+      "scoring": {
+        "rule": "Scores on catches.",
+        "per_true_hit": 3,
+        "per_false_hit": -1
+      },
+      "secret": {
+        "id": "auditor_fees",
+        "text": "Your firm consults for one board, named on your card. Catching it costs your firm fees.",
+        "check": {
+          "type": "street_never_caught_on",
+          "board": "consulted"
+        }
+      }
+    },
+    {
+      "seat": "short_seller",
+      "name": "Short seller",
+      "action": {
+        "id": "short",
+        "label": "Short",
+        "text": "Bet against one board.",
+        "effect": {
+          "bet": "target_stock_falls"
+        }
+      },
+      "scoring": {
+        "rule": "Scores when the target's stock ends the round lower.",
+        "per_true_hit": 3,
+        "per_false_hit": -2
+      },
+      "secret": {
+        "id": "short_leak",
+        "text": "A true tip to the Reporter makes your short pay. Leak at least once.",
+        "check": {
+          "type": "street_leaked_to",
+          "seat": "reporter",
+          "min": 1
+        }
+      }
+    },
+    {
+      "seat": "plaintiffs_lawyer",
+      "name": "Plaintiff's lawyer",
+      "action": {
+        "id": "file",
+        "label": "File",
+        "text": "File a Dodge-style suit on a board with high wages or low payout, or a harm suit on a caught burial.",
+        "effect": {
+          "suit": [
+            "dodge",
+            "harm"
+          ]
+        }
+      },
+      "scoring": {
+        "rule": "Scores on suits that win.",
+        "per_true_hit": 3,
+        "per_false_hit": -2
+      },
+      "secret": {
+        "id": "lawyer_cut",
+        "text": "You take a cut of any settlement. Get at least one suit settled.",
+        "check": {
+          "type": "street_settlement_taken",
+          "min": 1
+        }
+      }
+    }
+  ],
+  "credibility": {
+    "start": 1.0,
+    "max": 1.0,
+    "true_hit_delta": 0.15,
+    "false_hit_delta": -0.35,
+    "false_hit_causes": [
+      "false story",
+      "failed suit",
+      "short on a clean board",
+      "inspect that finds a Tell"
+    ],
+    "low_threshold": 0.5,
+    "low_effect": "Next action's effect is halved, then credibility is reset to the threshold.",
+    "note": "Provisional numbers."
+  },
+  "visits": {
+    "per_round": 1,
+    "rule": "One Street member attends one board per round, announced in the app and on the projector. No member visits the same board twice.",
+    "executive_session": {
+      "stock_hit": -1,
+      "logged_on_projector": true,
+      "text": "The board may vote to send the visitor out. Small stock hit, logged."
+    }
+  },
+  "secret_scoring_note": "Street secret pulls score a small bonus when met. Street members score on truth only, never on what a board does."
+}
