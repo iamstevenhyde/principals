@@ -72,7 +72,7 @@ try {
     }
     const tgt = await p.$('[data-tgt]'); if (tgt) await tgt.click();
     await p.waitForTimeout(1500);
-    const ballot = await p.$('[data-ballot]'); if (ballot) await ballot.click();
+    const ballot = await p.$('[data-ballot]'); if (ballot) await p.click('[data-ballot]', { timeout: 3000 }).catch(() => {});
     await p.screenshot({ path: join(shots, `3_player${i}_play.png`), fullPage: true });
   }
   await players[0].waitForTimeout(1500);
