@@ -312,7 +312,7 @@
         "facts": [
           {
             "id": "f1",
-            "text": "The recycled line is mostly virgin polyester.",
+            "text": "The recycled line is mostly new, non-recycled polyester.",
             "weight": 3
           },
           {
@@ -437,7 +437,7 @@
         "facts": [
           {
             "id": "f1",
-            "text": "The AI design tool produced a spring print that matches an independent designer's portfolio almost line for line.",
+            "text": "The AI design tool made a print nearly identical to an independent designer's portfolio.",
             "weight": 3
           },
           {
@@ -592,6 +592,11 @@
             "id": "f3",
             "text": "About 2,000 people would be out of work.",
             "weight": 2
+          },
+          {
+            "id": "f4",
+            "text": "The unpaid invoices are for the spring order.",
+            "weight": 1
           }
         ]
       }

@@ -561,7 +561,7 @@
         "facts": [
           {
             "id": "f1",
-            "text": "Lumen breached a debt covenant last month.",
+            "text": "Lumen broke a condition of its bank loans last month.",
             "weight": 3
           },
           {
@@ -571,7 +571,7 @@
           },
           {
             "id": "f3",
-            "text": "Waiver talks go easier if revenue looks steady.",
+            "text": "Lenders are easier to deal with if revenue looks steady.",
             "weight": 1
           }
         ]

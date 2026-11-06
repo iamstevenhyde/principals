@@ -318,7 +318,7 @@
         "facts": [
           {
             "id": "f1",
-            "text": "Billing codes were bumped up on about one in eight inpatient stays.",
+            "text": "Billing codes were bumped up on about one in eight hospital stays.",
             "weight": 3
           },
           {
@@ -333,7 +333,7 @@
           },
           {
             "id": "f4",
-            "text": "Nothing the board buys this round removes the problem.",
+            "text": "The review covered 3,200 stays at two hospitals.",
             "weight": 1
           }
         ]
@@ -444,7 +444,7 @@
         "facts": [
           {
             "id": "f1",
-            "text": "In testing, the AI triage pilot missed 9 of 40 sepsis cases that nurses caught.",
+            "text": "The AI triage pilot missed 9 of 40 sepsis (blood infection) cases nurses caught.",
             "weight": 3
           },
           {

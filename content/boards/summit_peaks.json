@@ -340,8 +340,8 @@
           },
           {
             "id": "f2",
-            "text": "A cable on the lift showed wear.",
-            "weight": 2
+            "text": "A cable on Chair 7 showed wear.",
+            "weight": 3
           },
           {
             "id": "f3",
@@ -350,7 +350,7 @@
           },
           {
             "id": "f4",
-            "text": "The lift stayed open through the holiday peak.",
+            "text": "Chair 7 is one of nine lifts at Summit.",
             "weight": 1
           }
         ]
@@ -476,7 +476,7 @@
           },
           {
             "id": "f3",
-            "text": "The pilot ran last spring and the model is still in use.",
+            "text": "The pilot ran for six weeks last spring.",
             "weight": 1
           }
         ]
