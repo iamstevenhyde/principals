@@ -37,6 +37,7 @@ export function tickerCard(b, i) {
     ${spark(b.stock, 220, 56, COLORS[i % COLORS.length])}
     <div class="dials">${dial('Payout', b.dials.payout)}${dial('Wages', b.dials.wages)}${dial('Price', b.dials.price)}</div>
     <p class="stmt ${st && st.kind === 'none' ? 'quiet' : ''}">${st ? esc(st.text) : '&nbsp;'}</p>
+    ${st && st.caught && st.caught.length ? st.caught.map(c => `<p class="stmt-caught"><b>Caught:</b> ${esc(c)}</p>`).join('') : ''}
     ${b.failed ? '<p class="failtag">FAILED</p>' : ''}</article>`;
 }
 export function outsideView(P) {
@@ -55,8 +56,10 @@ export function revealHTML(R) {
   const boards = R.boards.map((b, i) => `<article class="rboard">
     <header><h3>${esc(b.name)}</h3>${spark(b.stock, 160, 40, COLORS[i % COLORS.length])}</header>
     <p class="recog"><span class="gain">Gained: ${b.gained.map(c => esc((b.labels || {})[c] || c)).join(', ') || 'nobody'}</span> <span class="paid">Paid: ${b.paid.map(c => esc((b.labels || {})[c] || c)).join(', ') || 'nobody'}</span></p>
-    ${b.rounds.map(r => `<div class="rround"><div class="rr-h"><b>Round ${r.round}</b> <span class="disc d-${r.disclosure}">${esc(r.disclosure.toUpperCase())}</span>${r.caught ? ` <span class="caught">caught by ${esc(r.caughtBy)}</span>` : ''}${r.decided ? '' : ' <span class="quiet">failed to decide</span>'}</div>
+    ${b.rounds.map(r => `<div class="rround"><div class="rr-h"><b>Round ${r.round}</b> <span class="disc d-${r.level}">${esc({ all: 'Admitted every fact', some: 'Admitted some facts', none: 'Admitted nothing' }[r.level] || '')}</span>${r.caught ? ` <span class="caught">caught by ${esc(r.caughtBy)}</span>` : ''}${r.decided ? '' : ' <span class="quiet">failed to decide</span>'}</div>
       <p class="issue">${esc(r.issue)}</p>
+      <p class="stmt-public">${r.statement ? 'Public statement: "' + esc(r.statement) + '"' : 'No public statement.'}</p>
+      <ul class="facts">${r.facts.map(f => `<li class="${f.admitted ? 'admitted' : 'omitted'} ${f.caught ? 'caughtf' : ''}">${f.admitted ? '' : '<s>'}${esc(f.text)}${f.admitted ? '' : '</s>'}${f.caught ? ' <b class="caught">caught</b>' : ''}</li>`).join('')}</ul>
       ${r.quotes.map(q => `<div class="quote"><blockquote>"${esc(q.text)}" <cite>${esc(q.name)}</cite></blockquote><p class="shown">Projector at that moment: ${esc(q.projector)}</p></div>`).join('')}</div>`).join('')}
     <ul class="dirs">${b.directors.map(d => `<li><b>${esc(d.name)}</b> ${esc(d.seat)}${d.chair ? ' (Chair)' : ''} <span class="${d.fired ? 'fired' : 'safe'}">${d.fired ? 'exposure fired' : 'exposure safe'}</span> <span class="${d.secretMet ? 'met' : 'unmet'}">${d.secretMet ? 'secret met' : 'secret missed'}</span><br><small>${esc(d.secret)}</small></li>`).join('')}</ul>
   </article>`).join('');

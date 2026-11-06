@@ -34,21 +34,21 @@
       "title": "Attorney",
       "home": "The state bar",
       "exposure": {
-        "text": "Disbarred if the board is caught burying while she sits on it.",
+        "text": "Disbarred if the board is caught hiding facts while she sits on it.",
         "trigger": {
-          "type": "disclosure_caught",
-          "choice": "bury"
+          "type": "facts_caught",
+          "weight": 3
         }
       },
       "secrets": [
         {
           "id": "attorney_A",
-          "text": "Never be on a board that's caught burying.",
+          "text": "Never be on a board that's caught hiding facts.",
           "check": {
             "type": "not",
             "of": {
-              "type": "disclosure_caught",
-              "choice": "bury"
+              "type": "facts_caught",
+              "weight": 3
             }
           }
         },
@@ -146,13 +146,13 @@
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Dana signed off on delaying the Chair 7 inspection. Make sure the board never votes Tell on it.",
+          "text": "Dana signed off on delaying the Chair 7 inspection. Make sure the board never admits every fact about it.",
           "check": {
             "type": "not",
             "of": {
               "type": "disclosure_choice",
               "round": 1,
-              "choice": "tell"
+              "choice": "all"
             }
           }
         },
@@ -332,13 +332,28 @@
       "issue": {
         "id": "chair7_overdue",
         "text": "Chair 7's safety inspection is 14 months overdue. Nothing has gone wrong yet.",
-        "tell": "Close the lift and announce it; small stock dip now.",
-        "spin": "\"Chair 7 is closing for a scheduled upgrade.\"",
-        "bury": "Keep it running. If the Auditor or Reporter finds it, the stock drops hard and the Attorney is exposed. If Chair 7 was rebuilt this round, there is no accident risk, but the delay can still be found.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "Chair 7's safety inspection is 14 months overdue.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "A cable on the lift showed wear.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "Operations knew in March.",
+            "weight": 2
+          },
+          {
+            "id": "f4",
+            "text": "The lift stayed open through the holiday peak.",
+            "weight": 1
+          }
+        ]
       }
     },
     {
@@ -448,13 +463,23 @@
       "issue": {
         "id": "zip_pricing",
         "text": "The SnowSense pricing pilot last spring charged buyers with Alder Creek zip codes 18% more than visitors, because locals buy late and don't shop around.",
-        "tell": "Refund locals and announce it.",
-        "spin": "\"Prices reflected demand patterns during testing.\"",
-        "bury": "Say nothing and keep the model. If the pricing-only motion passed this round, the Reporter's odds of finding it go up.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "The SnowSense pricing pilot charged Alder Creek zip codes 18% more.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "Locals buy late and do not shop around, so the model targeted them.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "The pilot ran last spring and the model is still in use.",
+            "weight": 1
+          }
+        ]
       }
     },
     {
@@ -571,13 +596,23 @@
       "issue": {
         "id": "pension_gap",
         "text": "The staff pension is underfunded by $60M. Skipping the payment is legal, but workers think the fund is safe.",
-        "tell": "Disclose the shortfall to staff.",
-        "spin": "\"The pension remains on a long-term funding path.\"",
-        "bury": "Say nothing.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "The staff pension is underfunded by $60M.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "Skipping the payment is legal.",
+            "weight": 1
+          },
+          {
+            "id": "f3",
+            "text": "Workers think the fund is safe.",
+            "weight": 2
+          }
+        ]
       }
     }
   ],

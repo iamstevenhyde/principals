@@ -20,7 +20,7 @@ const ok = (c, msg) => { if (!c) { fails++; console.log('FAIL', msg); } };
 // 1. every rule type in RULES.md and in the content has a handler
 const rulesMd = (() => { try { return readFileSync(join(root, 'content', 'RULES.md'), 'utf8'); } catch { return ''; } })();
 const mdTypes = [...rulesMd.matchAll(/^- `([a-z_]+)`/gm)].map(m => m[1]);
-const motionFlags = new Set(['cost_m', 'effects', 'reveal_effects', 'lag_payback', 'coin_flip', 'if_found', 'resolves_issue', 'raises_detect', 'staff_cut_pct', 'payout_m', 'tags', 'founder_wants', 'removes_chair', 'investigates_current_issue', 'tell_stock_hit_mult', 'bury_penalty_mult', 'street_action_mult', 'settles_suit', 'plaintiff_cut', 'available', 'stock_end_below_start']);
+const motionFlags = new Set(['cost_m', 'effects', 'reveal_effects', 'lag_payback', 'coin_flip', 'if_found', 'resolves_issue', 'raises_detect', 'staff_cut_pct', 'payout_m', 'tags', 'founder_wants', 'removes_chair', 'investigates_current_issue', 'admit_stock_hit_mult', 'caught_penalty_mult', 'street_action_mult', 'settles_suit', 'plaintiff_cut', 'available', 'stock_end_below_start']);
 const ruleTypes = mdTypes.filter(t => !motionFlags.has(t) || RULES[t]);
 for (const t of ruleTypes) ok(RULES[t], 'RULES.md type has no handler: ' + t);
 const contentTypes = new Set();
@@ -61,7 +61,12 @@ function playGame(seed, { players = 24, boards = 4, skip2 = false, late = 0 } = 
   for (const b of Object.values(st.boards)) for (const r of st.schedule) {
     const h = b.hist[r]; if (!h) continue;
     ok(budgetRoom(st, b, r) >= -0.01, `seed ${seed} ${b.id} r${r}: budget respected (room ${budgetRoom(st, b, r)})`);
-    ok(['tell', 'spin', 'bury'].includes(h.disclosure), `seed ${seed} ${b.id} r${r}: disclosure set`);
+    ok(['all', 'some', 'none'].includes(h.disclosure), `seed ${seed} ${b.id} r${r}: disclosure level set`);
+    const fids = ((b.content.rounds.find(x => x.round === r) || {}).issue || {}).facts.map(f => f.id);
+    ok(h.admit.every(id => fids.includes(id)) && h.caughtFacts.every(c => fids.includes(c.id) && !h.admit.includes(c.id)), `seed ${seed} ${b.id} r${r}: admitted and caught facts are real and disjoint`);
+    ok((h.disclosure === 'all') === (h.admit.length === fids.length) && (h.disclosure === 'none') === (h.admit.length === 0), `seed ${seed} ${b.id} r${r}: level matches admitted facts`);
+    ok(h.caught === (h.caughtFacts.length > 0), `seed ${seed} ${b.id} r${r}: caught flag matches caught facts`);
+    ok((h.statement || '').length <= 400 && (h.decided || !h.statement), `seed ${seed} ${b.id} r${r}: statement within cap and empty unless locked`);
   }
   ok(!skip2 || !Object.values(st.boards).some(b => b.hist[2]), 'round 2 skipped');
   for (const s of Object.values(st.seats)) if (s.kind === 'director') ok(s.score && Number.isFinite(s.score.total), 'director scored ' + s.id);
@@ -73,11 +78,11 @@ function playGame(seed, { players = 24, boards = 4, skip2 = false, late = 0 } = 
 }
 
 const N = Number(process.argv[2]) || 20;
-const agg = { failed: 0, caught: 0, bury: 0, spin: 0, tell: 0, fired: 0, met: 0, dirs: 0, resign: 0, exec: 0, suits: 0, chats: 0, leaks: 0, sold: 0, coin: 0, nodecide: 0, chairs: 0 };
+const agg = { failed: 0, caught: 0, all: 0, some: 0, none: 0, facts: 0, admitted: 0, stmts: 0, fired: 0, met: 0, dirs: 0, resign: 0, exec: 0, suits: 0, chats: 0, leaks: 0, sold: 0, coin: 0, nodecide: 0, chairs: 0 };
 for (let g = 1; g <= N; g++) {
   const { st, nB, nS } = playGame(g);
   if (g === 1) { ok(nB === 4 && nS === 4, `24 players -> 4 boards + 4 Street (got ${nB} + ${nS})`); }
-  for (const b of Object.values(st.boards)) { agg.failed += b.failed; for (const h of Object.values(b.hist)) { agg.caught += h.caught; agg[h.disclosure]++; } }
+  for (const b of Object.values(st.boards)) { agg.failed += b.failed; for (const h of Object.values(b.hist)) { agg.caught += h.caught; agg[h.disclosure]++; agg.facts += h.admit.length + h.caughtFacts.length; agg.admitted += h.admit.length; if (h.statement) agg.stmts++; } }
   for (const s of Object.values(st.seats)) if (s.kind === 'director') { agg.dirs++; agg.fired += s.score.exposureFired; agg.met += s.score.secret; agg.sold += Object.keys(s.sold).length; }
   for (const f of st.feed) { if (f.kind === 'resign') agg.resign++; if (f.kind === 'exec') agg.exec++; if (f.kind === 'coin') agg.coin++; if (f.kind === 'nodecide') agg.nodecide++; if (f.kind === 'chair') agg.chairs++; }
   agg.suits += Object.values(st.streetActions).flatMap(x => Object.values(x)).filter(a => a.type === 'file').length;

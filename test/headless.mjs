@@ -40,13 +40,34 @@ try {
   for (const k of ['shock', 'play', 'outside']) await admin.fill('#tm_' + k, k === 'play' ? '25' : '6');
   await admin.click('#savetm');
   await admin.click('#start');
+  await admin.waitForTimeout(500);
+  // seat Tester 0 as Chair of their board so the facts vote can be driven from a real player page
+  await admin.evaluate(() => { const st = window.__host.state; for (const n of ['Tester 0', 'Tester 1']) { const me = st.players.find(p => p.name === n), s = me && st.seats[me.id]; if (s && s.kind === 'director') st.boards[s.board].chair = me.id; } window.__host.dirty = true; });
   await admin.waitForTimeout(2500);
   for (const [i, p] of players.entries()) await p.screenshot({ path: join(shots, `2_player${i}_shock.png`), fullPage: true });
   await admin.waitForTimeout(7000);
+  const lockedText = [];
   // real player acts: if director and chair, call the disclosure vote; post a chat line either way
   for (const [i, p] of players.entries()) {
     await p.fill('#msg', 'Tester ' + i + ' says we should talk about the issue first.'); await p.click('#send');
-    const callD = await p.$('[data-a=calld]'); if (callD) await callD.click();
+    const callD = await p.$('[data-a=calld]');
+    if (callD) {   // Chair: write the statement, tick a fact, call the vote, send picks, lock
+      const text = 'Tester ' + i + ' firm statement: we are reviewing a matter.';
+      await p.fill('#stmt', text); await p.waitForTimeout(1000);
+      const boxes = await p.$$('[data-fact]'); ok(boxes.length >= 3, 'player ' + i + ' sees a fact list (' + boxes.length + ')');
+      await p.check('[data-fact]');
+      await p.screenshot({ path: join(shots, `3a_player${i}_facts.png`), fullPage: true });
+      await p.click('[data-a=calld]'); await p.waitForSelector('[data-fsubmit]', { timeout: 5000 });
+      await p.click('[data-fsubmit]'); await p.waitForTimeout(800);
+      const cl = await p.$('[data-a=close]'); if (cl) await p.click('[data-a=close]', { timeout: 3000 }).catch(() => {}); await p.waitForTimeout(1200);   // the vote may already have closed when the last director voted
+      const mt = await p.textContent('#main');
+      // last write wins: a simulated director may have overwritten the text, so read back what actually locked
+      const lm = mt.match(/Public statement \(locked\):\s*(.*?)\s*Motions/s), locked = lm ? lm[1].trim() : '';
+      ok(mt.includes('Public statement (locked)') && locked.length > 0, 'player ' + i + ' chair locked facts + statement (' + locked.slice(0, 40) + ')');
+      ok(mt.includes('left out') || mt.includes('admitted'), 'player ' + i + ' sees admitted and left-out facts');
+      lockedText.push(locked);
+      await p.screenshot({ path: join(shots, `3b_player${i}_locked.png`), fullPage: true });
+    }
     const tgt = await p.$('[data-tgt]'); if (tgt) await tgt.click();
     await p.waitForTimeout(1500);
     const ballot = await p.$('[data-ballot]'); if (ballot) await ballot.click();
@@ -68,6 +89,10 @@ try {
   const rtxt = await proj.textContent('#app');
   ok(rtxt.includes('How each community ranks the boards'), 'projector reveal renders grid');
   ok(rtxt.includes('Seat leagues'), 'projector reveal renders leagues');
+  ok(rtxt.includes('Public statement') && /caught|left out|Admitted/.test(rtxt), 'projector reveal shows statement and fact list');
+  ok(!/^(Tell|Spin|Bury)$/i.test((await proj.$$eval('.disc', els => els.map(e => e.textContent.trim()))).join('\n')), 'projector reveal has no Tell/Spin/Bury label');
+  if (lockedText.length) ok(lockedText.some(t => rtxt.includes(t)), 'locked statement appears on the projector reveal (' + lockedText.length + ' chair(s) locked)');
+  else ok(true, 'no test player was seated as a director this run; statement check skipped');
   await proj.screenshot({ path: join(shots, '6_projector_reveal.png'), fullPage: true });
   for (const [i, p] of players.entries()) { await p.waitForTimeout(500); await p.screenshot({ path: join(shots, `7_player${i}_reveal.png`), fullPage: true }); ok((await p.textContent('#main')).includes('points'), 'player ' + i + ' sees own result'); }
   await admin.screenshot({ path: join(shots, '8_admin.png'), fullPage: true });

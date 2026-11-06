@@ -34,10 +34,10 @@
       "title": "Attorney",
       "home": "The state bar",
       "exposure": {
-        "text": "Disbarred if the board is caught burying while she sits on it.",
+        "text": "Disbarred if the board is caught hiding facts while she sits on it.",
         "trigger": {
-          "type": "disclosure_caught",
-          "choice": "bury"
+          "type": "facts_caught",
+          "weight": 3
         }
       },
       "secrets": [
@@ -134,13 +134,13 @@
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Idris knew about the bot traffic. Make sure the board never votes Tell on it.",
+          "text": "Idris knew about the bot traffic. Make sure the board never admits every fact about it.",
           "check": {
             "type": "not",
             "of": {
               "type": "disclosure_choice",
               "round": 1,
-              "choice": "tell"
+              "choice": "all"
             }
           }
         },
@@ -150,8 +150,7 @@
           "check": {
             "type": "not",
             "of": {
-              "type": "disclosure_caught",
-              "choice": "any"
+              "type": "facts_caught"
             }
           }
         }
@@ -303,13 +302,28 @@
       "issue": {
         "id": "bot_traffic",
         "text": "Advertisers paid for about a fifth of last quarter's traffic that turned out to be bots. Internal analytics flagged it three weeks ago. Nobody has told the advertisers.",
-        "tell": "Notify advertisers and issue credits; small stock dip now.",
-        "spin": "\"Traffic quality metrics are continuously refined.\"",
-        "bury": "Say nothing. If the Auditor or Reporter finds it, the stock drops hard and the Attorney is exposed. If the bot filter passed this round, no new bad traffic builds up, but the old traffic can still be found.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "About a fifth of last quarter's traffic was bots.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "Advertisers paid for that traffic.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "Internal analytics flagged it three weeks ago.",
+            "weight": 2
+          },
+          {
+            "id": "f4",
+            "text": "Nobody has told the advertisers.",
+            "weight": 1
+          }
+        ]
       }
     },
     {
@@ -413,13 +427,23 @@
       "issue": {
         "id": "moderation_gap",
         "text": "After human moderators were cut, the model let through flagged content that should have come down within the hour. Internal logs count 40,000 pieces in three weeks.",
-        "tell": "Publish the numbers and bring humans back on the highest-risk queues.",
-        "spin": "\"Enforcement systems continue to improve.\"",
-        "bury": "Say nothing. If the model replaced moderators this round, the problem grows and the Reporter's odds of finding it go up.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "Human moderators were cut and the model took over.",
+            "weight": 1
+          },
+          {
+            "id": "f2",
+            "text": "Flagged content that should have come down within the hour stayed up.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "Internal logs count 40,000 pieces in three weeks.",
+            "weight": 3
+          }
+        ]
       }
     },
     {
@@ -534,13 +558,23 @@
       "issue": {
         "id": "covenant_breach",
         "text": "Lumen breached a debt covenant last month. The lenders haven't been told, and waiver talks go easier if revenue looks steady.",
-        "tell": "Tell the lenders and ask for a waiver; stock dips now.",
-        "spin": "\"We remain in constructive discussions with our lenders.\"",
-        "bury": "Say nothing.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "Lumen breached a debt covenant last month.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "The lenders have not been told.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "Waiver talks go easier if revenue looks steady.",
+            "weight": 1
+          }
+        ]
       }
     }
   ],

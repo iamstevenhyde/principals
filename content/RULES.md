@@ -9,8 +9,8 @@ Every `trigger` (director exposure) and `check` (director secret, Street secret)
 - `tag_passed` `{tag, round?}`: at least one passed motion carries `tag` in `flags.tags` (optionally only in `round`).
 - `staff_cut_pct_gt` `{value}`: the SUM of `flags.staff_cut_pct` over all passed motions is greater than `value`.
 - `payout_m_gte` `{value}`: in some single round, the SUM of `flags.payout_m` over motions passed that round is at least `value` ($M).
-- `disclosure_choice` `{round, choice}`: the board's final disclosure decision in `round` was `choice` (`tell`, `spin`, `bury`). "Board failed to decide" counts as the previous round's choice.
-- `disclosure_caught` `{choice?, round?}`: the Street caught a disclosure. `choice` is `bury`, `spin`, or `any` (default `any`, meaning spin or bury). `round` optional.
+- `disclosure_choice` `{round, choice}`: the board's locked facts in `round` were `choice`: `all` (every fact admitted), `some`, or `none`. "Board failed to decide" counts as the previous round's level (round 1: `none`).
+- `facts_caught` `{min?, weight?, round?}`: the Street caught omitted facts. Default is at least one caught fact. `min` asks for that many caught facts. `weight` asks for caught facts whose weights total at least that. `round` optional.
 - `stock_end_below_start`, `stock_end_above_start`: final stock vs starting stock.
 - `stock_rank_bottom_half`: final stock rank is in the bottom half of the boards in play (rank > ceil(boards/2)).
 - `suit_filed`: any Street suit was filed against the board.
@@ -39,8 +39,12 @@ Every `trigger` (director exposure) and `check` (director secret, Street secret)
 - `payout_m`: $M paid to owners. Read by `payout_m_gte`.
 - `tags`: free labels read by `tag_passed`. Used: `payout`, `sells_user_data`, `factory_squeeze`, `pay_stock`, `pay_safety`.
 - `founder_wants`: the founder wants this passed. Read by `founder_motion_failed`.
-- Standing-motion only: `removes_chair`, `investigates_current_issue`, `tell_stock_hit_mult`, `bury_penalty_mult`, `street_action_mult`, `settles_suit`, `plaintiff_cut`, `available` (`any_round` or `suit_pending`).
+- Standing-motion only: `removes_chair`, `investigates_current_issue`, `admit_stock_hit_mult`, `caught_penalty_mult`, `street_action_mult`, `settles_suit`, `plaintiff_cut`, `available` (`any_round` or `suit_pending`).
+
+## Company issues (content/boards/*.json, rounds[].issue)
+
+Each issue is `{id, text, facts}`. `facts` is 3 to 5 entries of `{id, text, weight}`. `weight` 1 to 3 is how damaging the fact is and how easy it is to find: it sets the Auditor's per-fact detection chance (`factDetect` in config/scoring.js) and the fact's share of the stock move (`factStock`). Each director ticks the facts the board should admit, a fact is admitted when more than half of the ballots tick it (a tie follows the Chair's ballot), and the Chair locks the vote. The board's one shared statement text (400 characters, never scored) locks with it. Admitting every fact is level `all`, none is `none`, anything between is `some`. Omitted facts can be caught by an Auditor inspect (each omitted fact rolls on its own) or a Reporter story (finds the heaviest omitted fact).
 
 ## Round 3 design guarantee
 
-Each board file carries a `design_note`. Savings from motions that fire no motion-readable exposure total less than `must_save_m`, so every legal Round 3 package fires at least one exposure. Standing motions cost zero or more, so they cannot help. `disclosure_caught`, `stock_*` and `founder_motion_failed` exposures are not needed for the guarantee. A validation script confirms it by brute force over all motion subsets.
+Each board file carries a `design_note`. Savings from motions that fire no motion-readable exposure total less than `must_save_m`, so every legal Round 3 package fires at least one exposure. Standing motions cost zero or more, so they cannot help. `facts_caught`, `stock_*` and `founder_motion_failed` exposures are not needed for the guarantee. A validation script confirms it by brute force over all motion subsets.

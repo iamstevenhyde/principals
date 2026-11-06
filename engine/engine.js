@@ -17,7 +17,7 @@ const STREET_DEFAULT = {
 };
 const DEFAULT_STANDING = [
   { id: 'remove_chair', title: 'Remove the Chair', cost_m: 0, effects: {}, flags: { removes_chair: true }, available: 'any_round' },
-  { id: 'independent_investigator', title: 'Hire an independent investigator', cost_m: 4, effects: { public: 1 }, flags: { investigates_current_issue: true, raises_detect: 0.25, tell_stock_hit_mult: 0.5, bury_penalty_mult: 2 }, available: 'any_round' },
+  { id: 'independent_investigator', title: 'Hire an independent investigator', cost_m: 4, effects: { public: 1 }, flags: { investigates_current_issue: true, raises_detect: 0.25, admit_stock_hit_mult: 0.5, caught_penalty_mult: 2 }, available: 'any_round' },
   { id: 'poison_pill', title: 'Adopt a poison pill', cost_m: 3, effects: {}, flags: { street_action_mult: { campaign: 0.5 } }, available: 'any_round' },
   { id: 'pay_to_stock', title: 'Tie executive pay to the stock', cost_m: 0, effects: { shareholders: 1 }, flags: { tags: ['pay_stock'] }, available: 'any_round' },
   { id: 'pay_to_safety', title: 'Tie executive pay to a worker and safety measure', cost_m: 2, effects: { workers: 1 }, flags: { tags: ['pay_safety'] }, available: 'any_round' },
@@ -68,6 +68,8 @@ const streetSeats = st => Object.values(st.seats).filter(s => s.kind === 'street
 function menu(st, b, r) {   // the round's motions plus the standing motions, one list, one vote mechanism
   return [...(boardRound(b, r).motions || []).map(m => ({ ...m, standing: false })), ...st.content.standing.map(m => ({ ...m, standing: true }))];
 }
+const issueFacts = (b, r) => ((boardRound(b.content || b, r).issue || {}).facts) || [];
+const factW = fs => fs.reduce((n, f) => n + (f.weight || 1), 0);
 const suitPending = (st, b) => Object.values(st.streetActions[st.round] || {}).some(a => a.type === 'file' && a.target === b.id);
 function feed(st, t, text, extra = {}) { st.feed.push({ seq: ++st.seq, t, round: st.round, text, ...extra }); }
 function logEv(st, t, type, data) { st.log.push({ seq: ++st.seq, t, round: st.round, type, ...data }); }
@@ -136,8 +138,8 @@ function enterShock(st, t) {
   st.phase = 'shock';
   const r = st.round;
   for (const b of Object.values(st.boards)) {
-    b.votes = []; b.disclosure = null;
-    b.hist[r] = { passed: [], tags: [], payoutM: 0, staffCut: 0, effects: zero(), spentPos: 0, net: 0, disclosure: null, decided: false, caught: false, caughtBy: null, caughtOn: [], sued: false, settled: false, founderFailed: false, resolves: null, raisesDetect: 0, ifFound: zero(), stockStart: stockNow(b), stockEnd: null, suitsLost: 0 };
+    b.votes = []; b.disclosure = null; b.admit = null; b.statement = '';
+    b.hist[r] = { passed: [], tags: [], payoutM: 0, staffCut: 0, effects: zero(), spentPos: 0, net: 0, disclosure: null, admit: [], statement: '', omittedFrac: 0, decided: false, caught: false, caughtBy: null, caughtFacts: [], caughtOn: [], sued: false, settled: false, founderFailed: false, resolves: null, raisesDetect: 0, ifFound: zero(), stockStart: stockNow(b), stockEnd: null, suitsLost: 0 };
     // carry-ins: lag payback and coin flips from last round, activist payout push, standing pay ties
     const h = b.hist[r];
     addEff(h.effects, b.pending.lag); b.pending.lag = zero();
@@ -219,8 +221,9 @@ function openVote(st, b, seat, a, t) {
     } else if (seat.id !== b.chair) return 'Only the Chair calls a vote.';
     if (m.standing && m.flags && m.flags.tags && m.flags.tags.some(tg => (b.standing.pay || {})[tg])) return 'Already in place.';
     if (m.id === 'poison_pill' && b.standing.pill) return 'Already in place.';
-  } else if (a.kind === 'disclosure') {
+  } else if (a.kind === 'facts') {
     if (seat.id !== b.chair) return 'Only the Chair calls a vote.';
+    if (h.decided) return 'The facts and statement are locked.';
   } else return 'Unknown vote.';
   b.votes.push(v);
   logEv(st, t, 'vote_open', { board: b.id, vote: v.id, kind: v.kind, target: v.target, by: seat.id });
@@ -229,9 +232,14 @@ function openVote(st, b, seat, a, t) {
 function castBallot(st, b, seat, a, t) {
   const v = b.votes.find(x => x.id === a.vote && x.open);
   if (!v) return 'That vote is closed.';
-  const ok = v.kind === 'disclosure' ? ['tell', 'spin', 'bury'] : ['yes', 'no'];
-  if (!ok.includes(a.choice)) return 'Bad ballot.';
-  v.ballots[seat.id] = a.choice;
+  if (v.kind === 'facts') {
+    const ids = issueFacts(b, st.round).map(f => f.id);
+    if (!Array.isArray(a.admit) || a.admit.some(x => !ids.includes(x))) return 'Bad ballot.';
+    v.ballots[seat.id] = ids.filter(x => a.admit.includes(x));   // the facts this director wants admitted
+  } else {
+    if (!['yes', 'no'].includes(a.choice)) return 'Bad ballot.';
+    v.ballots[seat.id] = a.choice;
+  }
   if (directorsOf(st, b.id).every(d => v.ballots[d.id])) closeVote(st, b, v, t);
   return null;
 }
@@ -239,14 +247,17 @@ function closeVote(st, b, v, t) {
   v.open = false; v.closed = t;
   const ds = directorsOf(st, b.id), r = st.round, h = b.hist[r];
   const vals = Object.entries(v.ballots).filter(([id]) => ds.some(d => d.id === id)).map(([, c]) => c);
-  if (v.kind === 'disclosure') {
+  if (v.kind === 'facts') {
     if (!vals.length) { v.result = 'no votes'; }
     else {
-      const n = { tell: 0, spin: 0, bury: 0 }; vals.forEach(c => n[c]++);
-      const max = Math.max(n.tell, n.spin, n.bury);
-      let top = Object.keys(n).filter(k => n[k] === max);
-      if (top.length > 1) { const cv = v.ballots[b.chair]; top = top.includes(cv) ? [cv] : [top[0]]; }   // Chair breaks ties
-      v.result = top[0]; b.disclosure = top[0]; h.decided = true;
+      // majority per fact; a tie follows the Chair's ballot (not admitted when the Chair has none)
+      const cv = v.ballots[b.chair] || [];
+      const admit = issueFacts(b, r).map(f => f.id).filter(id => {
+        const n = vals.filter(x => x.includes(id)).length, no = vals.length - n;
+        return n > no || (n === no && cv.includes(id));
+      });
+      lockFacts(st, b, h, admit);
+      v.result = 'locked'; v.admit = admit;
     }
   } else {
     const m = menu(st, b, r).find(x => x.id === v.target);
@@ -257,6 +268,14 @@ function closeVote(st, b, v, t) {
     if (!pass && m.flags && m.flags.founder_wants) h.founderFailed = true;
   }
   logEv(st, t, 'vote_close', { board: b.id, vote: v.id, kind: v.kind, target: v.target, result: v.result, ballots: { ...v.ballots } });
+}
+// Lock the facts the board admits and its public statement. h.disclosure keeps all / some / none for the rules.
+function lockFacts(st, b, h, admit) {
+  const fs = issueFacts(b, st.round), out = fs.filter(f => !admit.includes(f.id));
+  b.admit = admit; h.admit = admit.slice(); h.decided = true;
+  h.statement = String(b.statement || '').trim().slice(0, S.statementMax);
+  h.omittedFrac = fs.length ? factW(out) / factW(fs) : 0;
+  b.disclosure = h.disclosure = !out.length ? 'all' : out.length === fs.length ? 'none' : 'some';
 }
 function passMotion(st, b, m, v, t) {
   const r = st.round, h = b.hist[r], fl = m.flags || {};
@@ -274,7 +293,7 @@ function passMotion(st, b, m, v, t) {
   if (fl.raises_detect) { const add = typeof fl.raises_detect === 'number' ? fl.raises_detect : S.raisesDetectTrue; h.raisesDetect += add; b.standing.detect = (b.standing.detect || 0) + (m.standing ? 0 : add); }
   // standing
   if (fl.removes_chair) { const old = b.chair; b.chair = v.nominee; feed(st, t, b.content.name + ' replaced its Chair.', { kind: 'chair', board: b.id }); logEv(st, t, 'chair', { board: b.id, from: old, to: v.nominee }); }
-  if (fl.investigates_current_issue) { h.investigator = { tell: S.investigatorTellHitMult ?? fl.tell_stock_hit_mult ?? 1, bury: S.investigatorBuryPenaltyMult ?? fl.bury_penalty_mult ?? 1, detect: S.investigatorRaisesDetect ?? (typeof fl.raises_detect === 'number' ? 0 : 0) }; }
+  if (fl.investigates_current_issue) { h.investigator = { admit: S.investigatorAdmitHitMult ?? fl.admit_stock_hit_mult ?? 1, caught: S.investigatorCaughtPenaltyMult ?? fl.caught_penalty_mult ?? 1, detect: S.investigatorRaisesDetect ?? (typeof fl.raises_detect === 'number' ? 0 : 0) }; }
   if (fl.street_action_mult) { b.standing.pill = { ...fl.street_action_mult, ...(S.poisonPillCampaignMult != null ? { campaign: S.poisonPillCampaignMult } : {}) }; }
   if (m.standing && fl.tags) for (const tg of fl.tags) if (S.payTieEffects[tg]) b.standing.pay = { ...(b.standing.pay || {}), [tg]: r };
   if (fl.settles_suit) { h.settled = true; h.plaintiffCut = fl.plaintiff_cut ?? 0.3; }
@@ -293,11 +312,17 @@ function resolveRound(st, t) {
   for (const b of Object.values(st.boards)) {
     const h = b.hist[r];
     if (!h.decided) {
-      const prev = st.schedule.slice(0, st.schedule.indexOf(r)).reverse().map(n => b.hist[n] && b.hist[n].disclosure).find(Boolean);
-      b.disclosure = prev || S.defaultDisclosure;
+      // previous round's call stands (round 1: admit nothing). Same level; a partial call admits as many facts, lightest first.
+      const prevR2 = st.schedule[st.schedule.indexOf(r) - 1];
+      const prev = st.schedule.slice(0, st.schedule.indexOf(r)).reverse().map(n => b.hist[n] && b.hist[n].disclosure).find(Boolean) || S.defaultDisclosure;
+      const fs = issueFacts(b, r), light = fs.slice().sort((x, y) => x.weight - y.weight || (x.id < y.id ? -1 : 1));
+      const prevN = prev === 'all' ? fs.length : prev === 'none' ? 0 : Math.max(1, Math.min(fs.length - 1, ((b.hist[prevR2] || {}).admit || []).length));
+      const keep = light.slice(0, prevN).map(f => f.id);
+      b.statement = '';
+      lockFacts(st, b, h, fs.map(f => f.id).filter(id => keep.includes(id)));
+      h.decided = false;
       feed(st, t, b.content.name + ': Board failed to decide.', { kind: 'nodecide', board: b.id });
     }
-    h.disclosure = b.disclosure;
     h._d = 0;
     // activist scoring from last round: did the target raise payout this round?
     if (prevR) for (const [sid, a] of Object.entries(st.streetActions[prevR] || {})) {
@@ -311,22 +336,22 @@ function resolveRound(st, t) {
     const s = st.seats[sid], b = st.boards[a.target]; if (!s || !b) continue;
     const h = b.hist[r], strength = s.weak ? 0.5 : 1;
     a.hit = null;
+    const left = issueFacts(b, r).filter(f => !h.admit.includes(f.id));
+    const catchFact = f => { if (!h.caughtFacts.some(c => c.id === f.id)) h.caughtFacts.push({ id: f.id, weight: f.weight }); h.caught = true; h.caughtBy = h.caughtBy || s.label; };
     if (a.type === 'inspect') {
-      if (h.disclosure === 'tell') { a.hit = false; a.found = false; }   // street.json: an inspect that finds a Tell is a false hit
+      if (!left.length) { a.hit = false; a.found = false; }   // street.json: an inspect of a board that admitted every fact is a false hit
       else {
-        const base = ((boardRound(b.content, r).issue || {}).detect_base || S.detectBase)[h.disclosure] ?? S.detectBase[h.disclosure];
-        let p = base + h.raisesDetect + (b.standing.detect || 0) * 0;
-        for (const n of Object.keys(b.hist)) if (Number(n) < r) p += b.hist[n].raisesDetect;   // raises_detect carries forward
-        if (visit && visit.board === b.id && !visit.out) p += S.detectVisitBonus;
-        if (h.investigator) p += S.detectInvestigatorBonus;
-        p = Math.min(0.97, p * strength);
-        a.found = rnd(st) < p;
-        if (a.found) { a.hit = true; h.caught = true; h.caughtBy = h.caughtBy || s.label; }
-        else a.hit = null;   // a miss is not a claim
+        let bonus = h.raisesDetect + (b.standing.detect || 0) * 0;
+        for (const n of Object.keys(b.hist)) if (Number(n) < r) bonus += b.hist[n].raisesDetect;   // raises_detect carries forward
+        if (visit && visit.board === b.id && !visit.out) bonus += S.detectVisitBonus;
+        if (h.investigator) bonus += S.detectInvestigatorBonus;
+        const found = left.filter(f => rnd(st) < Math.min(0.97, ((S.factDetect[f.weight] ?? S.factDetect[1]) + bonus) * strength));
+        found.forEach(catchFact);
+        a.found = found.length > 0; a.hit = a.found ? true : null;   // a miss is not a claim
       }
     } else if (a.type === 'story') {
-      a.hit = S.reporterTrueOn.includes(h.disclosure);
-      if (a.hit) { h.caught = true; h.caughtBy = h.caughtBy || s.label; }
+      a.hit = left.length > 0;   // a story finds the heaviest fact the board left out
+      if (a.hit) catchFact(left.slice().sort((x, y) => y.weight - x.weight || (x.id < y.id ? -1 : 1))[0]);
     } else if (a.type === 'campaign') {
       const mult = (b.standing.pill && b.standing.pill.campaign) || 1;
       h._d += S.activistHit * strength * mult;
@@ -346,18 +371,15 @@ function resolveRound(st, t) {
     d += h.effects.shareholders * S.stockPerShareholderPoint;
     if (prevR && b.hist[prevR]) d += wageIndex(b.hist[prevR]) * S.stockPerWorkerPointLag;
     if (r === 3 && b.hist[1] && prevR !== 1) d += wageIndex(b.hist[1]) * S.stockRound3WorkerRecognition;
-    const dz = S.disclosureStock[h.disclosure] || { clean: 0, caught: 0 };
-    if (h.caught) {
-      let hit = dz.caught;
-      const harmK = h.resolves === true ? 0 : h.resolves === 'partial' ? 0.5 : 1;   // resolves_issue removes or halves the harm part
-      hit = hit * (1 - S.harmShareOfCaught) + hit * S.harmShareOfCaught * harmK;
-      if (h.investigator && h.disclosure === 'bury') hit *= h.investigator.bury;
-      d += hit;
-    } else {
-      let v = dz.clean;
-      if (h.investigator && h.disclosure === 'tell') v *= h.investigator.tell;
-      d += v;
-    }
+    // stock from the facts: admitted facts cost a little, hidden-and-uncaught facts pay a little, caught facts cost a lot (config/scoring.js factStock)
+    const fs = issueFacts(b, r), tot = factW(fs) || 1, fr = fs.length ? h.omittedFrac : 0;
+    const caughtFrac = Math.min(fr, factW(h.caughtFacts) / tot);
+    const harmK = h.resolves === true ? 0 : h.resolves === 'partial' ? 0.5 : 1;   // resolves_issue removes or halves the harm part
+    let hit = S.factStock.caught * caughtFrac;
+    hit = hit * (1 - S.harmShareOfCaught) + hit * S.harmShareOfCaught * harmK;
+    let adm = S.factStock.admitted * (1 - fr), hid = S.factStock.hidden * (fr - caughtFrac);
+    if (h.investigator) { hit *= h.investigator.caught; adm *= h.investigator.admit; }
+    d += hit + adm + hid;
     if (visit && visit.board === b.id && visit.out) d += S.execSessionHit;
     if (br.must_save_m) {
       h.saved = r1(-h.net);
@@ -372,7 +394,7 @@ function resolveRound(st, t) {
   for (const [sid, a] of Object.entries(acts)) {
     const s = st.seats[sid], b = st.boards[a.target]; if (!s || !b || a.type !== 'file') continue;
     const h = b.hist[r];
-    const harm = Object.values(b.hist).some(x => x.caught && x.disclosure === 'bury');
+    const harm = Object.values(b.hist).some(x => factW(x.caughtFacts || []) >= S.harmCaughtWeight);
     const dodge = wageIndex(h) >= S.dodgeWageIndexMin || (payoutIndex(h) <= S.dodgePayoutMMax && h.effects.shareholders <= 0);
     let win = a.kind === 'harm' ? harm : a.kind === 'dodge' ? dodge : harm || dodge;
     const ov = (st.suitOverrides[r] || {})[sid];
@@ -417,7 +439,7 @@ function scoreStreet(s, hit, r, a) {
 function headline(s, a, b) {
   const n = b.content.name;
   if (a.type === 'inspect') return a.found ? 'Auditor finds a problem at ' + n + '.' : 'Auditor inspected ' + n + '.';
-  if (a.type === 'story') return 'Reporter: ' + n + ' buried it.';
+  if (a.type === 'story') return 'Reporter: ' + n + ' left something out.';
   if (a.type === 'campaign') return 'Activist campaign against ' + n + '.';
   if (a.type === 'short') return 'Short seller bets against ' + n + '.';
   if (a.type === 'file') return "Plaintiff's lawyer sues " + n + (a.result ? ': ' + a.result + '.' : '.');
@@ -432,7 +454,7 @@ function recomputeCommunities(st, final) {
       c.workers += wageIndex(h);
       c.customers += h.effects.customers;
       c.home += h.effects.home * (n === 3 ? 2 : 1);   // home community ranks on who absorbed The Dry Year
-      c.public += h.effects.public + (S.publicHonesty[h.disclosure] || 0);
+      c.public += h.effects.public + S.publicHonesty.admitAll + (S.publicHonesty.hideAll - S.publicHonesty.admitAll) * (h.omittedFrac || 0);
     }
     c.shareholders += (stockNow(b) - b.stock[0]) / 2;
     if (final) addEff(c, b.reveal);
@@ -492,10 +514,16 @@ function applyInner(st, a, t) {
         if (s.leaked[st.round]) return 'One leak per round.';
         const to = st.seats[a.to]; if (!to || to.kind !== 'street') return 'Pick a Street member.';
         const is = boardRound(b.content, st.round).issue || {};
-        const fact = a.fact === 'disclosure' && b.disclosure ? b.content.name + ' voted to ' + b.disclosure + ' on this: ' + is.text : b.content.name + ': ' + is.text;
+        const hh = b.hist[st.round], left = issueFacts(b, st.round).filter(f => hh && hh.decided && !hh.admit.includes(f.id));
+        const fact = a.fact === 'disclosure' && hh && hh.decided ? b.content.name + (left.length ? ' is leaving out: ' + left.map(f => f.text).join(' ') : ' admitted every fact: ' + is.text) : b.content.name + ': ' + is.text;
         s.leaked[st.round] = a.to;
         st.leaks.push({ round: st.round, from: s.id, to: a.to, board: b.id, fact, t });
         logEv(st, t, 'leak', { from: s.id, to: a.to, board: b.id }); return null;
+      }
+      case 'statement': {   // one shared text box per board: any director edits, last write wins, locked with the facts
+        if (st.phase !== 'play') return 'Write the statement during the round.';
+        if (b.hist[st.round].decided) return 'The facts and statement are locked.';
+        b.statement = String(a.text || '').slice(0, S.statementMax); return null;
       }
       case 'resign': return resign(st, s, t);
       case 'sell': {
@@ -588,9 +616,8 @@ const clamp5 = x => Math.max(0, Math.min(4, Math.round(x)));
 const dials = h => ({ payout: clamp5(2 + h.effects.shareholders + (h.payoutM >= 30 ? 1 : 0)), wages: clamp5(2 + wageIndex(h)), price: clamp5(2 - h.effects.customers) });
 function statement(b, r) {
   const h = b.hist[r]; if (!h || !h.disclosure) return null;
-  const is = boardRound(b.content, r).issue || {};
-  if (h.disclosure === 'bury') return { kind: 'none', text: 'No statement.' };
-  return { kind: 'statement', text: h.disclosure === 'tell' ? 'The board disclosed: ' + (is.text || '') : (is.spin || 'The board issued a statement.').replace(/^"|"$/g, '') };
+  const facts = issueFacts(b, r);
+  return { kind: h.statement ? 'statement' : 'none', text: h.statement || 'No statement.', caught: h.caughtFacts.map(c => (facts.find(f => f.id === c.id) || {}).text).filter(Boolean) };
 }
 export function publicView(st, t) {
   const rc = st.round ? roundContent(st, st.round) : null, v = st.visits[st.round];
@@ -641,8 +668,8 @@ export function seatView(st, id, t) {
     motions: h ? menu(st, b, r).filter(m => !m.standing).map(m => ({ id: m.id, title: m.title, cost_m: m.cost_m, motive: m.motive, effects: m.effects, passed: h.passed.includes(m.id), fits: fits(st, b, r, m) })) : [],
     standing: h ? menu(st, b, r).filter(m => m.standing).map(m => ({ id: m.id, title: m.title, cost_m: m.cost_m, motive: m.motive, effects: m.effects, passed: h.passed.includes(m.id), fits: fits(st, b, r, m), anyone: !!(m.flags && m.flags.removes_chair), available: m.available !== 'suit_pending' || suitPending(st, b) })) : [],
     suitPending: suitPending(st, b),
-    issue: br.issue ? { text: br.issue.text, tell: br.issue.tell, spin: br.issue.spin, bury: br.issue.bury } : null,
-    disclosure: b.disclosure, decided: h ? h.decided : false,
+    issue: br.issue ? { text: br.issue.text, facts: (br.issue.facts || []).map(f => ({ id: f.id, text: f.text, weight: f.weight })) } : null,
+    admit: h && h.decided ? h.admit : null, statement: h ? (h.decided ? h.statement : b.statement || '') : '', statementMax: S.statementMax, decided: h ? h.decided : false,
     votes: b.votes.map(v => ({ id: v.id, kind: v.kind, target: v.target, nominee: v.nominee, by: v.by, open: v.open, result: v.result, voted: Object.keys(v.ballots), ballots: v.open ? null : v.ballots, mine: v.ballots[id] || null })),
     visitor: st.visits[r] && st.visits[r].board === b.id && st.phase !== 'shock' ? { label: st.seats[st.visits[r].seat].label, out: st.visits[r].out } : null,
     street: streetSeats(st).map(x => ({ id: x.id, label: x.label, name: x.name })),
@@ -670,7 +697,7 @@ export function revealView(st) {
       gained: COMMUNITIES.filter(c => b.community[c] > 0.5), paid: COMMUNITIES.filter(c => b.community[c] < -0.5),
       rounds: st.schedule.filter(r => b.hist[r] && b.hist[r].disclosure).map(r => {
         const h = b.hist[r], br = boardRound(b.content, r), all = menu(st, b, r);
-        return { round: r, issue: br.issue ? br.issue.text : '', disclosure: h.disclosure, decided: h.decided, caught: h.caught, caughtBy: h.caughtBy, passed: h.passed.map(id => (all.find(m => m.id === id) || { title: id }).title), effects: h.effects, quotes: quotes(st, b, r) };
+        return { round: r, issue: br.issue ? br.issue.text : '', level: h.disclosure, statement: h.statement, facts: issueFacts(b, r).map(f => ({ id: f.id, text: f.text, weight: f.weight, admitted: h.admit.includes(f.id), caught: h.caughtFacts.some(c => c.id === f.id) })), decided: h.decided, caught: h.caught, caughtBy: h.caughtBy, passed: h.passed.map(id => (all.find(m => m.id === id) || { title: id }).title), effects: h.effects, quotes: quotes(st, b, r) };
       }),
       directors: directors.filter(d => d.board === b.id).map(d => ({ name: d.name, seat: SEAT_LABEL[d.seat], exposure: d.exposure ? d.exposure.text : '', fired: d.score ? d.score.exposureFired : false, secret: d.secret ? d.secret.text : '', secretMet: d.score ? d.score.secret : 0, score: d.score ? d.score.total : 0, chair: b.chair === d.id })),
     })),

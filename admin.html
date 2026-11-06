@@ -27,6 +27,7 @@ if (!code) {
     host = new Host(store, code, tok);
     await host.load({ boardCount: 4 });
     host.start();
+    window.__host = host;   // read by test/headless.mjs to seat a test player as Chair
     host.onChange(render);
     render(host.state);
   }
@@ -70,7 +71,7 @@ function render(st) {
   ${suits.length ? `<div class="card"><h2>Suits this round</h2>${suits.map(([sid, a]) => `<div class="row">${esc(st.seats[sid].name)}: ${esc(a.kind)} suit on ${esc(st.boards[a.target].content.name)}
      ${['auto', 'win', 'lose'].map(v => `<button data-suit="${sid}" data-v="${v}" class="${(ov[sid] || 'auto') === v ? 'sel' : ''}">${v}</button>`).join('')}</div>`).join('')}</div>` : ''}
   ${boards.length ? `<div class="card"><h2>Boards</h2>${boards.map(b => { const h = b.hist[st.round] || {}; return `<div class="row small" style="border-top:1px solid var(--line);padding:6px 0"><b style="min-width:140px">${esc(b.content.name)}</b>
-     stock ${b.stock[b.stock.length - 1]} ${b.failed ? '<b class="err">FAILED</b>' : ''} | passed ${(h.passed || []).length} | disclosure ${esc(b.disclosure || 'undecided')} | chair ${esc((st.seats[b.chair] || {}).name || '-')}
+     stock ${b.stock[b.stock.length - 1]} ${b.failed ? '<b class="err">FAILED</b>' : ''} | passed ${(h.passed || []).length} | facts ${esc(b.disclosure || 'undecided')} | chair ${esc((st.seats[b.chair] || {}).name || '-')}
      | ${Object.values(st.seats).filter(s => s.kind === 'director' && s.board === b.id).map(s => esc(s.name)).join(', ')}</div>`; }).join('')}
      <p class="small mute">Street: ${Object.values(st.seats).filter(s => s.kind === 'street').map(s => esc(s.name) + ' (' + esc(s.label) + ')').join(', ')}</p></div>` : ''}
   ${st.phase === 'reveal' ? '<div class="card"><p>The reveal is on the projector.</p></div>' : ''}

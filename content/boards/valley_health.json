@@ -34,21 +34,21 @@
       "title": "Attorney",
       "home": "The state bar",
       "exposure": {
-        "text": "Disbarred if the board is caught burying while he sits on it.",
+        "text": "Disbarred if the board is caught hiding facts while he sits on it.",
         "trigger": {
-          "type": "disclosure_caught",
-          "choice": "bury"
+          "type": "facts_caught",
+          "weight": 3
         }
       },
       "secrets": [
         {
           "id": "attorney_A",
-          "text": "Never be on a board that's caught burying.",
+          "text": "Never be on a board that's caught hiding facts.",
           "check": {
             "type": "not",
             "of": {
-              "type": "disclosure_caught",
-              "choice": "bury"
+              "type": "facts_caught",
+              "weight": 3
             }
           }
         },
@@ -147,13 +147,13 @@
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Dr. Marsh approved the new billing codes. Make sure the board never votes Tell on them.",
+          "text": "Dr. Marsh approved the new billing codes. Make sure the board never admits every fact about them.",
           "check": {
             "type": "not",
             "of": {
               "type": "disclosure_choice",
               "round": 1,
-              "choice": "tell"
+              "choice": "all"
             }
           }
         },
@@ -163,8 +163,7 @@
           "check": {
             "type": "not",
             "of": {
-              "type": "disclosure_caught",
-              "choice": "any"
+              "type": "facts_caught"
             }
           }
         }
@@ -316,13 +315,28 @@
       "issue": {
         "id": "upcoded_billing",
         "text": "An internal review found billing codes bumped up on about one in eight inpatient stays. It adds roughly $14M a year. Only the review team has seen it.",
-        "tell": "Report it to insurers and repay; small stock dip now.",
-        "spin": "\"Coding practices are under routine review.\"",
-        "bury": "Say nothing. If the Auditor or Reporter finds it, the stock drops hard and the Attorney is exposed. Nothing the board buys this round removes the problem.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "Billing codes were bumped up on about one in eight inpatient stays.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "It adds roughly $14M a year.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "Only the internal review team has seen it.",
+            "weight": 1
+          },
+          {
+            "id": "f4",
+            "text": "Nothing the board buys this round removes the problem.",
+            "weight": 1
+          }
+        ]
       }
     },
     {
@@ -427,13 +441,23 @@
       "issue": {
         "id": "sepsis_miss",
         "text": "In testing, the AI triage pilot missed 9 of 40 sepsis cases that nurses caught. The vendor knows. The system plans to extend the pilot to the rural clinics next month.",
-        "tell": "Publish the results and pause the pilot at the rural clinics.",
-        "spin": "\"Pilot performance is within expected variability for a new system.\"",
-        "bury": "Say nothing and extend the pilot. If full triage deployment passed this round, the odds of someone finding it go up.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "In testing, the AI triage pilot missed 9 of 40 sepsis cases that nurses caught.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "The vendor knows.",
+            "weight": 1
+          },
+          {
+            "id": "f3",
+            "text": "The system plans to extend the pilot to the rural clinics next month.",
+            "weight": 2
+          }
+        ]
       }
     },
     {
@@ -545,13 +569,28 @@
       "issue": {
         "id": "clinic_closure",
         "text": "The system plans to close the Marrow Creek rural clinic, which serves 11,000 people, and hasn't announced it. The lease ends in March.",
-        "tell": "Announce it now and hold public hearings; stock dips now.",
-        "spin": "\"We are exploring care-delivery options for the Marrow Creek area.\"",
-        "bury": "Say nothing.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "The system plans to close the Marrow Creek rural clinic.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "The clinic serves 11,000 people.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "The lease ends in March.",
+            "weight": 1
+          },
+          {
+            "id": "f4",
+            "text": "Nothing has been announced.",
+            "weight": 1
+          }
+        ]
       }
     }
   ],

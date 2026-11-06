@@ -39,9 +39,9 @@
       "action": {
         "id": "story",
         "label": "Story",
-        "text": "Name a board and claim it buried or spun its issue.",
+        "text": "Name a board and claim it left a fact out.",
         "effect": {
-          "claim": "buried_or_spun"
+          "claim": "left_out_fact"
         }
       },
       "scoring": {
@@ -64,13 +64,8 @@
       "action": {
         "id": "inspect",
         "label": "Inspect",
-        "text": "Chance to catch Spin (50%) or Bury (70%) on the target board.",
-        "effect": {
-          "detect": {
-            "spin": 0.5,
-            "bury": 0.7
-          }
-        }
+        "text": "Each fact the board left out can be caught; heavier facts are easier to find.",
+        "effect": {}
       },
       "scoring": {
         "rule": "Scores on catches.",
@@ -118,7 +113,7 @@
       "action": {
         "id": "file",
         "label": "File",
-        "text": "File a Dodge-style suit on a board with high wages or low payout, or a harm suit on a caught burial.",
+        "text": "File a Dodge-style suit on a board with high wages or low payout, or a harm suit on a board caught hiding facts.",
         "effect": {
           "suit": [
             "dodge",
@@ -150,7 +145,7 @@
       "false story",
       "failed suit",
       "short on a clean board",
-      "inspect that finds a Tell"
+      "inspect of a board that admitted every fact"
     ],
     "low_threshold": 0.5,
     "low_effect": "Next action's effect is halved, then credibility is reset to the threshold.",

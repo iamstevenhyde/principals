@@ -31,8 +31,8 @@
     "flags": {
       "investigates_current_issue": true,
       "raises_detect": 0.25,
-      "tell_stock_hit_mult": 0.5,
-      "bury_penalty_mult": 2
+      "admit_stock_hit_mult": 0.5,
+      "caught_penalty_mult": 2
     },
     "available": "any_round"
   },

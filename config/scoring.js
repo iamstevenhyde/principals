@@ -17,19 +17,18 @@ export const SCORING = {
   streetPriority: ['activist', 'reporter', 'auditor', 'short_seller', 'plaintiffs_lawyer'], // content/street.json priority wins if present
 
   // ---------- disclosure ----------
-  defaultDisclosure: 'bury',    // round 1, if the Chair never calls the disclosure vote (provisional: silence reads as burying)
-  // Stock move by disclosure outcome (spec 8 table). caught = auditor or reporter hit.
-  disclosureStock: {
-    tell: { clean: -2, caught: 0 },
-    spin: { clean: 0, caught: -5 },
-    bury: { clean: +2, caught: -12 },
-  },
-  detectBase: { spin: 0.5, bury: 0.7 },   // used when an issue has no detect_base
+  defaultDisclosure: 'none',    // round 1, if the Chair never locks the facts: admit nothing (provisional: silence reads as hiding)
+  statementMax: 400,            // characters in the board's public statement (never scored)
+  // Stock move from the facts (spec 8 table, rescaled per fact). Fractions are by fact weight.
+  // Admit every fact = -2, hide every fact uncaught = +2, hide every fact and get caught = -12 (the old Tell / Bury / caught-Bury).
+  factStock: { admitted: -2, hidden: +2, caught: -12 },
+  // Chance the Auditor's inspect finds one omitted fact, by the fact's weight (1 light, 3 heavy). Old Spin 50% / Bury 70% sat inside this range.
+  factDetect: { 1: 0.3, 2: 0.5, 3: 0.7 },
+  harmCaughtWeight: 3,                    // a harm suit wins when the caught facts weigh at least this much (old: a caught Bury)
   detectVisitBonus: 0.15,                 // a Street member sat at the table this round (no executive session)
   detectInvestigatorBonus: 0.2,           // the board hired an investigator and still spun or buried
   detectRaisesFlag: 0.15,                 // a passed motion with flags.raises_detect
-  reporterTrueOn: ['bury', 'spin'],       // a story "they buried it" counts as true on spin or bury
-  publicHonesty: { tell: 2, spin: -1, bury: -2 }, // the public's ranking, revealed only at the end
+  publicHonesty: { admitAll: 2, hideAll: -2 },   // the public's ranking, revealed only at the end; linear in the share of fact weight left out
 
   // ---------- stock ----------
   stockStart: 100,
@@ -77,7 +76,7 @@ export const SCORING = {
   missedSavingsPerM: 0.25,
   // standing_motions.json multipliers (independent_investigator, poison_pill) are read from the JSON flags;
   // these override them when not null.
-  investigatorRaisesDetect: null, investigatorTellHitMult: null, investigatorBuryPenaltyMult: null, poisonPillCampaignMult: null,
+  investigatorRaisesDetect: null, investigatorAdmitHitMult: null, investigatorCaughtPenaltyMult: null, poisonPillCampaignMult: null,
   // per-round effect while a pay tie stands (after the round it passed)
   payTieEffects: { pay_stock: { shareholders: 0.5, workers: -0.5 }, pay_safety: { shareholders: -0.5, workers: 0.5 } },
   // derived indices (content has no wage tracker; see engine wageIndex/payoutIndex)

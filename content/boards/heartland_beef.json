@@ -34,21 +34,21 @@
       "title": "Attorney",
       "home": "The state bar",
       "exposure": {
-        "text": "Disbarred if the board is caught burying while she sits on it.",
+        "text": "Disbarred if the board is caught hiding facts while she sits on it.",
         "trigger": {
-          "type": "disclosure_caught",
-          "choice": "bury"
+          "type": "facts_caught",
+          "weight": 3
         }
       },
       "secrets": [
         {
           "id": "attorney_A",
-          "text": "Never be on a board that's caught burying.",
+          "text": "Never be on a board that's caught hiding facts.",
           "check": {
             "type": "not",
             "of": {
-              "type": "disclosure_caught",
-              "choice": "bury"
+              "type": "facts_caught",
+              "weight": 3
             }
           }
         },
@@ -143,13 +143,13 @@
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Walt signed off on keeping the ammonia near-miss quiet. Make sure the board never votes Tell on it.",
+          "text": "Walt signed off on keeping the ammonia near-miss quiet. Make sure the board never admits every fact about it.",
           "check": {
             "type": "not",
             "of": {
               "type": "disclosure_choice",
               "round": 1,
-              "choice": "tell"
+              "choice": "all"
             }
           }
         },
@@ -314,13 +314,28 @@
       "issue": {
         "id": "ammonia_leak",
         "text": "Last month an ammonia line at the plant sprang a leak. Nobody was hurt, the floor cleared for twenty minutes, and nobody reported it to the regulator.",
-        "tell": "Report it, open the plant to inspection, and take a small stock dip now.",
-        "spin": "\"A routine maintenance event with no injuries.\"",
-        "bury": "Say nothing. If the Auditor or Reporter finds it, the stock drops hard and the Attorney is exposed. If the cooling system was replaced this round, the leak risk is gone, but the missing report can still be found.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "An ammonia line at the plant sprang a leak last month.",
+            "weight": 1
+          },
+          {
+            "id": "f2",
+            "text": "The floor was cleared for twenty minutes.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "Nobody reported it to the regulator.",
+            "weight": 3
+          },
+          {
+            "id": "f4",
+            "text": "The cooling system has not been replaced.",
+            "weight": 2
+          }
+        ]
       }
     },
     {
@@ -419,13 +434,28 @@
       "issue": {
         "id": "grader_bias",
         "text": "The AI carcass grader pilot has been downgrading cattle from small ranchers' herds. They are paid by grade, so they have been paid less for the same animals. The pilot data shows it clearly.",
-        "tell": "Publish the pilot results and repay the difference.",
-        "spin": "\"Grading results reflect natural variation in herd quality.\"",
-        "bury": "Say nothing and keep using it. If the plant-wide grader motion passed this round, ranchers talk and the Reporter's odds of finding it go up.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "The AI carcass grader pilot has been downgrading cattle from small ranchers' herds.",
+            "weight": 2
+          },
+          {
+            "id": "f2",
+            "text": "Ranchers are paid by grade, so they were paid less for the same animals.",
+            "weight": 3
+          },
+          {
+            "id": "f3",
+            "text": "The pilot data shows the pattern clearly.",
+            "weight": 2
+          },
+          {
+            "id": "f4",
+            "text": "The plant is still using the grader.",
+            "weight": 1
+          }
+        ]
       }
     },
     {
@@ -537,13 +567,23 @@
       "issue": {
         "id": "cancel_clause",
         "text": "A clause in the small-rancher contracts lets Heartland cancel on 30 days' notice, and most ranchers have not read it.",
-        "tell": "Tell the ranchers about the clause and what the board decided.",
-        "spin": "\"Contract terms are under review for flexibility.\"",
-        "bury": "Say nothing.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "Small-rancher contracts let Heartland cancel on 30 days' notice.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "Most ranchers have not read the clause.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "The board has now voted on how to use it.",
+            "weight": 1
+          }
+        ]
       }
     }
   ],

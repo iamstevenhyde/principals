@@ -1,7 +1,7 @@
 // Rule vocabulary for exposure triggers and secret checks (content/RULES.md is the spec).
 // evalRule(rule, ctx) returns 0 or 1. Triggers fire at 1; secrets are met at 1. Evaluated at the reveal.
 // Director ctx = { state, board, seat }. Street ctx = { state, seat } (seat.kind === 'street').
-// board.hist[round] = { passed, tags, payoutM, staffCut, disclosure, decided, caught, caughtOn, sued, founderFailed, ... }
+// board.hist[round] = { passed, tags, payoutM, staffCut, disclosure (all|some|none), admit, caughtFacts, decided, caught, caughtOn, sued, founderFailed, ... }
 
 const COMM = ['shareholders', 'workers', 'customers', 'home', 'public'];
 const H = b => Object.entries(b.hist).filter(([, h]) => h.disclosure).map(([r, h]) => ({ r: Number(r), ...h }));
@@ -14,9 +14,10 @@ export const RULES = {
   staff_cut_pct_gt: (r, x) => B(H(x.board).reduce((s, h) => s + h.staffCut, 0) > (r.value || 0)),
   payout_m_gte: (r, x) => B(H(x.board).some(h => h.payoutM >= (r.value || 0))),
   disclosure_choice: (r, x) => B(H(x.board).some(h => (!r.round || h.r === r.round) && h.disclosure === r.choice)),
-  disclosure_caught: (r, x) => {
-    const ch = r.choice && r.choice !== 'any' ? [r.choice] : ['spin', 'bury'];
-    return B(H(x.board).some(h => (!r.round || h.r === r.round) && h.caught && ch.includes(h.disclosure)));
+  // facts_caught: the Street caught omitted facts. {min} = at least that many caught facts (default 1); {weight} = caught weight totals at least that; {round} optional.
+  facts_caught: (r, x) => {
+    const cf = H(x.board).filter(h => !r.round || h.r === r.round).flatMap(h => h.caughtFacts || []);
+    return B(r.weight ? cf.reduce((n, f) => n + f.weight, 0) >= r.weight : cf.length >= (r.min || 1));
   },
   stock_end_below_start: (r, x) => B(stockNow(x.board) < x.board.stock[0]),
   stock_end_above_start: (r, x) => B(stockNow(x.board) > x.board.stock[0]),

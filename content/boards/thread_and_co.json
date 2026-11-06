@@ -34,21 +34,21 @@
       "title": "Attorney",
       "home": "The state bar",
       "exposure": {
-        "text": "Disbarred if the board is caught burying while he sits on it.",
+        "text": "Disbarred if the board is caught hiding facts while he sits on it.",
         "trigger": {
-          "type": "disclosure_caught",
-          "choice": "bury"
+          "type": "facts_caught",
+          "weight": 3
         }
       },
       "secrets": [
         {
           "id": "attorney_A",
-          "text": "Never be on a board that's caught burying.",
+          "text": "Never be on a board that's caught hiding facts.",
           "check": {
             "type": "not",
             "of": {
-              "type": "disclosure_caught",
-              "choice": "bury"
+              "type": "facts_caught",
+              "weight": 3
             }
           }
         },
@@ -138,13 +138,13 @@
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Elodie approved the 'recycled' label. Make sure the board never votes Tell on it.",
+          "text": "Elodie approved the 'recycled' label. Make sure the board never admits every fact about it.",
           "check": {
             "type": "not",
             "of": {
               "type": "disclosure_choice",
               "round": 1,
-              "choice": "tell"
+              "choice": "all"
             }
           }
         },
@@ -309,13 +309,28 @@
       "issue": {
         "id": "fake_recycled",
         "text": "The 'recycled' line is mostly virgin polyester. A supplier swapped the material two seasons ago to hit cost targets and the labels never changed.",
-        "tell": "Relabel the line and offer returns; small stock dip now.",
-        "spin": "\"Our materials strategy continues to evolve.\"",
-        "bury": "Say nothing. If the Auditor or Reporter finds it, the stock drops hard and the Attorney is exposed. If the recycled line was pushed this round, the odds of someone testing it go up.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "The recycled line is mostly virgin polyester.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "A supplier swapped the material two seasons ago to hit cost targets.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "The labels never changed.",
+            "weight": 2
+          },
+          {
+            "id": "f4",
+            "text": "Nobody has tested the fabric.",
+            "weight": 1
+          }
+        ]
       }
     },
     {
@@ -419,13 +434,28 @@
       "issue": {
         "id": "copied_prints",
         "text": "The AI design tool produced a spring print that matches an independent designer's portfolio almost line for line. Her work was in its training set. She hasn't noticed yet.",
-        "tell": "Contact her and pay a license; small stock dip now.",
-        "spin": "\"Our designs are original creations assisted by technology.\"",
-        "bury": "Say nothing and ship the line. If the license motion passed this round, the tool gets used more widely and the Reporter's odds of finding it go up.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "The AI design tool produced a spring print that matches an independent designer's portfolio almost line for line.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "Her work was in the tool's training set.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "She has not noticed yet.",
+            "weight": 1
+          },
+          {
+            "id": "f4",
+            "text": "The line is ready to ship.",
+            "weight": 1
+          }
+        ]
       }
     },
     {
@@ -547,13 +577,23 @@
       "issue": {
         "id": "unpaid_factory",
         "text": "Thread & Co. owes the largest Karvan factory $18M in unpaid invoices. Another quarter without payment will probably close it and put 2,000 people out of work.",
-        "tell": "Tell the factory, the press, and shoppers what the board decided.",
-        "spin": "\"We are working closely with our supplier partners on payment timing.\"",
-        "bury": "Say nothing.",
-        "detect_base": {
-          "spin": 0.5,
-          "bury": 0.7
-        }
+        "facts": [
+          {
+            "id": "f1",
+            "text": "Thread & Co. owes the largest Karvan factory $18M in unpaid invoices.",
+            "weight": 3
+          },
+          {
+            "id": "f2",
+            "text": "Another quarter without payment will probably close the factory.",
+            "weight": 2
+          },
+          {
+            "id": "f3",
+            "text": "About 2,000 people would be out of work.",
+            "weight": 2
+          }
+        ]
       }
     }
   ],
