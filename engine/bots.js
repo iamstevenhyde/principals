@@ -10,7 +10,7 @@ export function botStep(view, rand) {
     const d = view.director, b = view.board;
     if (b.failed) return out;
     if (rand() < 0.02) out.push({ type: 'chat', ch: 'board', text: pick(LINES) });
-    if (rand() < 0.03 && !b.decided && b.issue) out.push({ type: 'statement', text: pick(LINES) });
+    if (rand() < 0.03 && !b.decided && b.issue && !b.statement) out.push({ type: 'statement', text: pick(LINES) });
     if (rand() < 0.02 && b.directors.length > 1) out.push({ type: 'chat', ch: 'dm:' + pick(b.directors.filter(x => x.id !== me.id)).id, text: 'Between us: ' + pick(LINES) });
     if (P.phase === 'shock') {
       if (d.canResign && rand() < 0.002) out.push({ type: 'resign' });

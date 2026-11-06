@@ -98,7 +98,7 @@ function director() {
   const motions = `<div class="card"><h2>Motions</h2>${b.motions.map(mot).join('')}</div>`;
   const is = b.issue;
   const wt = w => ['', 'light', 'serious', 'severe'][w] || '';
-  if (!pick || pick.round !== P.round || pick.board !== b.id) pick = { round: P.round, board: b.id, ids: null }; stmtLocal = null;
+  if (!pick || pick.round !== P.round || pick.board !== b.id) { pick = { round: P.round, board: b.id, ids: null }; stmtLocal = null; }
   const mine = open && open.kind === 'facts' ? open.mine : null;
   if (!pick.ids) pick.ids = new Set(mine || []);
   const disc = is ? `<div class="card issue"><h2>The company issue</h2><p>${esc(is.text)}</p>

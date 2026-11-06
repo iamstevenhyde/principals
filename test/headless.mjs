@@ -39,6 +39,7 @@ try {
   ok((await proj.textContent('#app')).includes('Tester 0'), 'projector lobby lists players');
   for (const k of ['shock', 'play', 'outside']) await admin.fill('#tm_' + k, k === 'play' ? '25' : '6');
   await admin.click('#savetm');
+  await admin.evaluate(() => window.__host.act({ type: 'set_boards', n: 5 }));   // 22 players, 5 boards: every test player is seated as a director
   await admin.click('#start');
   await admin.waitForTimeout(500);
   // seat Tester 0 as Chair of their board so the facts vote can be driven from a real player page
@@ -53,7 +54,8 @@ try {
     const callD = await p.$('[data-a=calld]');
     if (callD) {   // Chair: write the statement, tick a fact, call the vote, send picks, lock
       const text = 'Tester ' + i + ' firm statement: we are reviewing a matter.';
-      await p.fill('#stmt', text); await p.waitForTimeout(1000);
+      await p.fill('#stmt', text);
+      await admin.waitForFunction(t => Object.values(window.__host.state.boards).some(b => b.statement === t), text, { timeout: 10000 }).catch(async e => { console.log('DBG', JSON.stringify(await admin.evaluate(() => ({ ph: window.__host.state.phase, err: window.__host.errors, st: Object.values(window.__host.state.boards).map(b => [b.chair, b.statement]) })))); throw e; });
       const boxes = await p.$$('[data-fact]'); ok(boxes.length >= 3, 'player ' + i + ' sees a fact list (' + boxes.length + ')');
       await p.check('[data-fact]');
       await p.screenshot({ path: join(shots, `3a_player${i}_facts.png`), fullPage: true });
@@ -89,6 +91,8 @@ try {
   const rtxt = await proj.textContent('#app');
   ok(rtxt.includes('How each community ranks the boards'), 'projector reveal renders grid');
   ok(rtxt.includes('Seat leagues'), 'projector reveal renders leagues');
+  const nStruck = await proj.$$eval('.facts li.omitted s', e => e.length), nCaught = await proj.$$eval('.facts li.caughtf', e => e.length);
+  ok(nStruck > 0, 'projector reveal shows struck omitted facts (' + nStruck + ' struck, ' + nCaught + ' caught)');
   ok(rtxt.includes('Public statement') && /caught|left out|Admitted/.test(rtxt), 'projector reveal shows statement and fact list');
   ok(!/^(Tell|Spin|Bury)$/i.test((await proj.$$eval('.disc', els => els.map(e => e.textContent.trim()))).join('\n')), 'projector reveal has no Tell/Spin/Bury label');
   if (lockedText.length) ok(lockedText.some(t => rtxt.includes(t)), 'locked statement appears on the projector reveal (' + lockedText.length + ' chair(s) locked)');
