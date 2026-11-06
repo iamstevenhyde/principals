@@ -53,17 +53,20 @@ const S3 = (p: number) => {
   </>);
 };
 const S4 = (p: number) => {
-  const opts = [['TELL', P.b], ['SPIN', P.a], ['BURY', P.c]];
-  const chosen = Math.floor(R(p, 0.6, 0.95) * 2.99);
+  const facts = [['Fact one', true], ['Fact two', true], ['Fact three', false], ['Fact four', true]] as [string, boolean][];
   return (<>
     <Txt x={960} y={110} s="Every round, the company has a problem" size={60} color={P.a} bold w={1600} />
-    <Rect x={960} y={330} w={420} h={160} fill={P.c} r={22} o={R(p, 0.05, 0.2)}><span style={{fontSize: 56, fontWeight: 800, color: '#101a2b'}}>PROBLEM</span></Rect>
-    {opts.map(([t, c], i) => (<React.Fragment key={i}>
-      <Arrow x1={960} y1={420} x2={560 + i * 400} y2={660} p={R(p, 0.25 + i * 0.1, 0.4 + i * 0.1)} color={c} sw={6} />
-      <Rect x={560 + i * 400} y={760} w={300} h={170} fill={P.panel} stroke={c} sw={i === chosen && p > 0.6 ? 12 : 4} r={20} o={R(p, 0.3 + i * 0.1, 0.45 + i * 0.1)}>
-        <span style={{fontSize: 64, fontWeight: 800, color: c}}>{t}</span></Rect>
-    </React.Fragment>))}
-    <Txt x={960} y={960} s="The board votes" size={44} color={P.ink} w={1400} o={R(p, 0.6, 0.75)} />
+    <Rect x={420} y={330} w={420} h={140} fill={P.c} r={22} o={R(p, 0.05, 0.2)}><span style={{fontSize: 52, fontWeight: 800, color: '#101a2b'}}>PROBLEM</span></Rect>
+    {facts.map(([t, ok], i) => { const vote = R(p, 0.3 + i * 0.07, 0.38 + i * 0.07);
+      return (<React.Fragment key={i}>
+        <Arrow x1={560} y1={400} x2={900} y2={480 + i * 120} p={R(p, 0.2 + i * 0.05, 0.3 + i * 0.05)} color={P.dim} sw={4} />
+        <Rect x={1180} y={480 + i * 120} w={520} h={90} fill={P.panel} stroke={ok || vote < 0.5 ? P.b : P.c} sw={4} r={16} o={R(p, 0.2 + i * 0.05, 0.3 + i * 0.05)}>
+          <span style={{fontSize: 40, color: ok || vote < 0.5 ? P.ink : P.dim, textDecoration: !ok && vote > 0.5 ? 'line-through' : 'none'}}>{t}</span></Rect>
+        <Txt x={870} y={480 + i * 120} s={vote > 0.5 ? (ok ? '✓' : '✗') : ''} size={56} color={ok ? P.b : P.c} w={80} bold />
+      </React.Fragment>); })}
+    <Txt x={420} y={620} s="The board votes on each fact" size={36} color={P.ink} w={560} o={R(p, 0.35, 0.5)} />
+    <Rect x={420} y={820} w={560} h={150} fill="#000" stroke={P.a} r={14} o={R(p, 0.6, 0.75)}><span style={{fontSize: 38, color: P.a}}>One shared statement</span></Rect>
+    <Txt x={1180} y={1000} s="A fact left out can be found" size={44} color={P.c} w={900} o={R(p, 0.8, 0.95)} />
   </>);
 };
 const S5 = (p: number) => {
