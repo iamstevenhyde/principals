@@ -1,30 +1,27 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Principals</title><link rel="icon" href="data:,"><link rel="stylesheet" href="pages/style.css">
-<style>
-.hdr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.hdr h1{flex:1;font-size:1.3rem}
-.chatin{display:flex;gap:6px}.chatin input{flex:1}
-details summary{cursor:pointer;font-weight:600;padding:4px 0}
-.opts{display:grid;gap:6px}.opt{border:1px solid var(--line);border-radius:10px;padding:8px}
-.opt b{display:block}.tgt{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.tgt button{text-align:left;min-height:64px}
-.notice{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:10px;z-index:9}
-</style></head><body><div class="wrap">
+</head><body><div class="wrap phone" id="shell">
 <div class="play"><main id="main"><p class="mute">Loading.</p></main>
-<aside class="card chatbox" id="chat"><div class="tabs" id="tabs"></div><div class="msgs" id="msgs"></div>
+<aside class="card chatbox sheet" id="chat"><div class="sheethd"><b>Chat</b><button id="chatx" aria-label="Close chat">__X__</button></div>
+<div class="tabs" id="tabs"></div><div class="msgs" id="msgs"></div>
+<div class="quick" id="quick"><button data-q="Agree">Agree</button><button data-q="Not sure yet">Not sure</button><button data-q="Let's vote">Let's vote</button></div>
 <div class="chatin"><input id="msg" maxlength="400" placeholder="Message" autocomplete="off"><button class="primary" id="send">Send</button></div></aside></div>
+<nav class="bar" id="bar"></nav>
 <div id="note"></div></div>
 <script type="module">
 import { openStore, params, savedSeat } from './pages/store.js';
-import { esc, fmtClock, spark, dial, arrowsLabeled, COLORS } from './pages/render.js';
+import { esc, fmtClock, spark, dial, effectStrip, legendStrip, sevBars, SEAT_ICON, STAKE_ICON, ICON, COLORS } from './pages/render.js';
+document.getElementById('chatx').innerHTML = ICON.x;
 const code = (params().get('g') || '').toUpperCase();
 const keep = params().get('local') === '1' ? '&local=1' : '';
 const seat = savedSeat(code);
 if (!seat) location.replace('index.html?g=' + code + keep);
 const store = await openStore();
 const $ = id => document.getElementById(id);
-let V = null, P = null, got = 0, ch = 'board', seen = {}, lastMain = '';
-let pick = null, stmtLocal = null, stmtTimer = null;   // my ticked facts and my unsent statement text survive re-renders
+let V = null, P = null, got = 0, ch = 'board', lastMain = '', lastBar = '', sheet = false, seenTotal = 0;
+let pick = null, stmtLocal = null, stmtTimer = null, step = 0, openM = null, cardOpen = true, lastKey = '';
+const STEPS = ['Facts', 'Statement', 'Motions'];
 const send = async a => { try { await store.submit(code, seat.token, a); setTimeout(load, 300); } catch (e) { flash(e.message); } };
 const flash = m => { $('note').innerHTML = `<div class="notice">${esc(m)}</div>`; setTimeout(() => $('note').innerHTML = '', 3500); };
 async function load() {
@@ -36,154 +33,168 @@ setInterval(() => { const el = $('clk'); if (el && P && P.clockLeft != null && !
 let lastNotice = '';
 const faceColor = s => COLORS[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
 const face = n => `<span class="face" style="background:${faceColor(n)}">${esc(n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase())}</span>`;
-const PH = { lobby: 'Waiting for the host', shock: 'New round', play: 'Board in session', outside: 'The outside view', reveal: 'Reveal' };
+const PHASES = ['shock', 'play', 'outside'];
+const dots = () => `<span class="pdots" title="${esc(P.phase)}">${PHASES.map(p => `<i class="${p === P.phase ? 'on' : ''}"></i>`).join('')}</span>`;
+const hdr = (title, extra = '') => `<div class="hdr"><h1>${title}</h1>${extra}${P.round ? `<span class="pill">${P.round}/${P.schedule.length}</span>` : ''}${dots()}<span class="clock" id="clk"></span></div>`;
 
 function render() {
-  if (!V) { $('main').innerHTML = '<div class="card"><h2>You are in.</h2><p class="mute">Waiting for the host to start.</p></div>'; return; }
+  if (!V) { $('main').innerHTML = '<div class="card"><h2>You are in.</h2></div>'; return; }
   if (V.notice && V.notice !== lastNotice) { flash(V.notice); } lastNotice = V.notice || '';
-  const head = `<div class="hdr"><h1>${V.board ? esc(V.board.name) : V.street ? 'The Street' : 'Principals'}</h1><span class="pill">${esc(PH[P.phase] || P.phase)}${P.round ? ' . round ' + P.round : ''}</span><span class="clock" id="clk"></span></div>`;
+  const key = P.phase + P.round; if (key !== lastKey) { lastKey = key; cardOpen = P.phase === 'shock'; if (P.phase === 'play') step = 0; pick = null; }
   let html;
-  if (P.phase === 'lobby' || V.me.kind === 'waiting') html = head + `<div class="card"><h2>Hi ${esc(V.me.name)}.</h2><p class="mute">Waiting for the host to start. You will be dealt a firm and a seat.</p></div>`;
-  else if (V.director) html = head + director();
-  else if (V.street) html = head + street();
-  else html = head;
+  if (P.phase === 'lobby' || V.me.kind === 'waiting') html = waiting();
+  else if (V.director) html = director();
+  else if (V.street) html = street();
+  else html = '';
   if (html !== lastMain) {
     const y = scrollY, main = $('main');
-    const open = [...main.querySelectorAll('details')].map(d => d.open);
-    const vals = Object.fromEntries([...main.querySelectorAll('select[id]')].map(s => [s.id, s.value]));
-    const radio = (main.querySelector('input[name=sk]:checked') || {}).value;
     const fa = document.activeElement, focus = fa && fa.id === 'stmt' ? { s: fa.selectionStart, e: fa.selectionEnd } : null;
     main.innerHTML = html; lastMain = html;
     if (focus && $('stmt')) { $('stmt').focus(); $('stmt').setSelectionRange(focus.s, focus.e); }
-    main.querySelectorAll('details').forEach((d, i) => { if (open[i]) d.open = true; });
-    for (const [id, v] of Object.entries(vals)) { const s = $(id); if (s && [...s.options].some(o => o.value === v)) s.value = v; }
-    if (radio) { const r = main.querySelector('input[name=sk][value=' + radio + ']'); if (r) r.checked = true; }
     scrollTo(0, y); wire();
   }
   const el = $('clk'); if (el) el.textContent = fmtClock(P.clockLeft);
-  renderChat();
+  renderBar(); renderChat();
 }
 
-function shockCard() { return P.shock ? `<div class="card"><h2>${esc(P.shock.title)}</h2><p>${esc(P.shock.text)}</p>${P.shock.board_text ? `<p class="mute">${esc(P.shock.board_text)}</p>` : ''}</div>` : ''; }
-function myTicker() {
-  const b = P.boards.find(x => x.id === V.board.id); if (!b) return '';
-  const i = P.boards.indexOf(b);
-  return `<div class="card"><div class="row"><b style="flex:1">Your stock</b><b>${b.stock[b.stock.length - 1].toFixed(1)}</b></div>${spark(b.stock, 300, 50, COLORS[i % COLORS.length])}<div class="dials">${dial('Payout', b.dials.payout)}${dial('Wages', b.dials.wages)}${dial('Price', b.dials.price)}</div></div>`;
+// ---------- waiting room ----------
+function waiting() {
+  const pl = V.placed;
+  const tile = pl ? `<div class="placed">${pl.kind === 'director' ? SEAT_ICON[pl.seat] : SEAT_ICON[pl.role]}<div><b>${esc(pl.seatLabel)}</b>${pl.board ? `<br><span class="mute">${esc(pl.board)}</span>` : '<br><span class="mute">Outside</span>'}</div>${ICON.check}</div>` : `<div class="placed wait"><span class="spin"></span><div><b>Waiting to be placed</b></div></div>`;
+  return `<div class="card center">${face(V.me.name).replace('class="face"', 'class="face big"')}<h2>${esc(V.me.name)}</h2><p class="count">${V.joined || ''}<small> in the room</small></p>${tile}<p class="mute small">${pl ? 'Your host has placed you. The game starts soon.' : 'The host will put you on a board.'}</p></div>`;
 }
+
+// ---------- director ----------
+function title(id) { const m = V.board.motions.find(x => x.id === id); return m ? esc(m.short || m.title) : 'Motion'; }
 function director() {
   const d = V.director, b = V.board, open = b.votes.find(v => v.open), chair = d.chair, play = P.phase === 'play';
-  const name = id => (b.directors.find(x => x.id === id) || { name: 'A director who left' }).name;
-  if (P.phase === 'reveal') return revealMine();
-  const card = `<div class="card secret"><div class="row">${face(V.me.name)}<div style="flex:1"><b>${esc(d.card.name || d.seatLabel)}</b> <span class="mute">${esc(d.seatLabel)}${d.card.title && d.card.title !== d.seatLabel ? ', ' + esc(d.card.title) : ''}</span>${chair ? ' <span class="pill" style="border-color:var(--accent)">Chair</span>' : ''}<br><span class="small mute">Played by you. Home: ${esc(d.card.home || '')}</span></div></div>
-    <p><b>You lose:</b> ${esc(d.exposure)}</p><p><b>Your secret:</b> ${esc(d.secret)}</p>
-    ${d.prior.length ? `<p class="small mute">You resigned from ${d.prior.map(p => esc(p.board)).join(', ')}.</p>` : ''}</div>`;
-  const chips = `<div class="card">${b.directors.map(x => `<span class="director-chip ${x.chair ? 'chair' : ''}">${face(x.name)} ${esc(x.name)} <span class="mute">${esc(x.seatLabel)}</span>${x.chair ? ' . Chair' : ''}</span>`).join('')}</div>`;
-  const visitor = b.visitor ? `<div class="card" style="border-color:var(--warn)">The <b>${esc(b.visitor.label)}</b> is sitting at your table.${b.visitor.out ? ' Sent out.' : chair && play ? ' <button data-a="exec">Executive session</button>' : ''}</div>` : '';
-  const labels = b.labels || {};
-  const voteBox = open ? (() => {
-    if (open.kind === 'facts') return `<div class="vote"><h2>Vote: which facts do we admit?</h2><p class="small">Tick the facts in the issue card below, then send your picks. A fact is admitted when most directors tick it. The Chair locks the vote and your statement together.</p>
-      <div class="ballots"><button data-fsubmit="${open.id}" class="primary">${open.mine ? 'Update my picks' : 'Send my picks'}</button></div>
-      <p class="small mute">${open.voted.length} of ${b.directors.length} voted: ${open.voted.map(n => esc(name(n))).join(', ')}</p>${chair ? '<button data-a="close">Lock facts and statement</button>' : ''}</div>`;
-    const what = (title(open.target)) + (open.nominee ? ': make ' + esc(name(open.nominee)) + ' Chair' : '');
-    const opts = ['yes', 'no'];
-    return `<div class="vote"><h2>Vote: ${what}</h2><div class="ballots">${opts.map(o => `<button data-ballot="${o}" data-vote="${open.id}" class="${open.mine === o ? 'sel primary' : ''}">${o.toUpperCase()}</button>`).join('')}</div>
-      <p class="small mute">${open.voted.length} of ${b.directors.length} voted: ${open.voted.map(n => esc(name(n))).join(', ')}</p>${chair ? '<button data-a="close">Close the vote</button>' : ''}</div>`;
-  })() : '';
-  const budget = b.mustSave
-    ? `<div class="card"><div class="budget"><b>Spend</b><div class="bar"><i style="width:${Math.min(100, (b.budget - b.room) / Math.max(1, b.budget) * 100)}%"></i></div><span>$${b.room}M left of $${b.budget}M</span></div>
-       <div class="budget" style="margin-top:6px"><b>Savings</b><div class="bar"><i style="width:${Math.max(0, Math.min(100, b.saved / b.mustSave * 100))}%;background:var(--warn)"></i></div><span>$${Math.max(0, b.saved)}M of $${b.mustSave}M target</span></div></div>`
-    : `<div class="card"><div class="budget"><b>Budget</b><div class="bar"><i style="width:${Math.max(0, Math.min(100, b.room / Math.max(1, b.budget) * 100))}%"></i></div><span>$${b.room}M of $${b.budget}M</span></div></div>`;
-  const mot = m => `<div class="motion ${m.passed ? 'passed' : ''}"><div><b class="t">${esc(m.title)}</b><br><span class="small mute">${esc(m.motive || '')}</span><br>${arrowsLabeled(m.effects, labels)}</div>
-     <div style="text-align:right"><span class="cost">${m.cost_m < 0 ? 'saves $' + (-m.cost_m) : '$' + m.cost_m}M</span><br>${chair && play && !m.passed && !open && m.fits ? `<button data-callm="${m.id}">Call vote</button>` : !m.fits && !m.passed ? '<span class="small mute">over budget</span>' : ''}</div></div>`;
-  const motions = `<div class="card"><h2>Motions</h2>${b.motions.map(mot).join('')}</div>`;
-  const is = b.issue;
-  const wt = w => ['', 'light', 'serious', 'severe'][w] || '';
+  const head = hdr(esc(b.name), `<span class="px">${P.boards.find(x => x.id === b.id) ? P.boards.find(x => x.id === b.id).stock.slice(-1)[0].toFixed(1) : ''}</span>`);
+  if (P.phase === 'reveal') return head + revealMine();
+  const rc = P.shock;
+  const hero = P.phase === 'shock' && rc ? `<div class="card hero"><h2>${esc(rc.title)}</h2><p>${esc(rc.board_text || rc.text)}</p></div>` : '';
+  const card = `<details class="card secret" id="card" ${cardOpen ? 'open' : ''}><summary>${SEAT_ICON[d.seat]}<b>${esc(d.card.name || d.seatLabel)}</b><span class="mute">${esc(d.seatLabel)}</span>${chair ? `<span class="chairtag">${ICON.crown}Chair</span>` : ''}</summary>
+    <p class="cardline">${ICON.fire}<span><b>You lose</b> ${esc(d.exposure)}</span></p><p class="cardline">${ICON.lock}<span><b>Your secret</b> ${esc(d.secret)}</span></p>
+    ${d.card.home ? `<p class="small mute">Home: ${esc(d.card.home)}</p>` : ''}</details>`;
+  const failed = b.failed ? '<div class="card"><h2 class="err">This firm has failed.</h2></div>' : '';
+  if (!play) return head + failed + hero + card + `<div class="card center mute">${ICON.eye}<p>${P.phase === 'shock' ? 'Read your card. Voting opens next.' : 'Round over. Watch the outside view.'}</p></div>`;
+  const voters = x => `<span class="voters">${b.directors.map(dd => `<i class="${x.voted.includes(dd.id) ? 'on' : ''}" title="${esc(dd.name)}">${esc(dd.name.slice(0, 1))}</i>`).join('')}</span>`;
+  const banner = open ? (open.kind === 'facts'
+    ? `<div class="vote"><h2>${ICON.check} Vote: facts and statement</h2><div class="ballots"><button data-fsubmit="${open.id}" class="primary">${open.mine ? 'Update my picks' : 'Send my picks'}</button>${chair ? '<button data-a="close">' + ICON.lock + 'Lock</button>' : ''}</div>${voters(open)}</div>`
+    : `<div class="vote"><h2>Vote: ${title(open.target)}</h2><div class="ballots yn">${['yes', 'no'].map(o => `<button data-ballot="${o}" data-vote="${open.id}" class="${open.mine === o ? 'sel primary' : ''}">${o === 'yes' ? ICON.check : ICON.x}${o.toUpperCase()}</button>`).join('')}${chair ? '<button data-a="close">Close</button>' : ''}</div>${voters(open)}</div>`) : '';
+  const is = b.issue, fs = is ? is.facts : [];
   if (!pick || pick.round !== P.round || pick.board !== b.id) { pick = { round: P.round, board: b.id, ids: null }; stmtLocal = null; }
   const mine = open && open.kind === 'facts' ? open.mine : null;
   if (!pick.ids) pick.ids = new Set(mine || []);
-  const disc = is ? `<div class="card issue"><h2>The company issue</h2><p>${esc(is.text)}</p>
-     ${b.decided ? `<ul class="facts">${is.facts.map(f => `<li class="${b.admit.includes(f.id) ? 'admitted' : 'omitted'}">${b.admit.includes(f.id) ? '' : '<s>'}${esc(f.text)}${b.admit.includes(f.id) ? ' <span class="small mute">admitted</span>' : '</s> <span class="small mute">left out</span>'}</li>`).join('')}</ul>
-       <p class="small"><b>Public statement (locked):</b> ${b.statement ? esc(b.statement) : 'none'}</p>`
-     : `<p class="small mute">Tick the facts the board will admit. Anything left out can be caught; the heavier the fact, the easier it is to find.</p>
-       <div class="opts">${is.facts.map(f => `<label class="opt"><input type="checkbox" data-fact="${f.id}" ${pick.ids.has(f.id) ? 'checked' : ''}> ${esc(f.text)} <span class="small mute">(${wt(f.weight)})</span></label>`).join('')}</div>
-       <h2 style="margin-top:10px">Public statement</h2><textarea id="stmt" maxlength="${b.statementMax}" rows="4" style="width:100%" placeholder="What the firm tells the public. Any director can edit; the last write stands." ${play ? '' : 'disabled'}>${esc(stmtLocal != null ? stmtLocal : b.statement)}</textarea>
-       <p class="small mute">Shown on the projector once the Chair locks it. It is never scored. Up to ${b.statementMax} characters.</p>
-       <p class="small">Not locked yet. If the Chair never locks, last round's call stands (round 1: nothing admitted, no statement).</p>
-       ${chair && play && !open ? '<button class="primary" data-a="calld">Call the vote on facts and statement</button>' : ''}`}</div>` : '';
-  const standing = `<details class="card"><summary>Standing motions</summary>${b.standing.filter(m => m.available).map(m => `<div class="motion ${m.passed ? 'passed' : ''}"><div><b class="t">${esc(m.title)}</b><br><span class="small mute">${esc(m.motive || '')}</span><br>${arrowsLabeled(m.effects, labels)}</div><div style="text-align:right"><span class="cost">$${m.cost_m}M</span><br>
-     ${m.anyone && play && !open ? `<select id="nom">${b.directors.filter(x => !x.chair).map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select><button data-chairout="${m.id}">Call vote</button>` : chair && play && !open && !m.passed && m.fits ? `<button data-callm="${m.id}">Call vote</button>` : ''}</div></div>`).join('')}
-     ${b.suitPending ? '<p class="err">A suit has been filed against this board.</p>' : ''}</details>`;
-  const past = b.votes.filter(v => !v.open);
-  const history = past.length ? `<details class="card"><summary>Votes so far (${past.length})</summary>${past.slice().reverse().map(v => `<p class="small"><b>${v.kind === 'facts' ? 'Facts and statement' : title(v.target)}</b>: ${esc(v.result)}<br>${v.kind === 'facts' ? '' : Object.entries(v.ballots || {}).map(([id, c]) => esc(name(id)) + ' ' + esc(c)).join(' . ')}</p>`).join('')}</details>` : '';
-  const acts = `<details class="card"><summary>On your own</summary>
-     <div class="row"><select id="leakto">${b.street.map(s => `<option value="${s.id}">${esc(s.label)}: ${esc(s.name)}</option>`).join('')}</select><select id="leakfact"><option value="issue">the issue</option><option value="disclosure">what we left out</option></select><button data-a="leak" ${d.leaked || !b.street.length ? 'disabled' : ''}>Leak</button></div>
-     <div class="row" style="margin-top:8px"><button data-a="sell" ${d.sold || !play ? 'disabled' : ''}>Sell your shares</button><button data-a="resign" ${d.canResign ? '' : 'disabled'}>Resign from this board</button></div></details>`;
-  const failed = b.failed ? '<div class="card"><h2 class="err">This firm has failed.</h2></div>' : '';
-  return failed + (P.phase === 'shock' ? shockCard() : '') + voteBox + visitor + card + budget + disc + motions + standing + history + chips + acts + myTicker();
+  const tot = fs.reduce((n, f) => n + f.weight, 0) || 1;
+  const counter = () => { const hid = fs.filter(f => !pick.ids.has(f.id)).reduce((n, f) => n + f.weight, 0); return `<b>${pick.ids.size}</b> of ${fs.length} admitted${dial('Risk', Math.round(4 * hid / tot))}`; };
+  counterFn = counter;
+  const facts = !is ? '' : b.decided
+    ? `<ul class="facts locked">${fs.map(f => `<li class="${b.admit.includes(f.id) ? 'admitted' : 'omitted'}"><span class="ft">${b.admit.includes(f.id) ? ICON.check : ICON.x}${esc(f.text)}</span>${sevBars(f.weight)}</li>`).join('')}</ul>`
+    : `<div class="opts">${fs.map(f => `<label class="frow"><input type="checkbox" data-fact="${f.id}" ${pick.ids.has(f.id) ? 'checked' : ''}><span class="sw"></span><span class="ft">${esc(f.text)}</span>${sevBars(f.weight)}</label>`).join('')}</div>
+       <div class="counter" id="counter">${counter()}</div>`;
+  const CH = ['We are looking into it.', 'We take this seriously.', 'We will share more soon.', 'We have nothing more to add.'];
+  const stmt = b.decided
+    ? `<p class="stmtlocked">${ICON.lock}${b.statement ? esc(b.statement) : '<span class="mute">No statement.</span>'}</p>`
+    : `<textarea id="stmt" maxlength="${b.statementMax}" rows="2" placeholder="What the firm tells the public">${esc(stmtLocal != null ? stmtLocal : b.statement)}</textarea>
+       <div class="chips">${CH.map(c => `<button data-chip="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+       ${chair && !open ? `<button class="primary wide" data-a="calld">${ICON.check} Call the vote</button>` : !open ? `<p class="mute small center">${ICON.crown} The Chair calls the vote.</p>` : ''}`;
+  const motions = `<div class="legendrow">${legendStrip(b.labels)}</div>` + b.motions.map(m => {
+    const isOpen = openM === m.id, voting = open && open.target === m.id;
+    return `<div class="mrow ${m.passed ? 'passed' : ''} ${voting ? 'voting' : ''}"><button class="mhead" data-m="${m.id}" aria-expanded="${isOpen}"><span class="mst">${m.passed ? ICON.check : voting ? ICON.eye : ICON.swap}</span><span class="mt">${esc(m.short || m.title)}</span>${effectStrip(m.effects, b.labels)}</button>
+      ${isOpen ? `<div class="mbody"><p>${esc(m.title)}</p><p class="mute small">${esc(m.motive || '')}</p>${chair && !m.passed && !open ? `<button class="primary" data-callm="${m.id}">Call vote</button>` : ''}</div>` : ''}</div>`;
+  }).join('');
+  const panes = [
+    `<h2>Which facts do we admit?</h2>${facts}`,
+    `<h2>Public statement</h2>${stmt}`,
+    `<h2>Motions</h2>${motions}`];
+  return head + failed + banner + `<div class="step">${panes[step]}</div>` + card;
 }
-function title(id) { const m = [...V.board.motions, ...V.board.standing].find(x => x.id === id); return m ? esc(m.title) : 'Motion'; }
+let counterFn = null;
 function revealMine() {
-  const s = V.director.score || {};
-  return `<div class="card"><h2>Your result</h2>
-    <p>Secret: <b class="${s.secret ? 'met' : 'unmet'}">${s.secret ? 'met' : 'missed'}</b>. Exposure: <b class="${s.exposureFired ? 'fired' : 'safe'}">${s.exposureFired ? 'fired' : 'safe'}</b>. Your home community ranked this board ${s.homeRank} of ${P.boards.length}.</p>
-    <p class="clock">${s.total ?? ''} points</p><p class="mute">The full reveal is on the projector.</p></div>`;
+  if (!V.director.score) return '<div class="card center"><span class="spin"></span></div>';
+  const s = V.director.score, n = P.boards.length;
+  return `<div class="card result"><div class="big">${s.total ?? ''}<small> pts</small></div>
+    <div class="tiles"><div class="tile ${s.secret ? 'ok' : 'no'}">${s.secret ? ICON.check : ICON.x}${ICON.lock}</div>
+    <div class="tile ${s.exposureFired ? 'no' : 'ok'}">${s.exposureFired ? ICON.fire : ICON.shield}</div>
+    <div class="tile">${dial('Rank', n > 1 ? Math.round((n - s.homeRank) / (n - 1) * 4) : 4)}<small>${s.homeRank} of ${n}</small></div></div>
+    <p class="mute small">Secret, exposure, home rank. The full reveal is on the projector.</p></div>`;
 }
+
+// ---------- outside (Reporter / Auditor) ----------
 function street() {
-  const s = V.street, play = ['shock', 'play'].includes(P.phase);
-  if (P.phase === 'reveal') return `<div class="card"><h2>Your result</h2><p class="clock">${s.score ?? ''} points</p><p>${s.history.filter(h => h.hit === true).length} true, ${s.history.filter(h => h.hit === false).length} false.</p></div>`;
-  const verb = { campaign: 'Campaign against', story: 'Run a story: they left something out', inspect: 'Inspect', short: 'Short', file: 'Sue' }[s.actionType] || 'Act on';
-  const visiting = s.visiting ? `<div class="card" style="border-color:var(--warn)"><h2>You attend a board this round</h2>${s.visiting.canPick ? `<div class="tgt">${P.boards.map(b => `<button data-visit="${b.id}" ${s.visiting.seen.includes(b.id) ? 'disabled' : ''} class="${s.visiting.board === b.id ? 'sel' : ''}">${esc(b.name)}</button>`).join('')}</div><p class="small mute">Pick one before the clock starts, or one is picked for you.</p>` : `<p>Go sit with <b>${esc((P.boards.find(b => b.id === s.visiting.board) || {}).name || '')}</b>.${s.visiting.out ? ' They sent you out.' : ''}</p>`}</div>` : '';
-  const kind = s.actionType === 'file' ? `<div class="row"><label><input type="radio" name="sk" value="dodge" checked> Dodge-style suit (wages high or payout low)</label><label><input type="radio" name="sk" value="harm"> Harm suit (a board caught hiding facts)</label></div>` : '';
-  const cards = P.boards.map((b, i) => { const st = b.statements[b.statements.length - 1]; return `<button data-tgt="${b.id}" class="${s.action && s.action.target === b.id ? 'sel' : ''}" ${play ? '' : 'disabled'}><b>${esc(b.name)}</b> ${b.stock[b.stock.length - 1].toFixed(1)}${spark(b.stock, 140, 30, COLORS[i % COLORS.length])}<span class="small mute">${st ? esc(st.text) : ''}</span></button>`; }).join('');
-  return (P.phase === 'shock' ? shockCard() : '') + visiting + `<div class="card secret"><div class="row">${face(V.me.name)}<div style="flex:1"><b>${esc(s.label)}</b><br><span class="small mute">${esc(s.actionText)}</span></div>${dial('Credibility', Math.round(s.cred * 4))}</div>
-    <p><b>Your secret:</b> ${esc(s.secret)}</p>${s.consulted ? `<p class="small">Your firm consults for <b>${esc(s.consulted)}</b>.</p>` : ''}${s.weak ? '<p class="err small">Low credibility: this round your action works at half strength.</p>' : ''}</div>
-    <div class="card"><h2>${verb}</h2>${kind}<div class="tgt">${cards}</div><p class="small mute">${s.action ? 'Locked in: ' + esc((P.boards.find(b => b.id === s.action.target) || {}).name) + '. You can change it until the boards lock.' : 'One action per round.'}</p></div>
-    ${s.leaks.length ? `<div class="card"><h2>Tips you received</h2>${s.leaks.map(l => `<p class="small">Round ${l.round}: ${esc(l.fact)}</p>`).join('')}</div>` : ''}
-    <details class="card"><summary>Tip another Street member</summary><div class="row"><select id="tipto">${s.members.filter(m => m.id !== V.me.id).map(m => `<option value="${m.id}">${esc(m.label)}: ${esc(m.name)}</option>`).join('')}</select><select id="tipb">${P.boards.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('')}</select><button data-a="tip">Send tip</button></div></details>
-    <div class="card"><h2>Wire</h2>${P.feed.slice().reverse().slice(0, 10).map(f => `<p class="small"><b>R${f.round}</b> ${esc(f.text)}</p>`).join('')}</div>`;
+  const s = V.street, play = ['shock', 'play'].includes(P.phase), r = s.role;
+  if (P.phase === 'reveal') return hdr('Result') + `<div class="card result"><div class="big">${s.score ?? ''}<small> pts</small></div><p>${s.history.filter(h => h.hit === true).length} ${ICON.check} ${s.history.filter(h => h.hit === false).length} ${ICON.x}</p></div>`;
+  const q = r === 'reporter' ? 'Which board left a fact out?' : 'Which board do you inspect?';
+  const cards = P.boards.map((b, i) => { const st = b.statements[b.statements.length - 1], on = s.action && s.action.target === b.id; return `<button class="tgtc ${on ? 'sel' : ''}" data-tgt="${b.id}" ${play ? '' : 'disabled'}><span class="chk">${on ? ICON.check : ''}</span><b>${esc(b.name)}</b><span class="px">${b.stock[b.stock.length - 1].toFixed(1)}</span><span class="sp">${spark(b.stock, 120, 28, COLORS[i % COLORS.length])}</span>${st ? `<span class="small mute one">${esc(st.text)}</span>` : ''}</button>`; }).join('');
+  const rc = P.shock;
+  return hdr(esc(s.label)) + (P.phase === 'shock' && rc ? `<div class="card hero"><h2>${esc(rc.title)}</h2><p>${esc(rc.text)}</p></div>` : '') +
+    `<div class="card"><h2>${q}</h2><div class="tgtl">${cards}</div></div>
+    <details class="card secret" ${cardOpen ? 'open' : ''}><summary>${SEAT_ICON[r]}<b>${esc(s.label)}</b>${dial('Credibility', Math.round(s.cred * 4))}</summary><p class="small">${esc(s.actionText)}</p><p class="cardline">${ICON.lock}<span><b>Your secret</b> ${esc(s.secret)}</span></p>${s.consulted ? `<p class="small">Your firm consults for <b>${esc(s.consulted)}</b>.</p>` : ''}${s.weak ? `<p class="err small">${ICON.fire} Low credibility: half strength this round.</p>` : ''}</details>
+    <div class="card wire"><h2>Wire</h2>${P.feed.slice().reverse().slice(0, 3).map(f => `<p class="small"><b>R${f.round}</b> ${esc(f.text)}</p>`).join('')}</div>`;
 }
+
+// ---------- fixed bottom bar ----------
+function renderBar() {
+  let h = '';
+  const msgs = V && V.chat ? V.chat.filter(m => m.from !== V.me.id).length : 0;
+  if (sheet) seenTotal = msgs;
+  const unread = Math.max(0, msgs - seenTotal);
+  const canChat = V && V.me.kind !== 'waiting' && P.phase !== 'lobby';
+  if (V && V.director && P.phase === 'play' && !V.board.failed) {
+    h += `<button class="nav" data-back ${step === 0 ? 'disabled' : ''} aria-label="Back">${'‹'}</button><span class="stepdots">${STEPS.map((n, i) => `<button class="sd ${i === step ? 'on' : ''}" data-go="${i}" aria-label="${n}"><i></i><small>${n}</small></button>`).join('')}</span><button class="nav" data-next ${step === 2 ? 'disabled' : ''} aria-label="Next">${'›'}</button>`;
+  }
+  if (canChat) h += `<button class="chatbtn" id="chatbtn" aria-label="Chat">${ICON.chat}${unread ? `<span class="badge">${unread}</span>` : ''}</button>`;
+  if (h !== lastBar) {
+    $('bar').innerHTML = h; lastBar = h;
+    document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { step = Number(b.dataset.go); lastMain = ''; render(); });
+    const bk = document.querySelector('[data-back]'), nx = document.querySelector('[data-next]');
+    if (bk) bk.onclick = () => { step = Math.max(0, step - 1); lastMain = ''; render(); };
+    if (nx) nx.onclick = () => { step = Math.min(2, step + 1); lastMain = ''; render(); };
+    const cb = $('chatbtn'); if (cb) cb.onclick = () => { sheet = true; seenTotal = msgs; $('chat').classList.add('open'); lastBar = ''; renderBar(); const b = $('msgs'); b.scrollTop = b.scrollHeight; };
+  }
+  $('bar').style.display = h ? '' : 'none';
+}
+$('chatx').onclick = () => { sheet = false; $('chat').classList.remove('open'); };
+
 function wire() {
   const q = s => document.querySelectorAll(s);
+  const card = $('card'); if (card) card.ontoggle = () => { cardOpen = card.open; };
   q('[data-ballot]').forEach(b => b.onclick = () => send({ type: 'ballot', vote: b.dataset.vote, choice: b.dataset.ballot }));
-  q('[data-fact]').forEach(c => c.onchange = () => { if (!pick) return; c.checked ? pick.ids.add(c.dataset.fact) : pick.ids.delete(c.dataset.fact); });
+  q('[data-fact]').forEach(c => c.onchange = () => { if (!pick) return; c.checked ? pick.ids.add(c.dataset.fact) : pick.ids.delete(c.dataset.fact); const el = $('counter'); if (el && counterFn) el.innerHTML = counterFn(); });
   q('[data-fsubmit]').forEach(b => b.onclick = () => send({ type: 'ballot', vote: b.dataset.fsubmit, admit: [...(pick ? pick.ids : [])] }));
   if ($('stmt')) $('stmt').oninput = e => { stmtLocal = e.target.value; clearTimeout(stmtTimer); stmtTimer = setTimeout(() => send({ type: 'statement', text: stmtLocal }), 600); };
+  q('[data-chip]').forEach(b => b.onclick = () => { stmtLocal = b.dataset.chip; $('stmt').value = stmtLocal; send({ type: 'statement', text: stmtLocal }); });
+  q('[data-m]').forEach(b => b.onclick = () => { openM = openM === b.dataset.m ? null : b.dataset.m; lastMain = ''; render(); });
   q('[data-callm]').forEach(b => b.onclick = () => send({ type: 'open_vote', kind: 'motion', target: b.dataset.callm }));
-  q('[data-chairout]').forEach(b => b.onclick = () => send({ type: 'open_vote', kind: 'motion', target: b.dataset.chairout, nominee: $('nom').value }));
-  q('[data-tgt]').forEach(b => b.onclick = () => { const k = document.querySelector('input[name=sk]:checked'); send({ type: 'street_action', target: b.dataset.tgt, kind: k ? k.value : null }); });
-  q('[data-visit]').forEach(b => b.onclick = () => send({ type: 'visit_board', board: b.dataset.visit }));
+  q('[data-tgt]').forEach(b => b.onclick = () => send({ type: 'street_action', target: b.dataset.tgt }));
   q('[data-a]').forEach(b => b.onclick = () => {
     const a = b.dataset.a;
     if (a === 'close') send({ type: 'close_vote' });
     if (a === 'calld') send({ type: 'open_vote', kind: 'facts' });
-    if (a === 'exec') send({ type: 'exec_session' });
-    if (a === 'leak') send({ type: 'leak', to: $('leakto').value, fact: $('leakfact').value });
-    if (a === 'sell' && confirm('Sell your shares now?')) send({ type: 'sell' });
-    if (a === 'resign' && confirm('Resign from this board? You move to another board with a new secret.')) send({ type: 'resign' });
-    if (a === 'tip') send({ type: 'street_leak', to: $('tipto').value, board: $('tipb').value });
   });
 }
 // ---------- chat ----------
 function channels() {
-  if (V && V.director) return [{ id: 'board', label: 'Board' }, ...V.board.directors.filter(x => x.id !== V.me.id).map(x => ({ id: 'dm:' + x.id, label: x.name, key: 'dm:' + [V.me.id, x.id].sort().join('|') }))];
+  if (V && V.director) return [{ id: 'board', label: 'Board' }, ...V.board.directors.filter(x => x.id !== V.me.id).map(x => ({ id: 'dm:' + x.id, label: x.name }))];
   if (V && V.street) return [{ id: 'street', label: 'Street' }];
   return [];
 }
-const keyOf = c => (c.id === 'board' ? 'board:' + V.board.id : c.key || c.id);
+const keyOf = c => (c.id === 'board' ? 'board:' + V.board.id : c.id === 'street' ? 'street' : 'dm:' + [V.me.id, c.id.slice(3)].sort().join('|'));
 function renderChat() {
-  const cs = channels();
-  if (!cs.length) { $('chat').style.display = 'none'; return; } $('chat').style.display = '';
+  const cs = channels(), box = $('chat');
+  if (!cs.length) { box.style.display = 'none'; return; } box.style.display = '';
   if (!cs.find(c => c.id === ch)) ch = cs[0].id;
-  const msgs = V.chat || [];
   const cur = cs.find(c => c.id === ch), k = keyOf(cur);
-  const count = kk => msgs.filter(m => m.ch === kk).length;
-  seen[k] = count(k);
-  $('tabs').innerHTML = cs.map(c => `<button data-ch="${c.id}" class="${c.id === ch ? 'sel' : ''}">${esc(c.label)}${count(keyOf(c)) > (seen[keyOf(c)] || 0) ? '<span class="dot"></span>' : ''}</button>`).join('');
+  const dms = cs.filter(c => c.id.startsWith('dm:'));
+  $('tabs').innerHTML = `<button data-ch="${cs[0].id}" class="${ch === cs[0].id ? 'sel' : ''}">${esc(cs[0].label)}</button>` + (dms.length ? `<select id="dmsel" aria-label="Private message"><option value="">Private...</option>${dms.map(c => `<option value="${c.id}" ${c.id === ch ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select>` : '');
   document.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => { ch = b.dataset.ch; renderChat(); });
-  const box = $('msgs'), atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
-  const html = msgs.filter(m => m.ch === k).map(m => `<div class="msg ${m.from === V.me.id ? 'me' : ''}"><b>${esc(m.name)}</b>${esc(m.text)}</div>`).join('') || '<p class="small mute">No messages yet.</p>';
-  if (box.dataset.h !== html) { box.innerHTML = html; box.dataset.h = html; if (atBottom) box.scrollTop = box.scrollHeight; }
+  const sel = $('dmsel'); if (sel) sel.onchange = () => { ch = sel.value || cs[0].id; renderChat(); };
+  const all = (V.chat || []).filter(m => m.ch === k), msgs = ch === 'street' ? all.slice(-3) : all;
+  const bx = $('msgs'), atBottom = bx.scrollHeight - bx.scrollTop - bx.clientHeight < 40;
+  const html = msgs.map(m => `<div class="msg ${m.from === V.me.id ? 'me' : ''}"><b>${esc(m.name)}</b>${esc(m.text)}</div>`).join('') || '<p class="small mute">No messages yet.</p>';
+  if (bx.dataset.h !== html) { bx.innerHTML = html; bx.dataset.h = html; if (atBottom) bx.scrollTop = bx.scrollHeight; }
 }
 $('send').onclick = () => { const t = $('msg').value.trim(); if (!t) return; $('msg').value = ''; send({ type: 'chat', ch, text: t }); };
 $('msg').onkeydown = e => { if (e.key === 'Enter') $('send').click(); };
+document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => send({ type: 'chat', ch, text: b.dataset.q }));
 </script></body></html>

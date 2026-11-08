@@ -1,5 +1,38 @@
 // Pure HTML-string renderers shared by the pages and the node simulation (no DOM access here).
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// ---- icon kit: stroke icons, no words. Same five stakeholders in the same order everywhere. ----
+const svg = d => `<svg class="ic" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+export const STAKE = ['shareholders', 'workers', 'customers', 'home', 'public'];
+export const STAKE_ICON = {
+  shareholders: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.2-1.8 2.5-1.8s2.5.6 2.5 1.8-1.2 1.6-2.5 1.9-2.5.7-2.5 2 1.2 1.8 2.5 1.8 2.5-.6 2.5-1.8"/>'),
+  workers: svg('<path d="M3 17h18"/><path d="M5 17a7 7 0 0 1 14 0"/><path d="M12 6v5"/>'),
+  customers: svg('<path d="M3 5h3l2 11h10l2-8H7"/><circle cx="9" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/>'),
+  home: svg('<path d="M3 11 12 3l9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>'),
+  public: svg('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+};
+export const SEAT_ICON = {
+  attorney: svg('<path d="M12 3v18M6 21h12M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>'),
+  labor: STAKE_ICON.workers, fund: STAKE_ICON.shareholders, community: STAKE_ICON.home,
+  founder_friend: svg('<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4M21 12v3"/>'),
+  reporter: svg('<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>'),
+  auditor: svg('<circle cx="10" cy="10" r="6"/><path d="M15 15l6 6"/>'),
+};
+export const ICON = {
+  check: svg('<path d="M4 12l5 5L20 6"/>'), chat: svg('<path d="M4 5h16v11H9l-5 4z"/>'), crown: svg('<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>'),
+  lock: svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'), eye: STAKE_ICON.public,
+  fire: svg('<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>'),
+  shield: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>'), star: svg('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),
+  swap: svg('<path d="M4 8h14l-3-3M20 16H6l3 3"/>'), x: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+};
+// one fixed strip per motion: the five stakeholders, always in this order; arrow up (green) or down (red), 1 or 2 chevrons
+export function effectStrip(eff, labels) {
+  const L = labels || {};
+  return `<span class="strip">${STAKE.map(k => { const v = (eff || {})[k] || 0, n = Math.min(2, Math.abs(v)), name = L[k] || COMM_LABEL[k] || k;
+    return `<span class="cell ${v > 0 ? 'up' : v < 0 ? 'down' : 'zero'}" title="${esc(name)}" aria-label="${esc(name + (v > 0 ? ' gains' : v < 0 ? ' loses' : ' unchanged'))}">${STAKE_ICON[k]}<b class="chev">${v === 0 ? '' : (v > 0 ? '▲' : '▼').repeat(n)}</b></span>`; }).join('')}</span>`;
+}
+export const legendStrip = labels => `<span class="strip legend">${STAKE.map(k => `<span class="cell zero" title="${esc((labels || {})[k] || COMM_LABEL[k])}">${STAKE_ICON[k]}<small>${esc(((labels || {})[k] || COMM_LABEL[k]).replace(/^The /, '').split(/[\s(]/)[0])}</small></span>`).join('')}</span>`;
+// severity meter: 1 to 3 bars, colour ramp, no words
+export const sevBars = w => `<span class="sev s${w}" role="img" aria-label="${['', 'light', 'serious', 'severe'][w] || ''}">${[1, 2, 3].map(i => `<i class="${i <= w ? 'on' : ''}"></i>`).join('')}</span>`;
 const COMM_LABEL = { shareholders: 'Shareholders', workers: 'Workers', customers: 'Customers', home: 'Home community', public: 'The public' };
 export const COLORS = ['#2f6db5', '#c0562f', '#3f8f5a', '#8a5aa8', '#b58a1f'];
 
@@ -52,7 +85,6 @@ export function revealHTML(R) {
   const shade = rk => `hsl(210 45% ${30 + (rk - 1) / Math.max(1, n - 1) * 55}%)`;
   const grid = `<table class="grid"><thead><tr><th></th>${C.map(c => `<th>${esc(COMM_LABEL[c])}</th>`).join('')}</tr></thead><tbody>
     ${R.boards.map(b => `<tr><th>${esc(b.name)}${b.failed ? ' <small>failed</small>' : ''}</th>${C.map(c => { const rk = R.grid[b.id][c]; return `<td style="background:${shade(rk)};color:${rk <= n / 2 ? '#fff' : '#111'}" title="${esc((b.labels || {})[c] || c)}">${ordinal(rk)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
-  const leagues = `<section class="leagues">${Object.values(R.leagues).map(l => `<div class="league"><span>${esc(l.label)}</span><b>${esc(l.name)}</b><small>${esc(l.board || '')}</small></div>`).join('')}</section>`;
   const boards = R.boards.map((b, i) => `<article class="rboard">
     <header><h3>${esc(b.name)}</h3>${spark(b.stock, 160, 40, COLORS[i % COLORS.length])}</header>
     <p class="recog"><span class="gain">Gained: ${b.gained.map(c => esc((b.labels || {})[c] || c)).join(', ') || 'nobody'}</span> <span class="paid">Paid: ${b.paid.map(c => esc((b.labels || {})[c] || c)).join(', ') || 'nobody'}</span></p>
@@ -64,5 +96,5 @@ export function revealHTML(R) {
     <ul class="dirs">${b.directors.map(d => `<li><b>${esc(d.name)}</b> ${esc(d.seat)}${d.chair ? ' (Chair)' : ''} <span class="${d.fired ? 'fired' : 'safe'}">${d.fired ? 'exposure fired' : 'exposure safe'}</span> <span class="${d.secretMet ? 'met' : 'unmet'}">${d.secretMet ? 'secret met' : 'secret missed'}</span><br><small>${esc(d.secret)}</small></li>`).join('')}</ul>
   </article>`).join('');
   const street = `<section class="rstreet"><h3>The Street</h3><ul>${R.street.map(s => `<li><b>${esc(s.name)}</b> ${esc(s.label)}: ${s.hits.filter(h => h.hit === true).length} true, ${s.hits.filter(h => h.hit === false).length} false</li>`).join('')}</ul></section>`;
-  return `<section class="reveal"><h2>How each community ranks the boards</h2>${grid}<h2>Seat leagues</h2>${leagues}<div class="rboards">${boards}</div>${street}</section>`;
+  return `<section class="reveal"><h2>How each community ranks the boards</h2>${grid}<div class="rboards">${boards}</div>${street}</section>`;
 }

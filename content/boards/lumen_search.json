@@ -43,19 +43,20 @@
       "secrets": [
         {
           "id": "attorney_A",
-          "text": "An independent investigator gets hired before the game ends.",
+          "text": "Clean the books: the board admits every fact in round 1.",
           "check": {
-            "type": "motion_passed",
-            "id": "independent_investigator"
+            "type": "disclosure_choice",
+            "round": 1,
+            "choice": "all"
           }
         },
         {
           "id": "attorney_B",
-          "text": "Your firm bills Lumen $3M a year. Keep the board out of court so the fees keep coming.",
+          "text": "Your firm bills Lumen $3M a year. One caught fact ends the contract, so none may be caught.",
           "check": {
             "type": "not",
             "of": {
-              "type": "suit_filed"
+              "type": "facts_caught"
             }
           }
         }
@@ -105,7 +106,7 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Pass a buyback or dividend of $40M or more in any round. After that you may resign.",
+          "text": "Pass a buyback of $40M or more in any round.",
           "check": {
             "type": "payout_m_gte",
             "value": 40
@@ -126,7 +127,7 @@
       "title": "Founder's friend",
       "home": "Idris Valdane, the co-founder (grad-school roommate)",
       "exposure": {
-        "text": "Loses the seat if the board ever votes against something Idris wants.",
+        "text": "Loses the seat if the board votes down replacing the moderators with the model, which Idris wants.",
         "trigger": {
           "type": "founder_motion_failed"
         }
@@ -162,31 +163,19 @@
       "title": "Community seat (User-privacy advocate)",
       "home": "Open Signal Alliance",
       "exposure": {
-        "text": "Loses standing at home if the board sells user data or turns on cross-site tracking.",
+        "text": "Loses standing at home if the board sells user data.",
         "trigger": {
-          "type": "any",
-          "of": [
-            {
-              "type": "tag_passed",
-              "tag": "sells_user_data"
-            },
-            {
-              "type": "motion_passed",
-              "id": "ad_tracking"
-            }
-          ]
+          "type": "motion_passed",
+          "id": "sell_data"
         }
       },
       "secrets": [
         {
           "id": "community_A",
-          "text": "Either the privacy dashboard or the ad targeting cap passes.",
+          "text": "The ad targeting cap passes.",
           "check": {
-            "type": "motion_passed_any",
-            "ids": [
-              "privacy_dashboard",
-              "ad_cap"
-            ]
+            "type": "motion_passed",
+            "id": "ad_cap"
           }
         },
         {
@@ -206,12 +195,11 @@
   "rounds": [
     {
       "round": 1,
-      "budget_m": 60,
       "motions": [
         {
           "id": "buyback",
           "title": "Stock buyback",
-          "cost_m": 40,
+          "short": "Stock buyback",
           "motive": "Return the cash to the owners, and the market will notice tonight.",
           "effects": {
             "shareholders": 2,
@@ -228,28 +216,9 @@
           }
         },
         {
-          "id": "special_dividend",
-          "title": "Special dividend",
-          "cost_m": 25,
-          "motive": "One check to holders, no promises about next year.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "payout_m": 25,
-            "tags": [
-              "payout"
-            ]
-          }
-        },
-        {
           "id": "mod_wellness",
           "title": "Moderator wellness program",
-          "cost_m": 12,
+          "short": "Moderator wellness",
           "motive": "Counseling and breaks for people who look at the worst of it all day.",
           "effects": {
             "shareholders": -1,
@@ -260,41 +229,15 @@
           }
         },
         {
-          "id": "privacy_dashboard",
-          "title": "Privacy dashboard",
-          "cost_m": 8,
-          "motive": "Show every user what we keep on them and let them delete it.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": -1,
-            "home": 2,
-            "public": 0
-          }
-        },
-        {
           "id": "ad_cap",
           "title": "Cap how finely advertisers can target",
-          "cost_m": 15,
+          "short": "Cap ad targeting",
           "motive": "Advertisers can pick a city and an interest, not a person.",
           "effects": {
             "shareholders": -1,
             "workers": 0,
             "customers": -2,
             "home": 2,
-            "public": 0
-          }
-        },
-        {
-          "id": "bot_filter",
-          "title": "Build a better bot filter",
-          "cost_m": 20,
-          "motive": "Advertisers should only pay for real people from here on.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 2,
-            "home": 0,
             "public": 0
           }
         }
@@ -328,134 +271,11 @@
     },
     {
       "round": 2,
-      "budget_m": 40,
-      "motions": [
-        {
-          "id": "ai_replace_mods",
-          "title": "Model handles moderation, cut 20% of moderators",
-          "cost_m": 10,
-          "motive": "Every platform will do this, and waiting just makes us the slow one.",
-          "effects": {
-            "shareholders": 2,
-            "workers": -2,
-            "customers": 0,
-            "home": 0,
-            "public": -1
-          },
-          "flags": {
-            "staff_cut_pct": 20,
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "ai_assist",
-          "title": "Model flags, moderators decide, retrain the team",
-          "cost_m": 25,
-          "motive": "Use the model for speed and keep people on the final call.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "ai_ads_only",
-          "title": "Use the model on ad review only",
-          "cost_m": 5,
-          "motive": "Faster ad approval. Nobody loses a job.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 1,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "hold_off",
-          "title": "Hold off on the model this year",
-          "cost_m": 0,
-          "motive": "Wait and see what breaks at other platforms first.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "appeals_team",
-          "title": "Hire a user appeals team",
-          "cost_m": 8,
-          "motive": "When the model gets it wrong, a person looks again.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 1,
-            "customers": 0,
-            "home": 1,
-            "public": 0
-          },
-          "flags": {
-            "resolves_issue": "partial"
-          }
-        },
-        {
-          "id": "sell_logs",
-          "title": "Sell search logs to AI model trainers",
-          "cost_m": -12,
-          "motive": "We already keep them. Others pay for them.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": -2,
-            "public": 0
-          },
-          "flags": {
-            "if_found": {
-              "public": -2
-            },
-            "tags": [
-              "sells_user_data"
-            ]
-          }
-        }
-      ],
-      "issue": {
-        "id": "moderation_gap",
-        "text": "After human moderators were cut, the model let through flagged content that should have come down within the hour. Internal logs count 40,000 pieces in three weeks.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "Human moderators were cut and the model took over.",
-            "weight": 1
-          },
-          {
-            "id": "f2",
-            "text": "Flagged content that should have come down within the hour stayed up.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "Internal logs count 40,000 pieces in three weeks.",
-            "weight": 3
-          }
-        ]
-      }
-    },
-    {
-      "round": 3,
-      "budget_m": 10,
-      "must_save_m": 26,
-      "brief": "Find $26M in savings this round. Only $10M to spend on anything new.",
       "motions": [
         {
           "id": "sell_data",
           "title": "Sell user profiles to data brokers",
-          "cost_m": -12,
+          "short": "Sell user data",
           "motive": "The terms of service allow it. Brokers pay well.",
           "effects": {
             "shareholders": 1,
@@ -474,22 +294,9 @@
           }
         },
         {
-          "id": "ad_tracking",
-          "title": "Turn on cross-site ad tracking",
-          "cost_m": -10,
-          "motive": "Advertisers will pay more for people they can follow.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 1,
-            "home": -3,
-            "public": 0
-          }
-        },
-        {
           "id": "mods_ai",
           "title": "Replace most moderators with the model",
-          "cost_m": -15,
+          "short": "Model replaces mods",
           "motive": "The model never takes a sick day.",
           "effects": {
             "shareholders": 0,
@@ -499,52 +306,14 @@
             "public": -1
           },
           "flags": {
-            "staff_cut_pct": 60
-          }
-        },
-        {
-          "id": "cut_buyback",
-          "title": "Cancel the buyback program",
-          "cost_m": -8,
-          "motive": "Owners share the bad year too.",
-          "effects": {
-            "shareholders": -2,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "exec_pay",
-          "title": "Executives take a 50% pay cut",
-          "cost_m": -3,
-          "motive": "Leaders go first.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 1
-          }
-        },
-        {
-          "id": "pause_hiring",
-          "title": "Freeze engineering hiring",
-          "cost_m": -7,
-          "motive": "Hold the headcount until revenue comes back.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
+            "staff_cut_pct": 60,
+            "founder_wants": true
           }
         },
         {
           "id": "safety_rebuild",
           "title": "Rebuild the trust and safety team",
-          "cost_m": 10,
+          "short": "Rebuild safety team",
           "motive": "Put people back on the queues the model can't handle.",
           "effects": {
             "shareholders": -1,
@@ -577,6 +346,5 @@
         ]
       }
     }
-  ],
-  "design_note": "Savings that fire no exposure are cut_buyback 8 + exec_pay 3 + pause_hiring 7 = 18, below 26; mods_ai fires Priya, and sell_data and ad_tracking fire Mira, so every legal package fires someone."
+  ]
 }

@@ -54,11 +54,11 @@
         },
         {
           "id": "attorney_B",
-          "text": "Your law firm bills Summit Peaks $2M a year. Keep the board out of court so the fees keep coming.",
+          "text": "Your law firm bills Summit Peaks $2M a year. One caught fact ends the contract, so none may be caught.",
           "check": {
             "type": "not",
             "of": {
-              "type": "suit_filed"
+              "type": "facts_caught"
             }
           }
         }
@@ -70,19 +70,10 @@
       "title": "Labor director",
       "home": "Lift & Lodge Workers Local 12",
       "exposure": {
-        "text": "Loses the next union vote if more than 10% of seasonal staff are cut, or the pension payment is skipped.",
+        "text": "Loses the next union vote if the pension payment is skipped.",
         "trigger": {
-          "type": "any",
-          "of": [
-            {
-              "type": "staff_cut_pct_gt",
-              "value": 10
-            },
-            {
-              "type": "motion_passed",
-              "id": "pension_skip"
-            }
-          ]
+          "type": "motion_passed",
+          "id": "pension_skip"
         }
       },
       "secrets": [
@@ -117,7 +108,7 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Pass a buyback of $40M or more in any round. After that you may resign.",
+          "text": "Pass a buyback of $40M or more in any round.",
           "check": {
             "type": "payout_m_gte",
             "value": 40
@@ -138,7 +129,7 @@
       "title": "Founder's friend",
       "home": "Dana Strand, the founder (college roommate)",
       "exposure": {
-        "text": "Loses the seat if the board ever votes against something Dana wants.",
+        "text": "Loses the seat if the board votes down closing the Alder Creek mountain, which Dana wants.",
         "trigger": {
           "type": "founder_motion_failed"
         }
@@ -158,13 +149,10 @@
         },
         {
           "id": "founder_friend_B",
-          "text": "SnowSense is Dana's pet project. It must be fully deployed in round 2.",
+          "text": "SnowSense is Dana's pet project and needs the cash. The pension payment must be skipped.",
           "check": {
-            "type": "motion_passed_any",
-            "ids": [
-              "deploy_full",
-              "deploy_retrain"
-            ]
+            "type": "motion_passed",
+            "id": "pension_skip"
           }
         }
       ]
@@ -175,19 +163,10 @@
       "title": "Community seat (Mayor)",
       "home": "Alder Creek",
       "exposure": {
-        "text": "Faces a recall if the Alder Creek mountain closes, or locals get priced out.",
+        "text": "Faces a recall if the Alder Creek mountain closes.",
         "trigger": {
-          "type": "any",
-          "of": [
-            {
-              "type": "motion_passed",
-              "id": "close_alder"
-            },
-            {
-              "type": "motion_passed",
-              "id": "raise_pass"
-            }
-          ]
+          "type": "motion_passed",
+          "id": "close_alder"
         }
       },
       "secrets": [
@@ -216,12 +195,11 @@
   "rounds": [
     {
       "round": 1,
-      "budget_m": 60,
       "motions": [
         {
           "id": "buyback",
           "title": "Stock buyback",
-          "cost_m": 40,
+          "short": "Stock buyback",
           "motive": "Return the cash to the owners, and the market will notice tonight.",
           "effects": {
             "shareholders": 2,
@@ -240,7 +218,7 @@
         {
           "id": "housing",
           "title": "Build staff housing",
-          "cost_m": 30,
+          "short": "Staff housing",
           "motive": "Half our lift crew lives in cars. Turnover costs us every winter.",
           "effects": {
             "shareholders": -1,
@@ -258,7 +236,7 @@
         {
           "id": "freeze",
           "title": "Freeze local pass prices",
-          "cost_m": 15,
+          "short": "Freeze pass prices",
           "motive": "Alder Creek families can't afford their own mountain.",
           "effects": {
             "shareholders": -1,
@@ -266,66 +244,6 @@
             "customers": 1,
             "home": 1,
             "public": 0
-          }
-        },
-        {
-          "id": "chair7",
-          "title": "Rebuild Chair 7",
-          "cost_m": 20,
-          "motive": "The oldest lift on the mountain is due for a rebuild.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "resolves_issue": true
-          }
-        },
-        {
-          "id": "lobby",
-          "title": "Lobby for a second tax cut",
-          "cost_m": 5,
-          "motive": "Cheap bet, big payoff if Congress bites.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "coin_flip": {
-              "chance": 0.5,
-              "effects": {
-                "shareholders": 2
-              },
-              "when": "next_round"
-            },
-            "if_found": {
-              "public": -1
-            }
-          }
-        },
-        {
-          "id": "special_dividend",
-          "title": "Special dividend",
-          "cost_m": 25,
-          "motive": "One-time cash to holders, no promises about next year.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "payout_m": 25,
-            "tags": [
-              "payout"
-            ]
           }
         }
       ],
@@ -358,140 +276,11 @@
     },
     {
       "round": 2,
-      "budget_m": 40,
-      "motions": [
-        {
-          "id": "deploy_full",
-          "title": "Full deployment, cut 20% of seasonal staff",
-          "cost_m": 10,
-          "motive": "Every competitor will do this, and waiting just makes us the slow one.",
-          "effects": {
-            "shareholders": 2,
-            "workers": -2,
-            "customers": 0,
-            "home": -1,
-            "public": 0
-          },
-          "flags": {
-            "staff_cut_pct": 20,
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "deploy_retrain",
-          "title": "Deploy, but retrain staff instead of cutting",
-          "cost_m": 25,
-          "motive": "Use the tool, keep the people who know the mountain.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "deploy_pricing",
-          "title": "Deploy pricing only",
-          "cost_m": 5,
-          "motive": "Let the algorithm price the lift tickets. Nobody loses a job.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": -1,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "raises_detect": 0.15
-          }
-        },
-        {
-          "id": "hold_off",
-          "title": "Hold off on SnowSense this season",
-          "cost_m": 0,
-          "motive": "Wait and see what breaks at other resorts first.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "worker_council",
-          "title": "Worker AI council",
-          "cost_m": 5,
-          "motive": "Staff help decide where the tool goes. Slower, fewer surprises.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "resolves_issue": "partial"
-          }
-        },
-        {
-          "id": "sell_location",
-          "title": "Sell skier location data to partners",
-          "cost_m": -10,
-          "motive": "We already collect it. Others pay for it.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "if_found": {
-              "public": -2
-            },
-            "tags": [
-              "sells_user_data"
-            ]
-          }
-        }
-      ],
-      "issue": {
-        "id": "zip_pricing",
-        "text": "The SnowSense pricing pilot last spring charged buyers with Alder Creek zip codes 18% more than visitors, because locals buy late and don't shop around.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "The SnowSense pricing pilot charged Alder Creek zip codes 18% more.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "Locals buy late and do not shop around, so the model targeted them.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "The pilot ran for six weeks last spring.",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "round": 3,
-      "budget_m": 15,
-      "must_save_m": 30,
-      "brief": "Find $30M in savings this round. Only $15M to spend on anything new.",
       "motions": [
         {
           "id": "pension_skip",
           "title": "Skip this year's pension payment",
-          "cost_m": -20,
+          "short": "Skip pension payment",
           "motive": "Legal. The fund will recover when the markets do.",
           "effects": {
             "shareholders": 0,
@@ -507,25 +296,9 @@
           }
         },
         {
-          "id": "layoff",
-          "title": "Lay off 25% of seasonal staff",
-          "cost_m": -15,
-          "motive": "No snow, no shifts.",
-          "effects": {
-            "shareholders": 0,
-            "workers": -2,
-            "customers": 0,
-            "home": -1,
-            "public": 0
-          },
-          "flags": {
-            "staff_cut_pct": 25
-          }
-        },
-        {
           "id": "close_alder",
           "title": "Close the Alder Creek mountain",
-          "cost_m": -15,
+          "short": "Close Alder Creek",
           "motive": "Smallest mountain, worst snow, and the costs add up.",
           "effects": {
             "shareholders": 1,
@@ -533,25 +306,15 @@
             "customers": 0,
             "home": -3,
             "public": 0
-          }
-        },
-        {
-          "id": "raise_pass",
-          "title": "Raise season pass prices 15%",
-          "cost_m": -12,
-          "motive": "Loyal skiers will pay it.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 0,
-            "customers": -2,
-            "home": 0,
-            "public": 0
+          },
+          "flags": {
+            "founder_wants": true
           }
         },
         {
           "id": "cut_div",
           "title": "Cut the dividend",
-          "cost_m": -10,
+          "short": "Cut the dividend",
           "motive": "Owners share the bad year too.",
           "effects": {
             "shareholders": -2,
@@ -559,37 +322,6 @@
             "customers": 0,
             "home": 0,
             "public": 0
-          }
-        },
-        {
-          "id": "exec_pay",
-          "title": "Executives take a 50% pay cut",
-          "cost_m": -3,
-          "motive": "Leaders go first.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 1
-          }
-        },
-        {
-          "id": "snowmaking",
-          "title": "Invest in snowmaking",
-          "cost_m": 15,
-          "motive": "Never let a dry year do this to us again.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "lag_payback": {
-              "shareholders": 2
-            }
           }
         }
       ],
@@ -615,6 +347,5 @@
         ]
       }
     }
-  ],
-  "design_note": "Savings that fire no exposure are cut_div 10 + exec_pay 3 = 13, below 30; pension_skip and layoff fire Tomas, close_alder and raise_pass fire June, so every legal package fires someone."
+  ]
 }

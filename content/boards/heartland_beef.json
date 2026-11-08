@@ -54,9 +54,9 @@
         },
         {
           "id": "attorney_B",
-          "text": "Your firm earns fees defending Heartland in court. A lawsuit against the board keeps the fees coming.",
+          "text": "Your firm earns fees when regulators look into Heartland. A hidden fact that comes out keeps the fees coming.",
           "check": {
-            "type": "suit_filed"
+            "type": "facts_caught"
           }
         }
       ]
@@ -67,19 +67,10 @@
       "title": "Labor director",
       "home": "Meatcutters Local 88",
       "exposure": {
-        "text": "Loses the next union vote if more than 10% of line staff are cut, or line wages are frozen.",
+        "text": "Loses the next union vote if line wages are frozen.",
         "trigger": {
-          "type": "any",
-          "of": [
-            {
-              "type": "staff_cut_pct_gt",
-              "value": 10
-            },
-            {
-              "type": "motion_passed",
-              "id": "wage_freeze"
-            }
-          ]
+          "type": "motion_passed",
+          "id": "wage_freeze"
         }
       },
       "secrets": [
@@ -114,7 +105,7 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Pass a buyback or dividend of $30M or more in any round. After that you may resign.",
+          "text": "Pass a buyback of $30M or more in any round.",
           "check": {
             "type": "payout_m_gte",
             "value": 30
@@ -135,7 +126,7 @@
       "title": "Founder's friend",
       "home": "Walt Dreyer, the founder (hunting partner of 30 years)",
       "exposure": {
-        "text": "Loses the seat if the board ever votes against something Walt wants.",
+        "text": "Loses the seat if the board votes down the wage freeze Walt wants.",
         "trigger": {
           "type": "founder_motion_failed"
         }
@@ -155,10 +146,12 @@
         },
         {
           "id": "founder_friend_B",
-          "text": "Walt's nephew sells the AI carcass grader. It must be switched on for every carcass in round 2.",
+          "text": "Walt's name is on the cancellation clause. No fact about it may ever be caught.",
           "check": {
-            "type": "motion_passed",
-            "id": "grader_full"
+            "type": "not",
+            "of": {
+              "type": "facts_caught"
+            }
           }
         }
       ]
@@ -169,30 +162,21 @@
       "title": "Community seat (Ranchers' co-op president)",
       "home": "Prairie Ranchers' Co-op",
       "exposure": {
-        "text": "Faces a no-confidence vote at home if contracts are cancelled on small ranchers, or the AI grader goes plant-wide.",
+        "text": "Faces a no-confidence vote at home if contracts are cancelled on small ranchers.",
         "trigger": {
-          "type": "any",
-          "of": [
-            {
-              "type": "motion_passed",
-              "id": "cancel_small"
-            },
-            {
-              "type": "motion_passed",
-              "id": "grader_full"
-            }
-          ]
+          "type": "motion_passed",
+          "id": "cancel_small"
         }
       },
       "secrets": [
         {
           "id": "community_A",
-          "text": "Either the grading appeal desk or the rancher price floor passes.",
+          "text": "Either the rancher bonus or the hardship loans pass.",
           "check": {
             "type": "motion_passed_any",
             "ids": [
-              "appeal_desk",
-              "price_floor"
+              "rancher_bonus",
+              "ranch_fund"
             ]
           }
         },
@@ -210,12 +194,11 @@
   "rounds": [
     {
       "round": 1,
-      "budget_m": 50,
       "motions": [
         {
           "id": "buyback",
           "title": "Stock buyback",
-          "cost_m": 30,
+          "short": "Stock buyback",
           "motive": "Hand the cash back to the owners, and the market will notice tonight.",
           "effects": {
             "shareholders": 2,
@@ -232,28 +215,9 @@
           }
         },
         {
-          "id": "special_dividend",
-          "title": "Special dividend",
-          "cost_m": 20,
-          "motive": "One check to holders, no promises about next year.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "payout_m": 20,
-            "tags": [
-              "payout"
-            ]
-          }
-        },
-        {
           "id": "ammonia_retrofit",
           "title": "Replace the ammonia cooling system",
-          "cost_m": 25,
+          "short": "Fix ammonia system",
           "motive": "The old system is forty years old and due for replacement.",
           "effects": {
             "shareholders": -1,
@@ -267,46 +231,15 @@
           }
         },
         {
-          "id": "line_raise",
-          "title": "Raise line wages",
-          "cost_m": 15,
-          "motive": "Pay hasn't moved in three years, and people leave for it.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 2,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "lag_payback": {
-              "shareholders": 2
-            }
-          }
-        },
-        {
           "id": "rancher_bonus",
           "title": "Pay ranchers a bonus on this year's cattle",
-          "cost_m": 12,
+          "short": "Rancher bonus",
           "motive": "They carry the weather and the feed bills. Share the good year.",
           "effects": {
             "shareholders": -1,
             "workers": 0,
             "customers": 0,
             "home": 2,
-            "public": 0
-          }
-        },
-        {
-          "id": "hold_prices",
-          "title": "Hold wholesale prices flat through winter",
-          "cost_m": 10,
-          "motive": "Grocers asked, and a steady price keeps the shelf space.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 2,
-            "home": 0,
             "public": 0
           }
         }
@@ -340,134 +273,11 @@
     },
     {
       "round": 2,
-      "budget_m": 35,
-      "motions": [
-        {
-          "id": "automate_cut",
-          "title": "Run the AI line system, cut 20% of line jobs",
-          "cost_m": 8,
-          "motive": "Every packer will do this, and waiting just makes us the expensive one.",
-          "effects": {
-            "shareholders": 2,
-            "workers": -2,
-            "customers": 0,
-            "home": -1,
-            "public": 0
-          },
-          "flags": {
-            "staff_cut_pct": 20
-          }
-        },
-        {
-          "id": "automate_retrain",
-          "title": "Run the AI line system, retrain the crew",
-          "cost_m": 22,
-          "motive": "Use the machines and move people into the jobs they create.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "grader_full",
-          "title": "Switch every carcass to the AI grader",
-          "cost_m": 6,
-          "motive": "The machine grades the same way every time. People don't.",
-          "effects": {
-            "shareholders": 2,
-            "workers": 0,
-            "customers": 1,
-            "home": -2,
-            "public": 0
-          },
-          "flags": {
-            "founder_wants": true,
-            "raises_detect": 0.15
-          }
-        },
-        {
-          "id": "appeal_desk",
-          "title": "Open a grading appeal desk for ranchers",
-          "cost_m": 6,
-          "motive": "A rancher can challenge a grade and get a person to look at it.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 2,
-            "public": 0
-          },
-          "flags": {
-            "resolves_issue": "partial"
-          }
-        },
-        {
-          "id": "price_floor",
-          "title": "Guarantee ranchers a minimum price per head",
-          "cost_m": 10,
-          "motive": "Some certainty for the people who raise our cattle.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 2,
-            "public": 0
-          }
-        },
-        {
-          "id": "hold_off",
-          "title": "Hold off on the AI systems this year",
-          "cost_m": 0,
-          "motive": "Let other packers find the problems first.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        }
-      ],
-      "issue": {
-        "id": "grader_bias",
-        "text": "The AI carcass grader pilot has been downgrading cattle from small ranchers' herds. They are paid by grade, so they have been paid less for the same animals. The pilot data shows it clearly.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "The AI carcass grader pilot has been downgrading cattle from small ranchers' herds.",
-            "weight": 2
-          },
-          {
-            "id": "f2",
-            "text": "Ranchers are paid by grade, so they were paid less for the same animals.",
-            "weight": 3
-          },
-          {
-            "id": "f3",
-            "text": "The pilot data shows the pattern clearly.",
-            "weight": 2
-          },
-          {
-            "id": "f4",
-            "text": "The pilot covers two of the plant's five lines.",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "round": 3,
-      "budget_m": 12,
-      "must_save_m": 24,
-      "brief": "Find $24M in savings this round. Only $12M to spend on anything new.",
       "motions": [
         {
           "id": "cancel_small",
           "title": "Cancel contracts with small ranchers",
-          "cost_m": -10,
+          "short": "Drop small ranchers",
           "motive": "The contract allows it. Small herds cost the most to collect.",
           "effects": {
             "shareholders": 1,
@@ -478,25 +288,9 @@
           }
         },
         {
-          "id": "layoff_line",
-          "title": "Lay off 20% of line workers",
-          "cost_m": -14,
-          "motive": "Less demand, fewer shifts.",
-          "effects": {
-            "shareholders": 0,
-            "workers": -2,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "staff_cut_pct": 20
-          }
-        },
-        {
           "id": "wage_freeze",
           "title": "Freeze line wages",
-          "cost_m": -5,
+          "short": "Freeze line wages",
           "motive": "No raises until the market comes back.",
           "effects": {
             "shareholders": 1,
@@ -504,56 +298,15 @@
             "customers": 0,
             "home": 0,
             "public": 0
-          }
-        },
-        {
-          "id": "cut_dividend",
-          "title": "Cut the dividend",
-          "cost_m": -8,
-          "motive": "Owners share the bad year too.",
-          "effects": {
-            "shareholders": -2,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "exec_pay",
-          "title": "Executives take a 50% pay cut",
-          "cost_m": -3,
-          "motive": "Leaders go first.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 1
-          }
-        },
-        {
-          "id": "defer_maintenance",
-          "title": "Push plant upgrades to next year",
-          "cost_m": -7,
-          "motive": "The plant runs fine. The upgrades can wait.",
-          "effects": {
-            "shareholders": 0,
-            "workers": -1,
-            "customers": -1,
-            "home": 0,
-            "public": 0
           },
           "flags": {
-            "if_found": {
-              "public": -1
-            }
+            "founder_wants": true
           }
         },
         {
           "id": "ranch_fund",
           "title": "Hardship loans for small ranchers",
-          "cost_m": 8,
+          "short": "Rancher hardship loans",
           "motive": "Help the small herds make it through the year.",
           "effects": {
             "shareholders": -1,
@@ -586,6 +339,5 @@
         ]
       }
     }
-  ],
-  "design_note": "Savings that fire no exposure are cut_dividend 8 + exec_pay 3 + defer_maintenance 7 = 18, below 24; layoff_line and wage_freeze fire Denise and cancel_small fires Luanne, so every legal package fires someone."
+  ]
 }

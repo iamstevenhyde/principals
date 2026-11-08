@@ -14,7 +14,7 @@ export const SCORING = {
   seatDropOrder: ['community', 'founder_friend', 'fund', 'labor', 'attorney'],
   // Board priority when the host picks fewer than five boards (spec: with 4 drop Lumen, with 3 also drop Thread).
   boardPriority: ['heartland', 'summit', 'valley', 'thread', 'lumen'],
-  streetPriority: ['activist', 'reporter', 'auditor', 'short_seller', 'plaintiffs_lawyer'], // content/street.json priority wins if present
+  streetPriority: ['reporter', 'auditor'], // content/street.json priority wins if present
 
   // ---------- disclosure ----------
   defaultDisclosure: 'none',    // round 1, if the Chair never locks the facts: admit nothing (provisional: silence reads as hiding)

@@ -29,15 +29,14 @@ function render() {
   if (P.phase === 'lobby') {
     if (qrDone && document.getElementById('qr')) { document.getElementById('names').innerHTML = (P.players || []).map(esc).join('<br>'); document.getElementById('cnt').textContent = (P.players || []).length; return; }
     app.innerHTML = head + `<div class="lobby"><div><div class="qr" id="qr"></div><p class="small">${esc(joinUrl)}</p></div>
-      <div><h2>Join on your phone or laptop. Code <b>${esc(code)}</b></h2><p><b id="cnt">${(P.players || []).length}</b> in</p><div class="names" id="names">${(P.players || []).map(esc).join('<br>')}</div></div></div>`;
+      <div><h2>Join on your phone. Code <b>${esc(code)}</b></h2><p><b id="cnt" style="font-size:2.4rem">${(P.players || []).length}</b> in the waiting room</p><div class="names" id="names">${(P.players || []).map(esc).join('<br>')}</div></div></div>`;
     try { new QRCode(document.getElementById('qr'), { text: joinUrl, width: 280, height: 280 }); } catch (e) { document.getElementById('qr').textContent = 'QR needs the network; use the link.'; }
     qrDone = true; return;
   }
   qrDone = false;
   if (P.phase === 'reveal') { app.innerHTML = head + revealHTML(P.reveal); return; }
   const shock = P.shock ? `<p class="shock"><b>${esc(P.shock.title)}.</b> ${esc(P.shock.text)}</p>` : '';
-  const visit = P.visit ? `<div class="banner">The ${esc(P.visit.label)} is attending ${esc((P.boards.find(b => b.id === P.visit.board) || {}).name)}.${P.visit.out ? ' Sent out: executive session.' : ''}</div>` : '';
   if (P.phase === 'shock') { app.innerHTML = head + shock + outsideView(P); return; }
-  app.innerHTML = head + visit + (P.phase === 'play' ? `<p class="mute">${esc(P.shock ? P.shock.title : '')}</p>` : '') + outsideView(P);
+  app.innerHTML = head + (P.phase === 'play' ? `<p class="mute">${esc(P.shock ? P.shock.title : '')}</p>` : '') + outsideView(P);
 }
 </script></body></html>

@@ -54,12 +54,11 @@
         },
         {
           "id": "attorney_B",
-          "text": "Your firm does Thread & Co.'s trademark work by the hour. Suits end in settlements, and settlements end the billing, so no suit gets settled.",
+          "text": "Your firm does Thread & Co.'s trademark work by the hour. One caught fact brings in outside counsel, so none may be caught.",
           "check": {
             "type": "not",
             "of": {
-              "type": "motion_passed",
-              "id": "settle_suit"
+              "type": "facts_caught"
             }
           }
         }
@@ -71,7 +70,7 @@
       "title": "Labor director",
       "home": "Garment Workers Federation (supplier side)",
       "exposure": {
-        "text": "Loses the next vote if the board squeezes factory prices, delays payment, or moves orders away from union factories.",
+        "text": "Loses the next vote if the board delays factory payment or moves orders away from union factories.",
         "trigger": {
           "type": "tag_passed",
           "tag": "factory_squeeze"
@@ -109,7 +108,7 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Pass a buyback or dividend of $30M or more in any round. After that you may resign.",
+          "text": "Pass a buyback of $30M or more in any round.",
           "check": {
             "type": "payout_m_gte",
             "value": 30
@@ -130,7 +129,7 @@
       "title": "Founder's friend",
       "home": "Elodie Marchetti, the founder (first design partner)",
       "exposure": {
-        "text": "Loses the seat if the board ever votes against something Elodie wants.",
+        "text": "Loses the seat if the board votes down moving orders to a cheaper country, which Elodie wants.",
         "trigger": {
           "type": "founder_motion_failed"
         }
@@ -150,13 +149,12 @@
         },
         {
           "id": "founder_friend_B",
-          "text": "You run the AI design tool. It must be deployed in round 2.",
+          "text": "You sit on two other boards. No scandal anywhere you sit, so no fact on this board may be caught.",
           "check": {
-            "type": "motion_passed_any",
-            "ids": [
-              "design_full",
-              "design_retrain"
-            ]
+            "type": "not",
+            "of": {
+              "type": "facts_caught"
+            }
           }
         }
       ]
@@ -185,13 +183,10 @@
       "secrets": [
         {
           "id": "community_A",
-          "text": "Either the factory safety fund or the supplier wage floor passes.",
+          "text": "The supplier wage floor passes.",
           "check": {
-            "type": "motion_passed_any",
-            "ids": [
-              "factory_safety",
-              "wage_floor"
-            ]
+            "type": "motion_passed",
+            "id": "wage_floor"
           }
         },
         {
@@ -208,12 +203,11 @@
   "rounds": [
     {
       "round": 1,
-      "budget_m": 50,
       "motions": [
         {
           "id": "buyback",
           "title": "Stock buyback",
-          "cost_m": 30,
+          "short": "Stock buyback",
           "motive": "Hand the cash back to the owners, and the market will notice tonight.",
           "effects": {
             "shareholders": 2,
@@ -232,7 +226,7 @@
         {
           "id": "wage_floor",
           "title": "Set a wage floor in supplier contracts",
-          "cost_m": 14,
+          "short": "Factory wage floor",
           "motive": "A minimum wage written into every factory contract.",
           "effects": {
             "shareholders": -1,
@@ -248,22 +242,9 @@
           }
         },
         {
-          "id": "factory_safety",
-          "title": "Fund fire doors and sprinklers",
-          "cost_m": 18,
-          "motive": "The older factories are overdue for them.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 2,
-            "customers": 0,
-            "home": 1,
-            "public": 0
-          }
-        },
-        {
           "id": "supplier_contract",
           "title": "Five-year deal with the biggest factory",
-          "cost_m": 12,
+          "short": "Five-year deal",
           "motive": "Steady orders for them and steady supply for us.",
           "effects": {
             "shareholders": 1,
@@ -271,38 +252,6 @@
             "customers": 0,
             "home": 1,
             "public": 0
-          }
-        },
-        {
-          "id": "price_cut",
-          "title": "Cut prices on the basics",
-          "cost_m": 10,
-          "motive": "Shoppers notice what a T-shirt costs.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 2,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "push_recycled",
-          "title": "Push the recycled line in stores",
-          "cost_m": 8,
-          "motive": "Our greenest line should be on the front table.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 1,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "if_found": {
-              "public": -1
-            },
-            "raises_detect": 0.1
           }
         }
       ],
@@ -335,139 +284,11 @@
     },
     {
       "round": 2,
-      "budget_m": 35,
-      "motions": [
-        {
-          "id": "design_full",
-          "title": "AI tools in design and factories, cut 20% of supplier jobs",
-          "cost_m": 8,
-          "motive": "Every brand will do this, and waiting just makes us the slow one.",
-          "effects": {
-            "shareholders": 2,
-            "workers": -2,
-            "customers": 0,
-            "home": -1,
-            "public": 0
-          },
-          "flags": {
-            "staff_cut_pct": 20,
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "design_retrain",
-          "title": "Roll out the tools and fund retraining at suppliers",
-          "cost_m": 22,
-          "motive": "Use the tools and keep the people who know the product.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "design_inhouse",
-          "title": "Use the design tool in-house only",
-          "cost_m": 5,
-          "motive": "Our own studio, our own files. Nobody else is affected.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "hold_off",
-          "title": "Hold off on the AI tools this season",
-          "cost_m": 0,
-          "motive": "Wait and see what breaks at other brands first.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "designer_fund",
-          "title": "License fund for independent designers",
-          "cost_m": 7,
-          "motive": "Pay designers whose work shaped the tool.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 1
-          },
-          "flags": {
-            "resolves_issue": "partial"
-          }
-        },
-        {
-          "id": "license_tool",
-          "title": "License the design tool to other brands",
-          "cost_m": -10,
-          "motive": "We built it. Others will pay to use it.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "if_found": {
-              "public": -2
-            }
-          }
-        }
-      ],
-      "issue": {
-        "id": "copied_prints",
-        "text": "The AI design tool produced a spring print that matches an independent designer's portfolio almost line for line. Her work was in its training set. She hasn't noticed yet.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "The AI design tool made a print nearly identical to an independent designer's portfolio.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "Her work was in the tool's training set.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "She has not noticed yet.",
-            "weight": 1
-          },
-          {
-            "id": "f4",
-            "text": "The line is ready to ship.",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "round": 3,
-      "budget_m": 8,
-      "must_save_m": 26,
-      "brief": "Find $26M in savings this round. Only $8M to spend on anything new.",
       "motions": [
         {
           "id": "delay_pay",
           "title": "Delay payment to the Karvan factory another quarter",
-          "cost_m": -14,
+          "short": "Delay factory pay",
           "motive": "It's in the contract terms. The factory will wait.",
           "effects": {
             "shareholders": 1,
@@ -486,27 +307,9 @@
           }
         },
         {
-          "id": "squeeze_price",
-          "title": "Cut factory prices 10% on next season's orders",
-          "cost_m": -10,
-          "motive": "They need the orders more than we need the price.",
-          "effects": {
-            "shareholders": 1,
-            "workers": -2,
-            "customers": 0,
-            "home": -2,
-            "public": 0
-          },
-          "flags": {
-            "tags": [
-              "factory_squeeze"
-            ]
-          }
-        },
-        {
           "id": "shift_orders",
           "title": "Move orders to a cheaper country",
-          "cost_m": -12,
+          "short": "Move orders abroad",
           "motive": "Same clothes, lower cost.",
           "effects": {
             "shareholders": 1,
@@ -518,52 +321,14 @@
           "flags": {
             "tags": [
               "factory_squeeze"
-            ]
-          }
-        },
-        {
-          "id": "raise_prices",
-          "title": "Raise prices 8% across the line",
-          "cost_m": -9,
-          "motive": "Shoppers will grumble and pay.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": -2,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "cut_marketing",
-          "title": "Cut the marketing budget",
-          "cost_m": -8,
-          "motive": "Fewer ads, fewer events.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          }
-        },
-        {
-          "id": "exec_pay",
-          "title": "Executives take a 50% pay cut",
-          "cost_m": -3,
-          "motive": "Leaders go first.",
-          "effects": {
-            "shareholders": 0,
-            "workers": 1,
-            "customers": 0,
-            "home": 0,
-            "public": 1
+            ],
+            "founder_wants": true
           }
         },
         {
           "id": "pay_factory",
           "title": "Pay the factory in full now",
-          "cost_m": 8,
+          "short": "Pay factory in full",
           "motive": "The invoice is due and the factory has payroll to meet.",
           "effects": {
             "shareholders": -2,
@@ -601,6 +366,5 @@
         ]
       }
     }
-  ],
-  "design_note": "Savings that fire no exposure are raise_prices 9 + cut_marketing 8 + exec_pay 3 = 20, below 26; delay_pay, squeeze_price and shift_orders fire Nasrin (delay_pay and shift_orders fire Rahel too), so every legal package fires someone."
+  ]
 }

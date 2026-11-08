@@ -12,17 +12,8 @@ export { unknownRules };
 export const SEAT_LABEL = { attorney: 'Attorney', labor: 'Labor director', fund: 'Fund partner', founder_friend: "Founder's friend", community: 'Community seat' };
 const SEAT_ORDER = ['attorney', 'labor', 'fund', 'founder_friend', 'community'];
 const STREET_DEFAULT = {
-  activist: { name: 'Activist', action: 'campaign' }, reporter: { name: 'Reporter', action: 'story' }, auditor: { name: 'Auditor', action: 'inspect' },
-  short_seller: { name: 'Short seller', action: 'short' }, plaintiffs_lawyer: { name: "Plaintiff's lawyer", action: 'file' },
+  reporter: { name: 'Reporter', action: 'story' }, auditor: { name: 'Auditor', action: 'inspect' },
 };
-const DEFAULT_STANDING = [
-  { id: 'remove_chair', title: 'Remove the Chair', cost_m: 0, effects: {}, flags: { removes_chair: true }, available: 'any_round' },
-  { id: 'independent_investigator', title: 'Hire an independent investigator', cost_m: 4, effects: { public: 1 }, flags: { investigates_current_issue: true, raises_detect: 0.25, admit_stock_hit_mult: 0.5, caught_penalty_mult: 2 }, available: 'any_round' },
-  { id: 'poison_pill', title: 'Adopt a poison pill', cost_m: 3, effects: {}, flags: { street_action_mult: { campaign: 0.5 } }, available: 'any_round' },
-  { id: 'pay_to_stock', title: 'Tie executive pay to the stock', cost_m: 0, effects: { shareholders: 1 }, flags: { tags: ['pay_stock'] }, available: 'any_round' },
-  { id: 'pay_to_safety', title: 'Tie executive pay to a worker and safety measure', cost_m: 2, effects: { workers: 1 }, flags: { tags: ['pay_safety'] }, available: 'any_round' },
-  { id: 'settle_suit', title: 'Settle the suit', cost_m: 8, effects: { shareholders: -1 }, flags: { settles_suit: true, plaintiff_cut: 0.3 }, available: 'suit_pending' },
-];
 
 // ---------- rng (mulberry32; state kept in the game so a replay is exact) ----------
 function rnd(st) { let a = (st.rng = (st.rng + 0x6D2B79F5) | 0); a = Math.imul(a ^ (a >>> 15), a | 1); a ^= a + Math.imul(a ^ (a >>> 7), a | 61); return ((a ^ (a >>> 14)) >>> 0) / 4294967296; }
@@ -38,7 +29,7 @@ export function normalizeContent(c) {
   const st = c.street || {};
   const seats = (Array.isArray(st) ? st : st.seats || st.roles || []).map(x => ({ ...x, seat: x.seat || x.id }));
   const boards = (c.boards || []).map(b => ({ ...b, communityLabels: communityLabels(b) }));
-  return { boards, rounds, standing: c.standing && c.standing.length ? c.standing : DEFAULT_STANDING, street: { ...(Array.isArray(st) ? {} : st), seats, priority: (st.priority) || S.streetPriority } };
+  return { boards, rounds, standing: [], street: { ...(Array.isArray(st) ? {} : st), seats: seats.filter(x => S.streetPriority.includes(x.seat)), priority: S.streetPriority } };   // middle cut: Auditor and Reporter only
 }
 // communities may be an array of {key,label} or an object {shareholders:'..', home:{id,label}}
 function communityLabels(b) {
@@ -54,9 +45,9 @@ export function createGame(content, { code = 'TEST', seed = 1, boardCount = 4, t
   return {
     code, seed, rng: seed | 0, content: normalizeContent(content),
     settings: { boardCount, timers: { ...S.timers, ...(timers || {}) }, autoAdvance: true },
-    phase: 'lobby', round: 0, schedule: [1, 2, 3], clock: null,
+    phase: 'lobby', round: 0, schedule: [1, 2], clock: null,
     players: [], seats: {}, boards: {}, chat: [], feed: [], log: [],
-    streetActions: {}, visits: {}, suitOverrides: {}, leaks: [], resigns: {}, seq: 0,
+    streetActions: {}, draft: null, seq: 0,
   };
 }
 
@@ -70,7 +61,6 @@ function menu(st, b, r) {   // the round's motions plus the standing motions, on
 }
 const issueFacts = (b, r) => ((boardRound(b.content || b, r).issue || {}).facts) || [];
 const factW = fs => fs.reduce((n, f) => n + (f.weight || 1), 0);
-const suitPending = (st, b) => Object.values(st.streetActions[st.round] || {}).some(a => a.type === 'file' && a.target === b.id);
 function feed(st, t, text, extra = {}) { st.feed.push({ seq: ++st.seq, t, round: st.round, text, ...extra }); }
 function logEv(st, t, type, data) { st.log.push({ seq: ++st.seq, t, round: st.round, type, ...data }); }
 function setClock(st, t, secs) { st.clock = secs == null ? null : { endsAt: t + secs * 1000, paused: false, remaining: secs * 1000, total: secs * 1000 }; }
@@ -81,12 +71,12 @@ export function join(st, { id, name, t }) {
   if (st.players.find(p => p.id === id)) return { ok: true, rejoin: true };
   const clean = String(name || '').trim().slice(0, 40) || 'Player ' + (st.players.length + 1);
   st.players.push({ id, name: clean, joinedAt: t });
-  if (st.phase !== 'lobby') { addStreet(st, id, clean); feed(st, t, clean + ' joined the Street.', { kind: 'join' }); }
+  if (st.phase !== 'lobby') { addStreet(st, id, clean, null); feed(st, t, clean + ' joined the Street.', { kind: 'join' }); }
   return { ok: true };
 }
-function addStreet(st, id, name) {
+function addStreet(st, id, name, forced) {
   const pr = st.content.street.priority, n = streetSeats(st).length;
-  const role = pr[n % pr.length];
+  const role = forced || pr[n % pr.length];
   const spec = st.content.street.seats.find(x => x.seat === role) || {};
   const def = STREET_DEFAULT[role] || { name: role, action: 'story' };
   const ids = Object.keys(st.boards);
@@ -98,27 +88,64 @@ function addStreet(st, id, name) {
   };
 }
 
-// ---------- assignment ----------
-export function assign(st, t) {
-  const players = shuffle(st, st.players);
-  const pool = orderBoards(st.content.boards);
-  const B = Math.min(st.settings.boardCount, pool.length, Math.max(1, Math.floor(players.length / S.minBoardSize)));
-  const boards = pool.slice(0, B);
-  const nSeated = Math.min(players.length, B * S.boardSize);
-  const seated = players.slice(0, nSeated), street = players.slice(nSeated);
-  const groups = boards.map(() => []);
-  seated.forEach((p, i) => groups[i % B].push(p));
-  boards.forEach((bc, i) => {
-    st.boards[bc.id] = { id: bc.id, content: bc, stock: [S.stockStart], hist: {}, community: zero(), reveal: zero(), failed: false, suitsLost: 0, chair: null, votes: [], standing: {}, pending: { lag: zero(), coin: [], activist: 0 } };
-    const drop = S.seatDropOrder.slice(0, Math.max(0, S.boardSize - groups[i].length));
-    const types = SEAT_ORDER.filter(x => !drop.includes(x));
-    groups[i].forEach((p, k) => seatDirector(st, p.id, p.name, bc, types[k] || SEAT_ORDER[k % 5], null));
-    const ds = directorsOf(st, bc.id);
-    if (ds.length) st.boards[bc.id].chair = pick(st, ds).id;
+// ---------- assignment (waiting room -> boards) ----------
+// st.draft = { boards: [boardId], seats: { boardId: { seatType: playerId|null } }, chairs: { boardId: playerId|null }, outside: { playerId: 'reporter'|'auditor' } }
+// The host edits the draft in the lobby (draft_auto, draft_seat, draft_chair, draft_outside); start deals everyone still unplaced.
+function unplace(d, id) {
+  for (const o of Object.values(d.seats)) for (const k of Object.keys(o)) if (o[k] === id) o[k] = null;
+  delete d.outside[id];
+}
+function emptyDraft(st) {
+  const n = Math.min(st.settings.boardCount, st.content.boards.length);
+  const boards = orderBoards(st.content.boards).slice(0, n).map(b => b.id);
+  return { boards, seats: Object.fromEntries(boards.map(id => [id, Object.fromEntries(SEAT_ORDER.map(k => [k, null]))])), chairs: {}, outside: {} };
+}
+const placedIds = d => new Set([...Object.values(d.seats).flatMap(o => Object.values(o)), ...Object.keys(d.outside)].filter(Boolean));
+function draftAuto(st) {
+  const d = emptyDraft(st), players = shuffle(st, st.players);
+  const B = Math.min(d.boards.length, Math.max(1, Math.floor(players.length / S.minBoardSize)));
+  d.boards = d.boards.slice(0, B); d.seats = Object.fromEntries(d.boards.map(id => [id, d.seats[id]]));
+  const nSeated = Math.min(players.length, B * S.boardSize), groups = d.boards.map(() => []);
+  players.slice(0, nSeated).forEach((p, i) => groups[i % B].push(p));
+  d.boards.forEach((id, i) => {
+    const drop = S.seatDropOrder.slice(0, Math.max(0, S.boardSize - groups[i].length)), types = SEAT_ORDER.filter(x => !drop.includes(x));
+    groups[i].forEach((p, k) => { d.seats[id][types[k] || SEAT_ORDER[k % 5]] = p.id; });
+    const ids = groups[i].map(p => p.id); if (ids.length) d.chairs[id] = pick(st, ids);
   });
-  street.forEach(p => addStreet(st, p.id, p.name));
+  const pr = st.content.street.priority;
+  players.slice(nSeated).forEach((p, i) => { d.outside[p.id] = pr[i % pr.length]; });
+  st.draft = d;
+}
+function fillDraft(st) {   // everyone the host left unplaced takes the first open seat, else goes outside
+  if (!st.draft) draftAuto(st);
+  const d = st.draft, placed = placedIds(d), pr = st.content.street.priority;
+  for (const p of st.players) {
+    if (placed.has(p.id)) continue;
+    let done = false;
+    for (const id of d.boards) { const k = SEAT_ORDER.find(x => !d.seats[id][x]); if (k) { d.seats[id][k] = p.id; done = true; break; } }
+    if (!done) d.outside[p.id] = pr[Object.keys(d.outside).length % pr.length];
+  }
+}
+export function placementOf(st, id) {   // what the waiting room shows a player once the host has placed them
+  const d = st.draft; if (!d) return null;
+  for (const bid of d.boards) for (const k of SEAT_ORDER) if (d.seats[bid][k] === id) return { kind: 'director', board: (st.content.boards.find(b => b.id === bid) || {}).name, seat: k, seatLabel: SEAT_LABEL[k] };
+  if (d.outside[id]) return { kind: 'street', role: d.outside[id], seatLabel: (STREET_DEFAULT[d.outside[id]] || {}).name };
+  return null;
+}
+export function assign(st, t) {
+  fillDraft(st);
+  const d = st.draft;
+  d.boards.forEach(bid => {
+    const bc = st.content.boards.find(b => b.id === bid), mem = SEAT_ORDER.filter(k => d.seats[bid][k]).map(k => [k, d.seats[bid][k]]);
+    if (!mem.length) return;
+    st.boards[bid] = { id: bid, content: bc, stock: [S.stockStart], hist: {}, community: zero(), reveal: zero(), failed: false, chair: null, votes: [], standing: {}, pending: { lag: zero(), coin: [] } };
+    for (const [k, pid] of mem) seatDirector(st, pid, st.players.find(p => p.id === pid).name, bc, k, null);
+    const c = d.chairs[bid];
+    st.boards[bid].chair = mem.some(([, pid]) => pid === c) ? c : pick(st, mem.map(([, pid]) => pid));
+  });
+  for (const [pid, role] of Object.entries(d.outside)) addStreet(st, pid, st.players.find(p => p.id === pid).name, role);
   for (const s of streetSeats(st)) if (!s.consulted) s.consulted = pick(st, Object.keys(st.boards));
-  logEv(st, t, 'assign', { boards: boards.map(b => b.id), street: street.length });
+  logEv(st, t, 'assign', { boards: Object.keys(st.boards), street: Object.keys(d.outside).length });
 }
 function seatDirector(st, id, name, bc, seatType, avoidIdx) {
   const card = (bc.directors || []).find(d => d.seat === seatType) || { seat: seatType, name: SEAT_LABEL[seatType], title: '', home: '', exposure: { text: '', trigger: null }, secrets: [] };
@@ -139,33 +166,21 @@ function enterShock(st, t) {
   const r = st.round;
   for (const b of Object.values(st.boards)) {
     b.votes = []; b.disclosure = null; b.admit = null; b.statement = '';
-    b.hist[r] = { passed: [], tags: [], payoutM: 0, staffCut: 0, effects: zero(), spentPos: 0, net: 0, disclosure: null, admit: [], statement: '', omittedFrac: 0, decided: false, caught: false, caughtBy: null, caughtFacts: [], caughtOn: [], sued: false, settled: false, founderFailed: false, resolves: null, raisesDetect: 0, ifFound: zero(), stockStart: stockNow(b), stockEnd: null, suitsLost: 0 };
+    b.hist[r] = { passed: [], tags: [], payoutM: 0, staffCut: 0, effects: zero(), spentPos: 0, net: 0, disclosure: null, admit: [], statement: '', omittedFrac: 0, decided: false, caught: false, caughtBy: null, caughtFacts: [], caughtOn: [], founderFailed: false, resolves: null, raisesDetect: 0, ifFound: zero(), stockStart: stockNow(b), stockEnd: null };
     // carry-ins: lag payback and coin flips from last round, activist payout push, standing pay ties
     const h = b.hist[r];
     addEff(h.effects, b.pending.lag); b.pending.lag = zero();
     for (const c of b.pending.coin) { if (rnd(st) < (c.chance ?? 0.5)) { addEff(h.effects, c.effects); feed(st, t, b.content.name + ': a bet paid off.', { kind: 'coin', board: b.id }); } }
     b.pending.coin = [];
-    if (b.pending.activist) { h.effects.shareholders += b.pending.activist; h.activistPush = true; b.pending.activist = 0; }
-    for (const tag of Object.keys(b.standing.pay || {})) addEff(h.effects, S.payTieEffects[tag]);
   }
   st.streetActions[r] = {};
   for (const s of streetSeats(st)) s.weak = s.cred < S.credLow;
-  const ss = streetSeats(st).sort((a, b) => (a.id < b.id ? -1 : 1));
-  if (ss.length && Object.keys(st.boards).length) st.visits[r] = { seat: ss[st.schedule.indexOf(r) % ss.length].id, board: null, out: false };
   feed(st, t, 'Round ' + r + ': ' + (roundContent(st, r).title || ''), { kind: 'shock' });
   setClock(st, t, st.settings.timers.shock);
 }
 function enterPlay(st, t) {
   st.phase = 'play';
-  const r = st.round, v = st.visits[r];
-  if (v) {
-    if (!v.board) {
-      const seen = new Set(Object.values(st.visits).filter(x => x.seat === v.seat && x.board).map(x => x.board));
-      const opts = Object.keys(st.boards).filter(id => !seen.has(id) && !st.boards[id].failed);
-      v.board = opts.length ? pick(st, opts) : pick(st, Object.keys(st.boards));
-    }
-    feed(st, t, 'The ' + st.seats[v.seat].label + ' is attending ' + st.boards[v.board].content.name + '.', { kind: 'visit', board: v.board });
-  }
+  const r = st.round;
   const rc = roundContent(st, r);
   setClock(st, t, st.settings.timers.play || rc.timer_s);
 }
@@ -195,13 +210,8 @@ export function tick(st, t) {
 }
 function enterReveal(st, t) { scoreAll(st); st.phase = 'reveal'; st.clock = null; feed(st, t, 'Reveal.', { kind: 'reveal' }); }
 
-// ---------- budget ----------
-// Rounds 1-2: net cost of passed motions <= budget_m. Round 3 (must_save_m): positive costs <= budget_m.
-export function budgetRoom(st, b, r) {
-  const br = boardRound(b.content, r), h = b.hist[r];
-  return br.must_save_m ? r1((br.budget_m || 0) - h.spentPos) : r1((br.budget_m || 0) - h.net);
-}
-const fits = (st, b, r, m) => (m.cost_m <= 0 || m.cost_m <= budgetRoom(st, b, r));
+// No budgets in the middle cut: any motion can be called.
+const fits = () => true;
 
 // ---------- votes ----------
 function openVote(st, b, seat, a, t) {
@@ -213,14 +223,7 @@ function openVote(st, b, seat, a, t) {
     const m = menu(st, b, r).find(x => x.id === a.target);
     if (!m) return 'No such motion.';
     if (h.passed.includes(m.id)) return 'Already passed.';
-    if (!fits(st, b, r, m)) return 'Over budget.';
-    if (m.available === 'suit_pending' && !suitPending(st, b)) return 'No suit is pending.';
-    if (m.flags && m.flags.removes_chair) {
-      const nom = st.seats[a.nominee];
-      if (!nom || nom.board !== b.id || nom.id === b.chair) return 'Pick a director to take the chair.';
-    } else if (seat.id !== b.chair) return 'Only the Chair calls a vote.';
-    if (m.standing && m.flags && m.flags.tags && m.flags.tags.some(tg => (b.standing.pay || {})[tg])) return 'Already in place.';
-    if (m.id === 'poison_pill' && b.standing.pill) return 'Already in place.';
+    if (seat.id !== b.chair) return 'Only the Chair calls a vote.';
   } else if (a.kind === 'facts') {
     if (seat.id !== b.chair) return 'Only the Chair calls a vote.';
     if (h.decided) return 'The facts and statement are locked.';
@@ -262,9 +265,9 @@ function closeVote(st, b, v, t) {
   } else {
     const m = menu(st, b, r).find(x => x.id === v.target);
     const yes = vals.filter(c => c === 'yes').length, no = vals.length - yes;
-    const pass = m.flags && m.flags.removes_chair ? yes > ds.length / 2 : yes > no;
+    const pass = yes > no;
     v.result = pass ? 'passed' : 'failed';
-    if (pass) { if (!fits(st, b, r, m)) v.result = 'over budget'; else passMotion(st, b, m, v, t); }
+    if (pass) passMotion(st, b, m, v, t);
     if (!pass && m.flags && m.flags.founder_wants) h.founderFailed = true;
   }
   logEv(st, t, 'vote_close', { board: b.id, vote: v.id, kind: v.kind, target: v.target, result: v.result, ballots: { ...v.ballots } });
@@ -291,13 +294,6 @@ function passMotion(st, b, m, v, t) {
   if (fl.reveal_effects) addEff(b.reveal, fl.reveal_effects);
   if (fl.resolves_issue) h.resolves = fl.resolves_issue === 'partial' ? (h.resolves === true ? true : 'partial') : true;
   if (fl.raises_detect) { const add = typeof fl.raises_detect === 'number' ? fl.raises_detect : S.raisesDetectTrue; h.raisesDetect += add; b.standing.detect = (b.standing.detect || 0) + (m.standing ? 0 : add); }
-  // standing
-  if (fl.removes_chair) { const old = b.chair; b.chair = v.nominee; feed(st, t, b.content.name + ' replaced its Chair.', { kind: 'chair', board: b.id }); logEv(st, t, 'chair', { board: b.id, from: old, to: v.nominee }); }
-  if (fl.investigates_current_issue) { h.investigator = { admit: S.investigatorAdmitHitMult ?? fl.admit_stock_hit_mult ?? 1, caught: S.investigatorCaughtPenaltyMult ?? fl.caught_penalty_mult ?? 1, detect: S.investigatorRaisesDetect ?? (typeof fl.raises_detect === 'number' ? 0 : 0) }; }
-  if (fl.street_action_mult) { b.standing.pill = { ...fl.street_action_mult, ...(S.poisonPillCampaignMult != null ? { campaign: S.poisonPillCampaignMult } : {}) }; }
-  if (m.standing && fl.tags) for (const tg of fl.tags) if (S.payTieEffects[tg]) b.standing.pay = { ...(b.standing.pay || {}), [tg]: r };
-  if (fl.settles_suit) { h.settled = true; h.plaintiffCut = fl.plaintiff_cut ?? 0.3; }
-  if (m.standing) feed(st, t, b.content.name + ': ' + m.title + '.', { kind: 'standing', board: b.id });
 }
 
 // Derived indices (content has no wage tracker): wage index = workers effect this round minus staff cuts;
@@ -307,7 +303,7 @@ export const payoutIndex = h => h.payoutM;
 
 // ---------- resolve one round ----------
 function resolveRound(st, t) {
-  const r = st.round, rc = roundContent(st, r), acts = st.streetActions[r] || {}, visit = st.visits[r];
+  const r = st.round, rc = roundContent(st, r), acts = st.streetActions[r] || {};
   const prevR = st.schedule[st.schedule.indexOf(r) - 1];
   for (const b of Object.values(st.boards)) {
     const h = b.hist[r];
@@ -324,12 +320,6 @@ function resolveRound(st, t) {
       feed(st, t, b.content.name + ': Board failed to decide.', { kind: 'nodecide', board: b.id });
     }
     h._d = 0;
-    // activist scoring from last round: did the target raise payout this round?
-    if (prevR) for (const [sid, a] of Object.entries(st.streetActions[prevR] || {})) {
-      if (a.type !== 'campaign' || a.target !== b.id) continue;
-      const s = st.seats[sid], raised = h.payoutM > b.hist[prevR].payoutM;
-      if (s) { if (raised) s.payoutRaised++; scoreStreet(s, raised, prevR, a); }
-    }
   }
   // Street actions
   for (const [sid, a] of Object.entries(acts)) {
@@ -343,8 +333,6 @@ function resolveRound(st, t) {
       else {
         let bonus = h.raisesDetect + (b.standing.detect || 0) * 0;
         for (const n of Object.keys(b.hist)) if (Number(n) < r) bonus += b.hist[n].raisesDetect;   // raises_detect carries forward
-        if (visit && visit.board === b.id && !visit.out) bonus += S.detectVisitBonus;
-        if (h.investigator) bonus += S.detectInvestigatorBonus;
         const found = left.filter(f => rnd(st) < Math.min(0.97, ((S.factDetect[f.weight] ?? S.factDetect[1]) + bonus) * strength));
         found.forEach(catchFact);
         a.found = found.length > 0; a.hit = a.found ? true : null;   // a miss is not a claim
@@ -352,25 +340,15 @@ function resolveRound(st, t) {
     } else if (a.type === 'story') {
       a.hit = left.length > 0;   // a story finds the heaviest fact the board left out
       if (a.hit) catchFact(left.slice().sort((x, y) => y.weight - x.weight || (x.id < y.id ? -1 : 1))[0]);
-    } else if (a.type === 'campaign') {
-      const mult = (b.standing.pill && b.standing.pill.campaign) || 1;
-      h._d += S.activistHit * strength * mult;
-      b.pending.activist = S.activistPayoutPush;
-      a.hit = undefined;   // judged next round (payout raised?)
-    } else if (a.type === 'file') {
-      h.sued = true;
     }
   }
-  // leaks of the issue also count as "found" for if_found (RULES.md)
   // stock
   for (const b of Object.values(st.boards)) {
     const h = b.hist[r], br = boardRound(b.content, r);
-    const leaked = st.leaks.some(l => l.round === r && l.board === b.id);
-    if (h.caught || leaked) addEff(h.effects, h.ifFound);
+    if (h.caught) addEff(h.effects, h.ifFound);
     let d = h._d;
     d += h.effects.shareholders * S.stockPerShareholderPoint;
     if (prevR && b.hist[prevR]) d += wageIndex(b.hist[prevR]) * S.stockPerWorkerPointLag;
-    if (r === 3 && b.hist[1] && prevR !== 1) d += wageIndex(b.hist[1]) * S.stockRound3WorkerRecognition;
     // stock from the facts: admitted facts cost a little, hidden-and-uncaught facts pay a little, caught facts cost a lot (config/scoring.js factStock)
     const fs = issueFacts(b, r), tot = factW(fs) || 1, fr = fs.length ? h.omittedFrac : 0;
     const caughtFrac = Math.min(fr, factW(h.caughtFacts) / tot);
@@ -378,52 +356,23 @@ function resolveRound(st, t) {
     let hit = S.factStock.caught * caughtFrac;
     hit = hit * (1 - S.harmShareOfCaught) + hit * S.harmShareOfCaught * harmK;
     let adm = S.factStock.admitted * (1 - fr), hid = S.factStock.hidden * (fr - caughtFrac);
-    if (h.investigator) { hit *= h.investigator.caught; adm *= h.investigator.admit; }
     d += hit + adm + hid;
-    if (visit && visit.board === b.id && visit.out) d += S.execSessionHit;
-    if (br.must_save_m) {
-      h.saved = r1(-h.net);
-      h.mustSaveShort = r1(Math.max(0, br.must_save_m - h.saved));
-      if (h.mustSaveShort > 0) { d -= h.mustSaveShort * S.missedSavingsPerM; feed(st, t, b.content.name + ' missed its savings target.', { kind: 'savings', board: b.id }); }
-    }
     if (rc.stock_shift) d += Number(rc.stock_shift) || 0;
     d += (rnd(st) * 2 - 1) * S.noise;
     h._d = d;
   }
-  // suits
-  for (const [sid, a] of Object.entries(acts)) {
-    const s = st.seats[sid], b = st.boards[a.target]; if (!s || !b || a.type !== 'file') continue;
-    const h = b.hist[r];
-    const harm = Object.values(b.hist).some(x => factW(x.caughtFacts || []) >= S.harmCaughtWeight);
-    const dodge = wageIndex(h) >= S.dodgeWageIndexMin || (payoutIndex(h) <= S.dodgePayoutMMax && h.effects.shareholders <= 0);
-    let win = a.kind === 'harm' ? harm : a.kind === 'dodge' ? dodge : harm || dodge;
-    const ov = (st.suitOverrides[r] || {})[sid];
-    if (ov === 'win') win = true; if (ov === 'lose') win = false;
-    if (h.settled) { a.result = 'settled'; a.hit = true; s.score += S.plaintiffSettleCut * (h.plaintiffCut || 0.3) / 0.3; h._d += S.settleStock; }
-    else if (win) { a.result = 'won'; a.hit = true; h.suitsLost++; b.suitsLost++; h._d += S.suitLossStock; }
-    else { a.result = 'lost'; a.hit = false; }
-  }
   for (const b of Object.values(st.boards)) {
     const h = b.hist[r];
     h.stockEnd = r1(Math.max(1, stockNow(b) + h._d)); b.stock.push(h.stockEnd); delete h._d;
-    if (!b.failed && (h.stockEnd < S.failFloor || b.suitsLost >= S.suitsLostToFail)) { b.failed = true; feed(st, t, b.content.name + ' has failed.', { kind: 'failed', board: b.id }); }
+    if (!b.failed && h.stockEnd < S.failFloor) { b.failed = true; feed(st, t, b.content.name + ' has failed.', { kind: 'failed', board: b.id }); }
   }
   for (const [sid, a] of Object.entries(acts)) {
     const s = st.seats[sid], b = st.boards[a.target]; if (!s || !b) continue;
     const h = b.hist[r];
-    if (a.type === 'short') { a.hit = h.stockEnd < h.stockStart; if (a.hit) { b.stock[b.stock.length - 1] = r1(h.stockEnd + S.shortHitIfTrue); h.stockEnd = stockNow(b); } }
     if (a.hit !== undefined) scoreStreet(s, a.hit, r, a);
     else s.hits.push({ round: r, type: a.type, target: a.target, hit: null, pending: true });
     feed(st, t, headline(s, a, b), { kind: 'street', board: b.id, street: s.role });
     if (s.weak && S.credResetAfterLow) s.cred = Math.max(s.cred, S.credLow);
-  }
-  for (const s of Object.values(st.seats)) {
-    if (s.kind !== 'director' || !s.sold[r]) continue;
-    const sale = s.sold[r], b = st.boards[sale.board], h = b.hist[r];
-    const watched = Object.values(acts).some(a => a.target === b.id && ['inspect', 'story', 'short'].includes(a.type));
-    sale.drop = r1(h.stockStart - h.stockEnd);
-    sale.caught = watched && sale.drop > 0;
-    if (sale.caught) feed(st, t, 'Insider sale caught at ' + b.content.name + '.', { kind: 'insider', board: b.id });
   }
   recomputeCommunities(st, false);
   logEv(st, t, 'resolve', { round: r, stocks: Object.fromEntries(Object.values(st.boards).map(b => [b.id, stockNow(b)])) });
@@ -440,9 +389,6 @@ function headline(s, a, b) {
   const n = b.content.name;
   if (a.type === 'inspect') return a.found ? 'Auditor finds a problem at ' + n + '.' : 'Auditor inspected ' + n + '.';
   if (a.type === 'story') return 'Reporter: ' + n + ' left something out.';
-  if (a.type === 'campaign') return 'Activist campaign against ' + n + '.';
-  if (a.type === 'short') return 'Short seller bets against ' + n + '.';
-  if (a.type === 'file') return "Plaintiff's lawyer sues " + n + (a.result ? ': ' + a.result + '.' : '.');
   return s.label + ' acts on ' + n + '.';
 }
 function recomputeCommunities(st, final) {
@@ -453,7 +399,7 @@ function recomputeCommunities(st, final) {
       c.shareholders += h.effects.shareholders * 0.5;
       c.workers += wageIndex(h);
       c.customers += h.effects.customers;
-      c.home += h.effects.home * (n === 3 ? 2 : 1);   // home community ranks on who absorbed The Dry Year
+      c.home += h.effects.home * (n === st.schedule[st.schedule.length - 1] ? 2 : 1);   // home community ranks on who absorbed The Dry Year
       c.public += h.effects.public + S.publicHonesty.admitAll + (S.publicHonesty.hideAll - S.publicHonesty.admitAll) * (h.omittedFrac || 0);
     }
     c.shareholders += (stockNow(b) - b.stock[0]) / 2;
@@ -463,29 +409,7 @@ function recomputeCommunities(st, final) {
   }
 }
 
-// ---------- individual + Street actions ----------
-function resign(st, s, t) {
-  if (!['shock', 'play'].includes(st.phase)) return 'Resign at the start of a round.';
-  const b = st.boards[s.board], r = st.round;
-  st.resigns[r] = st.resigns[r] || {};
-  if ((st.resigns[r][b.id] || 0) >= S.resignPerBoardPerRound) return 'Someone on this board already resigned this round.';
-  const others = Object.values(st.boards).filter(x => x.id !== b.id && !x.failed);
-  if (!others.length) return 'There is no other board to join.';
-  const dest = others.sort((x, y) => directorsOf(st, x.id).length - directorsOf(st, y.id).length || (x.id < y.id ? -1 : 1))[0];
-  const taken = new Set(directorsOf(st, dest.id).map(d => d.seat));
-  const seatType = SEAT_ORDER.find(x => !taken.has(x)) || s.seat;
-  const used = directorsOf(st, dest.id).filter(d => d.seat === seatType).map(d => d.secretIdx)[0];
-  st.resigns[r][b.id] = (st.resigns[r][b.id] || 0) + 1;
-  s.prior = (s.prior || []).concat({ board: b.id, seat: s.seat, secret: s.secret, exposure: s.exposure, round: r });
-  for (const v of b.votes) if (v.open) delete v.ballots[s.id];
-  seatDirector(st, s.id, s.name, dest.content, seatType, used ?? null);
-  st.seats[s.id].prior = s.prior;
-  if (b.chair === s.id) { const ds = directorsOf(st, b.id); b.chair = ds.length ? pick(st, ds).id : null; }
-  feed(st, t, 'Director resigned from ' + b.content.name + ', joins ' + dest.content.name + '.', { kind: 'resign', board: b.id });
-  logEv(st, t, 'resign', { seat: s.id, from: b.id, to: dest.id });
-  return null;
-}
-
+// ---------- Street actions ----------
 export function apply(st, a) {
   try { const err = applyInner(st, a, a.t || 0); return err ? { ok: false, error: err } : { ok: true }; }
   catch (e) { return { ok: false, error: 'Engine error: ' + e.message, crash: true }; }
@@ -504,32 +428,10 @@ function applyInner(st, a, t) {
       case 'open_vote': return openVote(st, b, s, a, t);
       case 'ballot': return castBallot(st, b, s, a, t);
       case 'close_vote': { if (s.id !== b.chair) return 'Only the Chair closes a vote.'; const v = b.votes.find(x => x.open); if (!v) return 'No open vote.'; closeVote(st, b, v, t); return null; }
-      case 'exec_session': {
-        if (s.id !== b.chair) return 'Only the Chair calls an executive session.';
-        const v = st.visits[st.round]; if (st.phase !== 'play' || !v || v.board !== b.id || v.out) return 'Nobody is visiting.';
-        v.out = true; feed(st, t, b.content.name + ' went into executive session.', { kind: 'exec', board: b.id }); logEv(st, t, 'exec', { board: b.id }); return null;
-      }
-      case 'leak': {
-        if (!['shock', 'play'].includes(st.phase)) return 'Leak during the round.';
-        if (s.leaked[st.round]) return 'One leak per round.';
-        const to = st.seats[a.to]; if (!to || to.kind !== 'street') return 'Pick a Street member.';
-        const is = boardRound(b.content, st.round).issue || {};
-        const hh = b.hist[st.round], left = issueFacts(b, st.round).filter(f => hh && hh.decided && !hh.admit.includes(f.id));
-        const fact = a.fact === 'disclosure' && hh && hh.decided ? b.content.name + (left.length ? ' is leaving out: ' + left.map(f => f.text).join(' ') : ' admitted every fact: ' + is.text) : b.content.name + ': ' + is.text;
-        s.leaked[st.round] = a.to;
-        st.leaks.push({ round: st.round, from: s.id, to: a.to, board: b.id, fact, t });
-        logEv(st, t, 'leak', { from: s.id, to: a.to, board: b.id }); return null;
-      }
       case 'statement': {   // one shared text box per board: any director edits, last write wins, locked with the facts
         if (st.phase !== 'play') return 'Write the statement during the round.';
         if (b.hist[st.round].decided) return 'The facts and statement are locked.';
         b.statement = String(a.text || '').slice(0, S.statementMax); return null;
-      }
-      case 'resign': return resign(st, s, t);
-      case 'sell': {
-        if (st.phase !== 'play') return 'Sell during the round.';
-        if (s.sold[st.round]) return 'Already sold this round.';
-        s.sold[st.round] = { board: b.id, price: stockNow(b), t }; logEv(st, t, 'sell', { seat: s.id, board: b.id }); return null;
       }
       default: return 'Unknown action.';
     }
@@ -538,20 +440,8 @@ function applyInner(st, a, t) {
     case 'street_action': {
       if (!['shock', 'play'].includes(st.phase)) return 'Street actions are entered before the boards lock.';
       if (!st.boards[a.target]) return 'Pick a board.';
-      st.streetActions[st.round][s.id] = { type: s.actionType, target: a.target, kind: s.actionType === 'file' ? (a.kind === 'harm' ? 'harm' : 'dodge') : null, t };
+      st.streetActions[st.round][s.id] = { type: s.actionType, target: a.target, kind: null, t };
       logEv(st, t, 'street_action', { seat: s.id, type: s.actionType, target: a.target, kind: a.kind || null }); return null;
-    }
-    case 'street_leak': {   // Street to Street tip (short seller can leak to the reporter)
-      const to = st.seats[a.to]; if (!to || to.kind !== 'street' || to.id === s.id) return 'Pick another Street member.';
-      if (!st.boards[a.board]) return 'Pick a board.';
-      st.leaks.push({ round: st.round, from: s.id, to: a.to, board: a.board, fact: s.label + ' tip: look at ' + st.boards[a.board].content.name + '.', t, street: true });
-      return null;
-    }
-    case 'visit_board': {
-      const v = st.visits[st.round]; if (!v || v.seat !== s.id || st.phase !== 'shock') return 'You are not visiting this round.';
-      const seen = Object.entries(st.visits).filter(([n, x]) => Number(n) !== st.round && x.seat === s.id).map(([, x]) => x.board);
-      if (!st.boards[a.board] || seen.includes(a.board)) return 'Pick a board you have not visited.';
-      v.board = a.board; return null;
     }
     default: return 'Unknown action.';
   }
@@ -571,7 +461,26 @@ function chat(st, s, a, t) {
 }
 function hostAction(st, a, t) {
   switch (a.type) {
-    case 'set_boards': if (st.phase !== 'lobby') return 'Set boards in the lobby.'; st.settings.boardCount = Math.max(1, Math.min(5, a.n | 0)); return null;
+    case 'set_boards': if (st.phase !== 'lobby') return 'Set boards in the lobby.'; st.settings.boardCount = Math.max(1, Math.min(5, a.n | 0)); st.draft = null; return null;
+    case 'draft_auto': if (st.phase !== 'lobby') return 'Assign in the lobby.'; draftAuto(st); return null;
+    case 'draft_clear': if (st.phase !== 'lobby') return 'Assign in the lobby.'; st.draft = emptyDraft(st); return null;
+    case 'draft_seat': {   // place a player in a board seat (a.player null empties it); a player is only ever in one place
+      if (st.phase !== 'lobby') return 'Assign in the lobby.';
+      if (!st.draft) st.draft = emptyDraft(st);
+      const d = st.draft; if (!d.seats[a.board] || !SEAT_ORDER.includes(a.seat)) return 'No such seat.';
+      if (a.player && !st.players.find(p => p.id === a.player)) return 'No such player.';
+      if (a.player) unplace(d, a.player);
+      d.seats[a.board][a.seat] = a.player || null; return null;
+    }
+    case 'draft_outside': {
+      if (st.phase !== 'lobby') return 'Assign in the lobby.';
+      if (!st.draft) st.draft = emptyDraft(st);
+      if (!st.players.find(p => p.id === a.player)) return 'No such player.';
+      unplace(st.draft, a.player);
+      if (a.role) { if (!st.content.street.priority.includes(a.role)) return 'No such role.'; st.draft.outside[a.player] = a.role; }
+      return null;
+    }
+    case 'draft_chair': if (st.draft && st.draft.seats[a.board]) st.draft.chairs[a.board] = a.player; return null;
     case 'set_timers': st.settings.timers = { ...st.settings.timers, ...a.timers }; return null;
     case 'start': if (st.phase !== 'lobby') return 'Already started.'; return advance(st, t).error || null;
     case 'advance': return advance(st, t).error || null;
@@ -579,9 +488,7 @@ function hostAction(st, a, t) {
     case 'resume': if (st.clock && st.clock.paused) { st.clock.endsAt = t + st.clock.remaining; st.clock.paused = false; } return null;
     case 'add_time': if (st.clock) { const ms = (a.secs || 30) * 1000; if (st.clock.paused) st.clock.remaining += ms; else st.clock.endsAt += ms; } return null;
     case 'auto': st.settings.autoAdvance = !!a.on; return null;
-    case 'skip_round2': if (st.round >= 2) return 'Round 2 has started.'; st.schedule = st.schedule.filter(r => r !== 2); return null;
-    case 'suit_override': st.suitOverrides[st.round] = { ...(st.suitOverrides[st.round] || {}), [a.seat]: a.value }; return null;
-    case 'kick': { const s = st.seats[a.seat]; if (st.phase === 'lobby') st.players = st.players.filter(p => p.id !== a.seat); else if (s) s.away = true; return null; }
+    case 'kick': { const s = st.seats[a.seat]; if (st.phase === 'lobby') { st.players = st.players.filter(p => p.id !== a.seat); if (st.draft) unplace(st.draft, a.seat); } else if (s) s.away = true; return null; }
     case 'reveal': if (st.phase === 'play') enterOutside(st, t); if (st.phase !== 'outside') return 'Reveal after the last round.'; enterReveal(st, t); return null;
     default: return 'Unknown host action.';
   }
@@ -602,11 +509,9 @@ export function scoreAll(st) {
     const fired = s.exposure && s.exposure.trigger ? evalRule(s.exposure.trigger, ctx) === 1 : false;
     const home = homeCommunity(s), rank = rankOf(st, home, b.id);
     const homePts = nB > 1 ? (nB - rank) / (nB - 1) : 1;
-    let insider = 0;
-    for (const sale of Object.values(s.sold)) insider += sale.caught ? -S.insiderCaughtPenalty : Math.max(0, sale.drop || 0) * S.insiderGainPerPoint;
-    let total = sec * S.secretWeight - (fired ? S.exposurePenalty : 0) + homePts * S.homeRankWeight + insider;
+    let total = sec * S.secretWeight - (fired ? S.exposurePenalty : 0) + homePts * S.homeRankWeight;
     if (b.failed && !(s.secret && rewardsFailure(s.secret.check))) total = Math.min(total, S.failedCap);
-    s.score = { total: r1(total), secret: sec, exposureFired: fired, homeRank: rank, home, insider: r1(insider) };
+    s.score = { total: r1(total), secret: sec, exposureFired: fired, homeRank: rank, home };
   }
 }
 export function homeCommunity(s) { return { labor: 'workers', fund: 'shareholders', community: 'home', attorney: 'public', founder_friend: 'shareholders' }[s.seat] || 'public'; }
@@ -620,13 +525,12 @@ function statement(b, r) {
   return { kind: h.statement ? 'statement' : 'none', text: h.statement || 'No statement.', caught: h.caughtFacts.map(c => (facts.find(f => f.id === c.id) || {}).text).filter(Boolean) };
 }
 export function publicView(st, t) {
-  const rc = st.round ? roundContent(st, st.round) : null, v = st.visits[st.round];
+  const rc = st.round ? roundContent(st, st.round) : null;
   const out = {
     code: st.code, phase: st.phase, round: st.round, schedule: st.schedule, clockLeft: clockLeft(st, t), clockTotal: st.clock ? st.clock.total : null, paused: !!(st.clock && st.clock.paused),
     shock: rc ? { title: rc.title, text: rc.projector_text || rc.text || '', board_text: rc.board_text || '', image: rc.image || null } : null,
     players: st.phase === 'lobby' ? st.players.map(p => p.name) : st.players.length,
     boardCount: st.settings.boardCount,
-    visit: v && v.board && st.phase !== 'shock' ? { label: st.seats[v.seat].label, board: v.board, out: v.out } : null,
     boards: Object.values(st.boards).map(b => {
       const done = st.schedule.filter(r => b.hist[r] && b.hist[r].stockEnd != null), lastR = done[done.length - 1];
       return { id: b.id, name: b.content.name, industry: b.content.industry, image: b.content.image || null, stock: b.stock, failed: b.failed,
@@ -640,39 +544,27 @@ export function publicView(st, t) {
 export function seatView(st, id, t) {
   const s = st.seats[id];
   const base = { me: s ? { id, name: s.name, kind: s.kind } : { id, name: (st.players.find(p => p.id === id) || {}).name, kind: 'waiting' }, public: publicView(st, t) };
-  if (!s) return base;
+  if (!s) return { ...base, placed: placementOf(st, id), joined: st.players.length };
   const r = st.round;
   if (s.kind === 'street') {
-    const v = st.visits[r];
-    const seen = Object.entries(st.visits).filter(([n, x]) => Number(n) !== r && x.seat === id).map(([, x]) => x.board);
     return { ...base, street: {
       role: s.role, label: s.label, secret: s.secret ? s.secret.text : '', actionType: s.actionType, actionText: s.actionText, cred: r1(s.cred), weak: s.weak,
       consulted: s.role === 'auditor' && s.consulted ? st.boards[s.consulted].content.name : null,
       action: (st.streetActions[r] || {})[id] || null, history: s.hits,
-      visiting: v && v.seat === id ? { board: v.board, out: v.out, canPick: st.phase === 'shock', seen } : null,
-      leaks: st.leaks.filter(l => l.to === id).map(l => ({ round: l.round, board: l.board, fact: l.fact })),
       score: st.phase === 'reveal' ? s.final : null,
-      members: streetSeats(st).map(x => ({ id: x.id, name: x.name, label: x.label })),
     }, chat: st.chat.filter(c => c.ch === 'street').slice(-200) };
   }
   const b = st.boards[s.board], br = boardRound(b.content, r), h = b.hist[r];
   return { ...base, director: {
     seat: s.seat, seatLabel: SEAT_LABEL[s.seat], card: s.card, exposure: s.exposure ? s.exposure.text : '', secret: s.secret ? s.secret.text : '',
     chair: b.chair === id, score: st.phase === 'reveal' ? s.score : null,
-    sold: !!s.sold[r], leaked: !!s.leaked[r], canResign: ['shock', 'play'].includes(st.phase) && !((st.resigns[r] || {})[b.id] >= S.resignPerBoardPerRound),
-    prior: (s.prior || []).map(p => ({ board: st.boards[p.board].content.name, round: p.round })),
   }, board: {
     id: b.id, name: b.content.name, industry: b.content.industry, blurb: b.content.blurb, image: b.content.image || null, labels: b.content.communityLabels, failed: b.failed,
     directors: directorsOf(st, b.id).map(d => ({ id: d.id, name: d.name, seat: d.seat, seatLabel: SEAT_LABEL[d.seat], cardName: d.card.name, title: d.card.title, chair: d.id === b.chair })),
-    budget: br.budget_m || 0, room: h ? budgetRoom(st, b, r) : 0, mustSave: br.must_save_m || 0, saved: h ? r1(-h.net) : 0,
-    motions: h ? menu(st, b, r).filter(m => !m.standing).map(m => ({ id: m.id, title: m.title, cost_m: m.cost_m, motive: m.motive, effects: m.effects, passed: h.passed.includes(m.id), fits: fits(st, b, r, m) })) : [],
-    standing: h ? menu(st, b, r).filter(m => m.standing).map(m => ({ id: m.id, title: m.title, cost_m: m.cost_m, motive: m.motive, effects: m.effects, passed: h.passed.includes(m.id), fits: fits(st, b, r, m), anyone: !!(m.flags && m.flags.removes_chair), available: m.available !== 'suit_pending' || suitPending(st, b) })) : [],
-    suitPending: suitPending(st, b),
+    motions: h ? menu(st, b, r).filter(m => !m.standing).map(m => ({ id: m.id, title: m.title, short: m.short || m.title, motive: m.motive, effects: m.effects, passed: h.passed.includes(m.id) })) : [],
     issue: br.issue ? { text: br.issue.text, facts: (br.issue.facts || []).map(f => ({ id: f.id, text: f.text, weight: f.weight })) } : null,
     admit: h && h.decided ? h.admit : null, statement: h ? (h.decided ? h.statement : b.statement || '') : '', statementMax: S.statementMax, decided: h ? h.decided : false,
     votes: b.votes.map(v => ({ id: v.id, kind: v.kind, target: v.target, nominee: v.nominee, by: v.by, open: v.open, result: v.result, voted: Object.keys(v.ballots), ballots: v.open ? null : v.ballots, mine: v.ballots[id] || null })),
-    visitor: st.visits[r] && st.visits[r].board === b.id && st.phase !== 'shock' ? { label: st.seats[st.visits[r].seat].label, out: st.visits[r].out } : null,
-    street: streetSeats(st).map(x => ({ id: x.id, label: x.label, name: x.name })),
   }, chat: st.chat.filter(c => c.ch === 'board:' + b.id || (c.ch.startsWith('dm:') && c.ch.slice(3).split('|').includes(id))).slice(-300) };
 }
 
@@ -681,17 +573,8 @@ export function revealView(st) {
   const boards = Object.values(st.boards), grid = {};
   for (const c of COMMUNITIES) communityTable(st, c).forEach((e, i) => { (grid[e.id] = grid[e.id] || {})[c] = i + 1; });
   const directors = Object.values(st.seats).filter(s => s.kind === 'director');
-  const leagues = {};
-  for (const k of SEAT_ORDER) {
-    const best = directors.filter(d => d.seat === k && d.score).sort((a, b) => b.score.total - a.score.total)[0];
-    if (best) leagues[k] = { label: SEAT_LABEL[k], name: best.name, board: st.boards[best.board].content.name, score: best.score.total };
-  }
-  const chairs = boards.map(b => st.seats[b.chair]).filter(x => x && x.score).sort((a, b) => b.score.total - a.score.total);
-  if (chairs[0]) leagues.chair = { label: 'Chair', name: chairs[0].name, board: st.boards[chairs[0].board].content.name, score: chairs[0].score.total };
-  const sb = streetSeats(st).sort((a, b) => (b.final || 0) - (a.final || 0))[0];
-  if (sb) leagues.street = { label: 'Street', name: sb.name, board: sb.label, score: sb.final };
   return {
-    communities: COMMUNITIES, grid, leagues,
+    communities: COMMUNITIES, grid,
     boards: boards.map(b => ({
       id: b.id, name: b.content.name, labels: b.content.communityLabels, failed: b.failed, stock: b.stock, community: b.community,
       gained: COMMUNITIES.filter(c => b.community[c] > 0.5), paid: COMMUNITIES.filter(c => b.community[c] < -0.5),

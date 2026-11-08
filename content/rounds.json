@@ -5,22 +5,14 @@
     "title": "The Windfall",
     "timer_s": 240,
     "projector_text": "A federal tax cut lands today. Every firm in the room gets the same one-time cash. Who gets it?",
-    "board_text": "Same cash for every firm. Your board has a budget and a menu."
+    "board_text": "Same cash for every firm. Your board votes on three motions."
   },
   {
     "round": 2,
-    "id": "tool",
-    "title": "The Tool",
-    "timer_s": 240,
-    "projector_text": "A new AI system can do the work of one in five frontline employees. Every firm has the same offer on the table.",
-    "board_text": "Same tool for every firm. Your board decides how to use it."
-  },
-  {
-    "round": 3,
     "id": "dry_year",
     "title": "The Dry Year",
     "timer_s": 240,
     "projector_text": "A hard year. Revenue is down about 30% in every firm, and each board must cut.",
-    "board_text": "Revenue is down for every firm. Your board has a savings target and very little to spend."
+    "board_text": "Revenue is down for every firm. Your board votes on three motions."
   }
 ]
