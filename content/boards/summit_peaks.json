@@ -56,22 +56,22 @@
    {
     "n": 1,
     "title": "Stop everything",
-    "text": "Close every Series 7 lift now, halt production and shipments, hire an outside safety review that reports straight to the board, and withhold dividends and buybacks until it finishes."
+    "text": "Close every Series 7 lift, halt production, and bring in an outside safety review before anything reopens."
    },
    {
     "n": 2,
     "title": "Fix and keep running",
-    "text": "Close only Alder Creek and the lifts that regulators order closed, keep building lifts while the software fix is finished, and release a public statement that the fix will make the Series 7 safe."
+    "text": "Close Alder Creek and any lift regulators order closed, keep building, and say the fix will make it safe."
    },
    {
     "n": 3,
     "title": "Keep building and shield the company",
-    "text": "Keep every Series 7 lift open, continue production, rely on inspectors and lobbyists to set the timetable, and defend the company's record in public."
+    "text": "Keep every lift open and building, follow the inspectors' timetable, and defend the company in public."
    },
    {
     "n": 4,
     "title": "Change the leadership",
-    "text": "Separate the Chair and CEO roles at once, form a board safety committee with the power to see all engineering messages, and leave the operating decision to the new committee after a three-week review."
+    "text": "Separate the Chair and CEO roles and let a new safety committee decide after a three-week review."
    }
   ]
  },
