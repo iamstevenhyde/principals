@@ -1,351 +1,98 @@
 {
-  "id": "heartland_beef",
-  "name": "Heartland Beef",
-  "short": "Heartland",
-  "industry": "Beef-on-dairy packer",
-  "from_week": "2",
-  "blurb": "One big packing plant in Prairie Bend, 1,400 line workers, and about 600 ranches that sell it cattle. Founder Walt Dreyer started as a rancher and holds 28% of the vote.",
-  "communities": [
-    {
-      "key": "shareholders",
-      "label": "Shareholders"
-    },
-    {
-      "key": "workers",
-      "label": "Line workers"
-    },
-    {
-      "key": "customers",
-      "label": "Grocers and diners"
-    },
-    {
-      "key": "home",
-      "label": "Ranchers' co-op"
-    },
-    {
-      "key": "public",
-      "label": "The public"
-    }
-  ],
-  "directors": [
-    {
-      "seat": "attorney",
-      "name": "Carla Whitfield",
-      "title": "Attorney",
-      "home": "The state bar",
-      "motive": "You reviewed the Premium Program terms and told Heartland the opt-in language was enough. You have since read the complaints.",
-      "exposure": {
-        "text": "You are disbarred if the board is caught hiding a heavy fact.",
-        "label": "Disbarred if caught hiding",
-        "trigger": {
-          "type": "facts_caught",
-          "weight": 3
-        }
-      },
-      "secrets": [
-        {
-          "id": "attorney_A",
-          "text": "Clean the books: the board admits every fact in round 1.",
-          "label": "Admit every fact in round 1",
-          "check": {
-            "type": "disclosure_choice",
-            "round": 1,
-            "choice": "all"
-          }
-        },
-        {
-          "id": "attorney_B",
-          "text": "Your firm bills Heartland $2M a year for its contract work. One caught fact ends it, so none may be caught.",
-          "label": "No fact gets caught",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "seat": "labor",
-      "name": "Denise Kowalski",
-      "title": "Labor director",
-      "home": "Meatcutters Local 88",
-      "motive": "Your members cut the beef, and the buyers who push quotas are their neighbors. You have seen what a missed quota does to a family.",
-      "exposure": {
-        "text": "Members vote you out if $60M goes to TraceMark while their raise stays frozen.",
-        "label": "TraceMark funded",
-        "trigger": {
-          "type": "motion_passed",
-          "id": "fund_tracemark"
-        }
-      },
-      "secrets": [
-        {
-          "id": "labor_A",
-          "text": "The buyer quotas end.",
-          "label": "Quotas end",
-          "check": {
-            "type": "motion_passed",
-            "id": "end_quotas"
-          }
-        },
-        {
-          "id": "labor_B",
-          "text": "Your members' retirement plan holds Heartland stock. The stock must end above where it started.",
-          "label": "Stock ends above start",
-          "check": {
-            "type": "stock_end_above_start"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "fund",
-      "name": "Marcus Feld",
-      "title": "Fund partner",
-      "home": "Cornbelt Partners (owns 9%)",
-      "motive": "Cornbelt's investors want growth, and sign-up numbers have been the growth chart. TraceMark is the kind of story that lifts a price.",
-      "exposure": {
-        "text": "Your investors pull their money if the stock ends below where it started.",
-        "label": "Stock ends below start",
-        "trigger": {
-          "type": "stock_end_below_start"
-        }
-      },
-      "secrets": [
-        {
-          "id": "fund_A",
-          "text": "Your fund holds a stake in the nephew's startup. TraceMark must pass.",
-          "label": "TraceMark passes",
-          "check": {
-            "type": "motion_passed",
-            "id": "fund_tracemark"
-          }
-        },
-        {
-          "id": "fund_B",
-          "text": "Your fund quietly owns a rival packer. The stock must finish in the bottom half.",
-          "label": "Stock ends in bottom half",
-          "check": {
-            "type": "stock_rank_bottom_half"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "founder_friend",
-      "name": "Gus Halvorsen",
-      "title": "Founder's friend",
-      "home": "Walt Dreyer, the founder (hunting partner of 30 years)",
-      "motive": "Walt has never been wrong about cattle in the thirty years you have hunted together. He has never been right about software, but he has never lost an argument about it.",
-      "exposure": {
-        "text": "You lose the seat if the board votes down TraceMark, which Walt wants.",
-        "label": "TraceMark voted down",
-        "trigger": {
-          "type": "founder_motion_failed"
-        }
-      },
-      "secrets": [
-        {
-          "id": "founder_friend_A",
-          "text": "Walt signed off on the buyer quotas. The board must never admit every fact about them in round 1.",
-          "label": "Don't admit every fact in round 1",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "disclosure_choice",
-              "round": 1,
-              "choice": "all"
-            }
-          }
-        },
-        {
-          "id": "founder_friend_B",
-          "text": "Walt's name is on the TraceMark deal and on the quota memo. No fact on this board may be caught.",
-          "label": "No fact gets caught",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "seat": "community",
-      "name": "Luanne Pruitt",
-      "title": "Community seat (Ranchers' co-op president)",
-      "home": "Prairie Ranchers' Co-op",
-      "motive": "You lead the ranchers' co-op, and some Premium fees came out of your members' checks. You have also sold Heartland your own cattle for years.",
-      "exposure": {
-        "text": "You face a no-confidence vote at home if the quotas stay.",
-        "label": "Quotas stay",
-        "trigger": {
-          "type": "not",
-          "of": {
-            "type": "motion_passed",
-            "id": "end_quotas"
-          }
-        }
-      },
-      "secrets": [
-        {
-          "id": "community_A",
-          "text": "TraceMark fails and the money goes to rancher refunds instead.",
-          "label": "TraceMark fails",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "fund_tracemark"
-            }
-          }
-        },
-        {
-          "id": "community_B",
-          "text": "Buyers chasing quota pay your 4,000-head feedlot the best price in the county. The quotas stay.",
-          "label": "Quotas stay",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "end_quotas"
-            }
-          }
-        }
-      ]
-    }
-  ],
-  "rounds": [
-    {
-      "round": 1,
-      "motions": [
-        {
-          "id": "end_quotas",
-          "title": "End buyer sign-up quotas and refund Premium Program fees",
-          "short": "End buyer quotas",
-          "motive": "Stop paying people to sign up ranchers who did not ask.",
-          "effects": {
-            "shareholders": -2,
-            "workers": 0,
-            "customers": 0,
-            "home": 2,
-            "public": 1
-          },
-          "headline": {
-            "passed": "Heartland ends buyer quotas and refunds ranchers",
-            "failed": "Heartland keeps quotas despite rancher complaints"
-          },
-          "flags": {
-            "resolves_issue": true
-          }
-        }
-      ],
-      "issue": {
-        "id": "quota_signups",
-        "text": "To hit quotas, some Heartland cattle buyers enrolled ranchers in a paid Premium Program. The hotline logged 212 complaints last year. HR reviewed some and calls most of them misunderstandings.",
-        "case_for_silence": "Most complaints may be misunderstandings, ranchers did sign something, and ending the program would blow a hole in this year's numbers.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "The hotline logged 212 complaints from ranchers about Premium Program fees they did not expect.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "Buyers get bonuses for sign-ups and lose their jobs for missing quota.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "HR reviewed some complaints and called most of them misunderstandings.",
-            "weight": 2
-          },
-          {
-            "id": "f4",
-            "text": "Board reports mentioned sign-up growth but not the complaints.",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "round": 2,
-      "motions": [
-        {
-          "id": "fund_tracemark",
-          "title": "Put $60M into the founder's TraceMark system and announce it to buyers",
-          "short": "Fund TraceMark",
-          "motive": "Tracing is the future, and Walt has never missed on cattle.",
-          "effects": {
-            "shareholders": 2,
-            "workers": -1,
-            "customers": 1,
-            "home": 0,
-            "public": 0
-          },
-          "headline": {
-            "passed": "Heartland backs founder's $60M TraceMark bet",
-            "failed": "Heartland board turns down founder's TraceMark bet"
-          },
-          "flags": {
-            "founder_wants": true,
-            "reveal_effects": {
-              "shareholders": -3,
-              "workers": 0,
-              "customers": 0,
-              "home": 0,
-              "public": -2
-            }
-          }
-        }
-      ],
-      "issue": {
-        "id": "tracemark",
-        "text": "Founder Walt Dreyer wants $60M for TraceMark, a cattle-tracing system built by his nephew's startup. It has run only in demos. Nobody on the board has run a tracing system.",
-        "case_for_silence": "Demos are how every new system starts, the engineers may have left for ordinary reasons, and public doubt could kill a bet that may pay.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "No one on the board has run a tracing system or read its test data.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "TraceMark has only been shown in demos run by Walt's nephew's team.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "Two TraceMark engineers left last spring, and the startup calls it ordinary turnover.",
-            "weight": 2
-          },
-          {
-            "id": "f4",
-            "text": "No outside lab has tested it.",
-            "weight": 1
-          }
-        ]
-      }
-    }
-  ],
-  "real": {
-    "cases": [
-      {
-        "round": 1,
-        "event": "Wells Fargo",
-        "years": "2013 to 2020",
-        "line": "Wells Fargo paid $185M in 2016 over unauthorized accounts. Its board heard of the risk in 2014 but got incomplete numbers."
-      },
-      {
-        "round": 2,
-        "event": "Theranos",
-        "years": "2015 to 2022",
-        "line": "Theranos raised over $700M. Its founder was sentenced in 2022 to 11 years 3 months. Critics noted a board of famous names with little medical expertise."
-      }
-    ],
-    "fix": "Ask for the raw numbers, and seat directors who can read them."
+ "id": "heartland_beef",
+ "name": "Heartland Beef",
+ "short": "Heartland",
+ "industry": "Beef-on-dairy packer",
+ "blurb": "One big packing plant in Prairie Bend, 1,400 line workers, and about 600 ranches that sell it cattle. Founder Walt Dreyer started as a rancher and holds 28% of the vote.",
+ "directors": [
+  {
+   "seat": "attorney",
+   "name": "Carla Whitfield",
+   "title": "Attorney",
+   "home": "The state bar",
+   "motive": "You are the company's outside counsel, and you have seen the complaint numbers. You know the line that the problem is a few bad employees is the same line a regulator will examine. You will be asked what you told the board, you want your advice in writing, and your firm bills Heartland more than any other client. Your partners would also prefer that you not become a witness."
+  },
+  {
+   "seat": "labor",
+   "name": "Denise Kowalski",
+   "title": "Labor director",
+   "home": "Meatcutters Local 88",
+   "motive": "You speak for the plant workers, and some of your members' cousins are the field staff who were fired. You think the people at the bottom took the blame for targets set at the top, and you said so at the union hall last month. You also know that if the stock falls and the plant loses cattle, your members lose hours. You will have to explain the vote to your members on Thursday."
+  },
+  {
+   "seat": "fund",
+   "name": "Marcus Feld",
+   "title": "Fund partner",
+   "home": "Cornbelt Partners (owns 9%)",
+   "motive": "Your fund owns 9% and likes the program count as a measure of growth, and you told your own investors it was why you bought. You have seen what a drop in a headline metric does to a price, and you have also seen a fraud story wipe out a company. You do not want to learn which one this is from a newspaper. You have until the annual meeting to decide whether to sell."
+  },
+  {
+   "seat": "founder_friend",
+   "name": "Gus Halvorsen",
+   "title": "Founder's friend",
+   "home": "Walt Dreyer, the founder (hunting partner of 30 years)",
+   "motive": "Walt Dreyer started as a rancher and is proud of the culture he thinks the count measures. You have hunted with him for thirty years, and he has told you he will not believe the stories until he sees proof. You are the person he trusts most on this board, and you know he is more worried about Karen Mueller than he admits. A vote against Karen would end your hunting weekends with the founder."
+  },
+  {
+   "seat": "community",
+   "name": "Luanne Pruitt",
+   "title": "Community seat",
+   "home": "Prairie Ranchers' Co-op (President)",
+   "motive": "You are the president of the co-op whose members found fees on their checks, and you were elected on a promise to protect them. You also know that Heartland is the only buyer within a day's haul for many of them, and your own herd is one of them. You want an apology and a refund, and you need the plant to stay open."
   }
+ ],
+ "briefing": {
+  "intro": "It is February 2014 and a special meeting of the Heartland Beef board has been called. Heartland runs one big packing plant in Prairie Bend, with 1,400 line workers and about 600 ranches that sell it cattle. Walt Dreyer, the founder, started as a rancher and holds 28% of the vote. Directors are paid partly in company stock. Heartland is publicly traded, and its growth story is that it sells more products to each customer than any other packer. The annual shareholder meeting is in five weeks.",
+  "facts": [
+   "For six years Heartland has paid its field buyers and sales reps a bonus based on how many of its programs each rancher or grocery account joins. The programs include a branded-beef contract, a weighing service with a monthly fee, a financing line, and a feed-supply plan. The internal slogan is \"five programs per account,\" and it hangs on the wall of every regional office.",
+   "The company's average is now 4.6 programs per account, up from 2.1. Wall Street analysts cite the number as proof that Heartland's customers are loyal, and the company's lenders watch it as well. Walt Dreyer has said in public that the number shows the company's culture, and he repeated it to employees last month.",
+   "A newspaper has asked about reps who enrolled ranchers in the weighing service and the financing line without their knowledge. Some ranchers found monthly fees deducted from their cattle payments and did not know why. The newspaper says it has talked to former employees in three states, plans to publish in ten days, and has asked Heartland for comment by Friday.",
+   "Heartland's own ethics hotline logged 650 complaints about enrollment in the last two years. About 200 of them came from reps who said they were told to hit the numbers by any means. The hotline reports to the head of the sales division, who has called most of the complaints isolated. The hotline vendor says the count is higher than at similar firms, but it cannot say whether that signals a problem or a hotline that people trust.",
+   "Last year the company fired 230 field staff for enrolling accounts without consent, mostly at the lowest levels. Several of those fired say a manager told them to enroll accounts, and Heartland's lawyers have not interviewed them. Human resources estimates that the true number of improper enrollments is at least 10 times the number caught, but there is no sample review to back the estimate.",
+   "The division head, Karen Mueller, is the most successful executive in the company. Her division brings in 60% of the profit. She says the enrollment problem is a handful of employees who cheated, and that the targets themselves are fair and tough. Her bonus depends on the program count, and she has told directors she will not run a division she cannot hold to a number.",
+   "If the targets are scrapped, analysts will read it as an admission. Sales staff might sell less, and the program count would drop, probably by half in two years. The stock could fall by 15% or more, and it has a high price based on the count. A rival packer in the next state dropped its own program-count bonus last year, lost two of its best reps, and reports that customer complaints fell by a third.",
+   "If the targets stay and the newspaper is right, the company could face fines, ranchers' lawsuits and regulators. In similar cases elsewhere, fines have run from tens of millions of dollars to several hundred million, and executives have lost their jobs. Regulators have punished firms that knew of a pattern and did not change the incentives, and they have been gentler with firms that changed course before a story ran.",
+   "Heartland's total improper fees are estimated at $4 million to $40 million. The wide range exists because no one has checked the bank records. Refunding the fees with an apology would cost the low end quickly and the high end over a year, and the refund itself could be read as an admission.",
+   "Ranchers in the co-op are angry and talking about selling their cattle to a rival packer. About 600 ranches supply the plant, and a boycott of even a quarter of them would leave the plant short of cattle. For many of them Heartland is the only buyer within a day's haul, so a boycott would also cost the ranchers.",
+   "Heartland's stock is at $52, with 120 million shares outstanding. The board has been told about the sales practices before, in short slides, as a low-level risk. It has never asked to see the complaint data, and the audit committee chair says she cannot recall the hotline numbers ever being shown to her.",
+   "Two of the five directors sit on the audit committee and say they asked about the hotline in 2012 and were told the numbers were normal for a company of Heartland's size. Neither can find a record of the question, and management says it has no record of the answer.",
+   "Heartland's chief financial officer says that if the board refunds fees and drops the bonus, the company will report a one-time charge and a weak quarter, and the bank that holds the plant's credit line has the right to reprice it if earnings miss two quarters in a row. The CFO adds that the charge now would likely cost less than a year of continuing losses.",
+   "A state agriculture regulator called the Chair on Tuesday to ask for a copy of the standard rancher contract, and did not say why. A former sales rep has also posted a long account online, which has been shared about 4,000 times and has not been checked by anyone at Heartland."
+  ]
+ },
+ "decision": {
+  "lead": "Heartland's senior management team has been asked to attend the meeting. The Board Chair, who is also the CEO, plans to open by proposing four alternatives. The board must select one by the end of the meeting:",
+  "options": [
+   {
+    "n": 1,
+    "title": "End the targets",
+    "text": "Drop the program-count bonus for all staff now, refund every disputed fee, hire an outside firm to review every enrollment, and move the ethics hotline to report to the board."
+   },
+   {
+    "n": 2,
+    "title": "Keep the targets and police them",
+    "text": "Keep the bonus plan, add enrollment confirmation calls to ranchers, fire anyone caught, and have human resources report quarterly on terminations."
+   },
+   {
+    "n": 3,
+    "title": "Review before deciding",
+    "text": "Keep the plan for now, hire an outside firm to study the incentive plan and report in six months, and tell the newspaper the company takes the matter seriously."
+   },
+   {
+    "n": 4,
+    "title": "Change the people",
+    "text": "Move Karen Mueller out of the sales division, appoint an interim head, and let that head decide on the targets after a ninety-day review."
+   }
+  ]
+ },
+ "reveal": {
+  "case": "Wells Fargo sales practices, 2013-2016",
+  "text": "The real firm was Wells Fargo. For years the bank set cross-selling goals under the slogan \"Gr-eight,\" a push for eight products per household, and employees opened accounts customers had not asked for. In September 2016 regulators fined the bank $185 million (CFPB $100 million, Los Angeles City Attorney $50 million, OCC $35 million), and the SEC filing reports about 5,300 employees terminated between January 2011 and March 2016. The independent directors' 2017 report found that management first flagged sales-practice problems to the board in February 2014 and that later reporting was incomplete and inaccurate, and some directors said a May 2015 presentation had left them believing 200 to 300 people had been fired. The bank dropped its sales goals, and CEO John Stumpf left in October 2016. In April 2017 the board announced about $75 million in new recoveries, including a $28 million clawback from Stumpf, and said forfeitures and adjustments for Stumpf (about $69 million) and Carrie Tolstedt, head of the community bank (about $67 million), were part of a total above $180 million across senior leaders."
+ },
+ "questions": [
+  "Agency theory says incentives pull an agent toward what is measured. What was measured at Heartland, what was left unmeasured, and what behavior did your board expect from the bonus plan?",
+  "The hotline reported to the sales division head. Why does the reporting line of a monitoring device matter, and which option moved it?",
+  "Firing the lowest-level staff fixed the individuals and left the incentive in place. Who bore the cost of that choice, and who benefited?",
+  "The board had seen the problem on short slides as a low-level risk. What does it take for a board to demand raw data instead of summaries, and what held your directors back?"
+ ]
 }

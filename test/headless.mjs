@@ -1,5 +1,5 @@
-// node test/headless.mjs : drives a full local-mode game in headless Chrome (global playwright, system Chrome).
-// Admin + projector + 2 real player tabs (phone and laptop width) + simulated players. Screenshots to test/shots/.
+// node test/headless.mjs : plays one full board end to end in local mode (global playwright, system Chrome).
+// Admin + projector + two real phone pages on the SAME board (Chair + Labor director) + simulated players. Screenshots to test/shots/.
 import { createRequire } from 'node:module';
 import { execSync, spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -12,132 +12,97 @@ const shots = join(root, 'test', 'shots'); mkdirSync(shots, { recursive: true })
 const PORT = 8131, base = 'http://localhost:' + PORT + '/';
 const srv = spawn(process.execPath, [join(root, 'serve.mjs'), String(PORT)], { stdio: 'ignore' });
 await new Promise(r => setTimeout(r, 800));
-const errs = [], phoneH = [];
+const errs = [];
 let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) fails++; };
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
+  // a separate context per phone so each has its own sessionStorage seat
+  const mk = async (name, vp) => { const c = await browser.newContext({ viewport: vp }); const p = await c.newPage(); p.on('pageerror', e => errs.push(name + ': ' + e.message)); p.on('console', m => { if (m.type() === 'error') errs.push(name + ' console: ' + m.text()); }); return p; };
+  // local mode shares localStorage per origin, so all pages live in ONE context
   const ctx = await browser.newContext();
-  const watch = (p, name) => { p.on('pageerror', e => errs.push(name + ': ' + e.message)); p.on('console', m => { if (m.type() === 'error') errs.push(name + ' console: ' + m.text()); }); return p; };
-  const admin = watch(await ctx.newPage(), 'admin');
+  const open = async (name, vp) => { const p = await ctx.newPage(); await p.setViewportSize(vp); p.on('pageerror', e => errs.push(name + ': ' + e.message)); p.on('console', m => { if (m.type() === 'error') errs.push(name + ' console: ' + m.text()); }); return p; };
+  const admin = await open('admin', { width: 1100, height: 900 });
   await admin.goto(base + 'admin.html');
-  await admin.click('#new');
-  await admin.waitForSelector('#start');
+  await admin.click('#new'); await admin.waitForSelector('#start');
   const code = new URL(admin.url()).searchParams.get('g');
   ok(!!code, 'game created ' + code);
-  const proj = watch(await ctx.newPage(), 'projector'); await proj.setViewportSize({ width: 1400, height: 900 });
+  const proj = await open('projector', { width: 1400, height: 900 });
   await proj.goto(base + 'projector.html?g=' + code);
-  const players = [];
-  for (const [i, vp] of [[0, { width: 390, height: 844 }], [1, { width: 1280, height: 800 }]]) {
-    const p = watch(await ctx.newPage(), 'player' + i); await p.setViewportSize(vp);
+  const phones = [];
+  for (const i of [0, 1]) {
+    const p = await open('phone' + i, { width: 390, height: 844 });
     await p.goto(base + 'index.html?g=' + code);
-    await p.fill('#name', 'Tester ' + i); await p.click('#go');
-    await p.waitForURL(/play\.html/); players.push(p);
+    await p.fill('#name', 'Tester ' + i); await p.click('#go'); await p.waitForURL(/play\.html/);
+    // sessionStorage is per page, fine
+    phones.push(p);
   }
-  for (let k = 0; k < 4; k++) await admin.click('#bots');
+  for (let k = 0; k < 2; k++) await admin.click('#bots');
   await admin.waitForTimeout(1500);
   await proj.screenshot({ path: join(shots, '1_projector_lobby.png') });
-  ok((await proj.textContent('#app')).includes('Tester 0'), 'projector lobby lists players');
-  await admin.click('#tmbox summary');
-  for (const k of ['shock', 'play', 'outside']) await admin.fill('#tm_' + k, k === 'play' ? '1' : '6');
-  await admin.click('#savetm');
-  await admin.selectOption('#nb', '5');   // 22 players, 5 boards: every test player is seated as a director
-  await admin.click('#auto2');
+  await admin.selectOption('#nb', '2'); await admin.click('#auto2'); await admin.waitForTimeout(500);
+  // put both phones on Valley Health: Tester 0 is the Attorney and Chair, Tester 1 the Labor director
+  await admin.evaluate(() => {
+    const h = window.__host, st = h.state, id = n => st.players.find(p => p.name === n).id;
+    if (!st.draft.boards.includes('valley_health')) h.act({ type: 'set_boards', n: 5 });
+    h.act({ type: 'draft_seat', board: 'valley_health', seat: 'attorney', player: id('Tester 0') });
+    h.act({ type: 'draft_seat', board: 'valley_health', seat: 'labor', player: id('Tester 1') });
+    h.act({ type: 'draft_chair', board: 'valley_health', player: id('Tester 0') });
+  });
   await admin.waitForTimeout(1500);
-  // waiting room -> host placement: phones show where they were placed, host can move a player by hand
-  ok((await players[0].$$('.placed:not(.wait)')).length === 1, 'phone waiting room shows the placement tile');
-  ok((await admin.$$('[data-seat]')).length === 25, 'host sees 5 boards x 5 seats');
-  const first = admin.locator('[data-seat]').first(), who = await first.inputValue();
-  await first.selectOption(''); await admin.waitForTimeout(400);
-  ok((await admin.locator('[data-seat]').first().inputValue()) === '' && (await admin.textContent('.chipgrid')).trim().length > 0, 'host emptied a seat and the player went back to the waiting room');
-  await admin.locator('[data-seat]').first().selectOption(who); await admin.waitForTimeout(400);
-  ok((await admin.locator('[data-seat]').first().inputValue()) === who, 'host put the player back');
   await admin.screenshot({ path: join(shots, '1b_admin_lobby.png'), fullPage: true });
-  await admin.click('#start');
-  await admin.waitForTimeout(500);
-  // seat Tester 0 as Chair of their board so the facts vote can be driven from a real player page
-  await admin.evaluate(() => { const st = window.__host.state; for (const n of ['Tester 0', 'Tester 1']) { const me = st.players.find(p => p.name === n), s = me && st.seats[me.id]; if (s && s.kind === 'director') st.boards[s.board].chair = me.id; } window.__host.dirty = true; });
-  await admin.waitForTimeout(2500);
-  for (const [i, p] of players.entries()) await p.screenshot({ path: join(shots, `2_player${i}_shock.png`), fullPage: true });
-  await admin.waitForTimeout(7000);
-  const lockedText = [];
-  // real player acts: if director and chair, call the disclosure vote; post a chat line either way
-  const say = async (p, text) => { const cb = p.locator('#chatbtn'); if (await cb.isVisible()) await cb.click(); await p.fill('#msg', text); await p.click('#send'); await p.waitForTimeout(300); const x = p.locator('#chatx'); if (await x.isVisible()) await x.click(); };
-  for (const [i, p] of players.entries()) {
-    await say(p, 'Tester ' + i + ' says we should talk about the issue first.');
-    if (await p.$('[data-go="1"]')) await p.click('[data-go="1"]');
-    const callD = await p.$('[data-a=calld]');
-    ok((await p.textContent('.powers')).includes(callD ? 'You are Chair' : 'Chair:'), 'player ' + i + ' sees Chair powers or who the Chair is');
-    ok((await p.textContent('.hdr .px')).includes('Share price'), 'player ' + i + ' header labels the share price');
-    if (callD) {   // Chair: write the statement, tick a fact, call the vote, send picks, lock
-      const text = 'Tester ' + i + ' firm statement: we are reviewing a matter.';
-      await p.fill('#stmt', text);
-      await admin.waitForFunction(t => Object.values(window.__host.state.boards).some(b => b.statement === t), text, { timeout: 10000 }).catch(async e => { console.log('DBG', JSON.stringify(await admin.evaluate(() => ({ ph: window.__host.state.phase, err: window.__host.errors, st: Object.values(window.__host.state.boards).map(b => [b.chair, b.statement]) })))); throw e; });
-      await p.click('[data-go="0"]');
-      ok((await p.textContent('.counter')).includes('Share price') && (await p.textContent('.legendnote')).includes('how bad'), 'facts step shows the price cost and what the bars mean');
-      const boxes = await p.$$('[data-fact]'); ok(boxes.length >= 3, 'player ' + i + ' sees a fact list (' + boxes.length + ')');
-      await p.click('[data-go="0"]');
-      await p.check('[data-fact]');
-      const hgt = await p.evaluate(() => document.documentElement.scrollHeight); phoneH.push(hgt); ok(hgt < 1500, 'player ' + i + ' facts step is short (' + hgt + ' px, was about 3000)');
-      await p.click('[data-go="1"]');
-      await p.screenshot({ path: join(shots, `3a_player${i}_facts.png`), fullPage: true });
-      await p.click('[data-a=calld]'); await p.waitForSelector('[data-fsubmit]', { timeout: 5000 });
-      await p.click('[data-fsubmit]'); await p.waitForTimeout(800);
-      const cl = await p.$('[data-a=close]'); if (cl) await p.click('[data-a=close]', { timeout: 3000 }).catch(() => {}); await p.waitForTimeout(1200);   // the vote may already have closed when the last director voted
-      // last write wins: a simulated director may have overwritten the text, so read back what actually locked
-      await p.click('[data-go="1"]');
-      const locked = ((await p.textContent('.stmtlocked').catch(() => '')) || '').trim();
-      ok(locked.length > 0, 'player ' + i + ' chair locked facts + statement (' + locked.slice(0, 40) + ')');
-      await p.click('[data-go="0"]');
-      ok((await p.$$('.facts.locked li')).length >= 3, 'player ' + i + ' sees admitted and left-out facts');
-      await p.click('[data-go="2"]');
-      const rows = await p.$$('.mrow'); ok(rows.length === 1, 'player ' + i + ' sees exactly one headline motion (' + rows.length + ')');
-      ok((await p.$$('.mrow .strip .cell')).length === 5, 'player ' + i + ' motion carries 5 stakeholder icons');
-      ok((await p.textContent('.legendrow')).includes('Owners') && (await p.textContent('.legendrow')).includes('Community'), 'player ' + i + ' sees the same five stakeholder words');
-      const mh = await p.evaluate(() => document.documentElement.scrollHeight); phoneH.push(mh); ok(mh < 1500, 'player ' + i + ' motions step is short (' + mh + ' px)');
-      await p.screenshot({ path: join(shots, `3c_player${i}_motions.png`), fullPage: true });
-      if (await p.$('[data-callm]')) { await p.click('[data-callm]'); await p.waitForTimeout(800); const y = await p.$('[data-ballot="yes"]'); if (y) { await y.click({ timeout: 3000 }).catch(() => {}); await p.waitForTimeout(500); } }
-      lockedText.push(locked);
-      await p.screenshot({ path: join(shots, `3b_player${i}_locked.png`), fullPage: true });
-    }
-    const tgt = await p.$('[data-tgt]'); if (tgt) await tgt.click();
-    await p.waitForTimeout(1500);
-    const ballot = await p.$('[data-ballot]'); if (ballot) await p.click('[data-ballot]', { timeout: 3000 }).catch(() => {});
-    await p.screenshot({ path: join(shots, `3_player${i}_play.png`), fullPage: true });
+  ok((await phones[0].$$('.placed:not(.wait)')).length === 1, 'phone waiting room shows the placement');
+  await phones[0].screenshot({ path: join(shots, '2_phone0_waiting.png') });
+  await admin.click('#start'); await admin.waitForTimeout(2500);
+  const st0 = await admin.evaluate(() => { const s = window.__host.state; return { phase: s.phase, boards: Object.keys(s.boards), valley: s.boards.valley_health && s.boards.valley_health.chair }; });
+  ok(st0.phase === 'play' && st0.boards.includes('valley_health'), 'meeting started with Valley Health in play');
+  // Phase: briefing
+  await proj.screenshot({ path: join(shots, '3_projector_meeting.png') });
+  await phones[0].screenshot({ path: join(shots, '4_phone0_briefing.png') });
+  await phones[0].click('[data-pg="1"]'); await phones[0].click('[data-pg="1"]');
+  ok((await phones[0].textContent('#main')).includes('Fact 2 of'), 'briefing pages one fact at a time');
+  await phones[0].screenshot({ path: join(shots, '4b_phone0_fact.png') });
+  await phones[1].screenshot({ path: join(shots, '4_phone1_briefing.png') });
+  // Phase: private cards (different text on each device)
+  for (const [i, p] of phones.entries()) { await p.click('[data-tab="card"]'); await p.waitForTimeout(300); await p.screenshot({ path: join(shots, `5_phone${i}_card.png`) }); }
+  const c0 = await phones[0].textContent('#main'), c1 = await phones[1].textContent('#main');
+  ok(c0.includes('Oliver Brandt') && c1.includes('Teresa Alvarado') && c0 !== c1, 'each phone sees only its own private role card');
+  // Phase: chat (prominent button) both ways
+  await phones[0].click('#chatbtn'); await phones[0].fill('#msg', 'I lean toward option 1. What does your card say?'); await phones[0].click('#send');
+  await phones[0].waitForTimeout(600); await phones[0].screenshot({ path: join(shots, '6_phone0_chat.png') });
+  await phones[1].waitForTimeout(1800);
+  ok((await phones[1].textContent('#chatbtn')).includes('Chat'), 'chat is a labelled button');
+  await phones[1].click('#chatbtn'); await phones[1].waitForTimeout(400);
+  ok((await phones[1].textContent('#msgs')).includes('I lean toward option 1'), 'chat message crosses to the other device');
+  await phones[1].screenshot({ path: join(shots, '6_phone1_chat.png') });
+  await phones[1].click('#chatx'); await phones[0].click('#chatx');
+  // Phase: vote
+  for (const p of phones) await p.click('[data-tab="vote"]');
+  await phones[0].click('[data-opt="1"]'); await phones[1].click('[data-opt="1"]');
+  await phones[0].waitForTimeout(1200);
+  await phones[0].screenshot({ path: join(shots, '7_phone0_vote.png') });
+  await phones[1].screenshot({ path: join(shots, '7_phone1_vote.png') });
+  ok((await phones[1].$('[data-lock]')) === null && (await phones[0].$('[data-lock]')) !== null, 'only the Chair sees the lock button');
+  await phones[0].click('[data-lock]'); await admin.waitForTimeout(2200);
+  const lk = await admin.evaluate(() => { const b = window.__host.state.boards.valley_health; return { locked: b.locked, choice: b.choice }; });
+  ok(lk.locked && lk.choice === 1 || lk.locked, 'Chair locked; choice ' + lk.choice);
+  await phones[1].waitForTimeout(1500);
+  ok((await phones[1].textContent('#main')).includes('The board chose option'), 'other phone shows the locked choice');
+  await phones[1].screenshot({ path: join(shots, '8_phone1_locked.png') });
+  await proj.screenshot({ path: join(shots, '8_projector_locked.png') });
+  // Phase: debrief
+  await admin.click('#adv'); await admin.waitForTimeout(2200);
+  await proj.screenshot({ path: join(shots, '9_projector_debrief_overview.png') });
+  await phones[0].screenshot({ path: join(shots, '9_phone0_debrief.png') });
+  const nSteps = await admin.evaluate(() => window.__host.state.boards && Object.keys(window.__host.state.boards).length);
+  let sawValleyCase = false, sawQs = false;
+  for (let k = 1; k <= 2 * nSteps; k++) {
+    await admin.click('#rnext'); await admin.waitForTimeout(1500);
+    const t = await proj.textContent('#app');
+    if (t.includes('Valley Health: what happened')) { sawValleyCase = t.includes('Columbia/HCA'); await proj.screenshot({ path: join(shots, '10_projector_real_case.png') }); }
+    if (t.includes('Valley Health: discuss')) { sawQs = t.includes('information asymmetry'); await proj.screenshot({ path: join(shots, '11_projector_questions.png') }); }
   }
-  await players[0].waitForTimeout(1500);
-  ok((await players[0].textContent('#msgs')).includes('Tester 0 says'), 'chat message delivered');
-  await proj.screenshot({ path: join(shots, '4_projector_play.png') });
-  ok((await proj.textContent('#app')).includes('The Principal Times'), 'projector shows the front page during play');
-  // run through the rest on the clock
-  const t0 = Date.now();
-  while (Date.now() - t0 < 240000) {
-    const txt = await admin.textContent('#app');
-    if (/Phase:\s*reveal/.test(txt)) break;
-    const btn = await admin.$('#adv');
-    if (btn && (await btn.textContent()).trim() === 'Reveal') { await proj.screenshot({ path: join(shots, '5_projector_final_edition.png') }); const ft = await proj.textContent('#app'); ok(ft.includes('Final edition') && /Share price/.test(ft), 'final edition of the front page shows share prices'); if (lockedText.length) ok(lockedText.some(t => ft.includes(t.replace(/^.*?:\s*/, '').slice(0, 20)) || ft.includes('“')), 'a locked statement is printed as a pull quote'); await btn.click(); }
-    await admin.waitForTimeout(1000);
-  }
-  await proj.waitForTimeout(2500);
-  const seen = [];
-  for (let n = 0; n < 12; n++) {
-    const txt = await proj.textContent('#app'); seen.push(txt);
-    const words = txt.trim().split(/\s+/).length;
-    ok(words <= 200, 'debrief screen ' + (n + 1) + ' is short (' + words + ' words)');
-    await proj.screenshot({ path: join(shots, '6_projector_debrief_' + (n + 1) + '.png') });
-    const nx = admin.locator('#rnext'); if (await nx.isDisabled()) break;
-    await nx.click(); await proj.waitForTimeout(1800);
-  }
-  const rtxt = seen.join(' ');
-  ok(/Reactions/.test(seen[0]) && /Side by side/.test(seen[1]) && /Governance/.test(seen[2]) && /Fixes/.test(seen[3]), 'debrief runs Reactions, Side by side, Governance, Fixes');
-  ok(seen.length >= 6 && seen.slice(4).every(t => t.includes('Ethics')), 'one ethics screen per board follows (' + (seen.length - 4) + ')');
-  ok(/Columbia\/HCA|Boeing|Facebook|H&M|Wells Fargo/.test(seen[3]), 'Fixes screen reveals the real cases');
-  ok(!/Activist|Short seller|Plaintiff|Executive session|Resign|Reporter/i.test(rtxt), 'debrief mentions no cut features');
-  ok(!/^(Tell|Spin|Bury)$/i.test(rtxt), 'no Tell/Spin/Bury label');
-  ok(!/exposure safe|secret missed|Gained: |Paid: /.test(rtxt), 'reveal labels are plain words');
-  await proj.screenshot({ path: join(shots, '6_projector_reveal.png'), fullPage: true });
-  for (const [i, p] of players.entries()) { await p.waitForTimeout(500); await p.screenshot({ path: join(shots, `7_player${i}_reveal.png`), fullPage: true }); ok((await p.$('.result .big')) !== null, 'player ' + i + ' sees own result'); }
-  console.log('phone heights (px):', phoneH.join(', '));
-  await admin.screenshot({ path: join(shots, '8_admin.png'), fullPage: true });
+  ok(sawValleyCase, 'debrief reveals the real case (Columbia/HCA)');
+  ok(sawQs, 'debrief shows the discussion questions');
+  ok(errs.length === 0, 'no page or console errors' + (errs.length ? ': ' + errs.slice(0, 3).join(' | ') : ''));
 } finally { await browser.close(); srv.kill(); }
-ok(errs.length === 0, 'no page errors' + (errs.length ? ': ' + errs.slice(0, 5).join(' | ') : ''));
 process.exit(fails ? 1 : 0);

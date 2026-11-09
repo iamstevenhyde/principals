@@ -1,348 +1,97 @@
 {
-  "id": "summit_peaks",
-  "name": "Summit Peaks Resorts",
-  "short": "Summit",
-  "industry": "Ski resort group",
-  "from_week": "8",
-  "blurb": "Public ski company, six mountains, one season pass. Founder Dana Strand built it from a single hill in Alder Creek and holds 30% of the vote. Alder Creek is the oldest mountain and the town's main employer.",
-  "communities": [
-    {
-      "key": "shareholders",
-      "label": "Shareholders"
-    },
-    {
-      "key": "workers",
-      "label": "Seasonal workers"
-    },
-    {
-      "key": "customers",
-      "label": "Pass holders"
-    },
-    {
-      "key": "home",
-      "label": "Alder Creek (town)"
-    },
-    {
-      "key": "public",
-      "label": "The public"
-    }
-  ],
-  "directors": [
-    {
-      "seat": "attorney",
-      "name": "Marisa Kell",
-      "title": "Attorney",
-      "home": "The state bar",
-      "motive": "Your firm has handled Summit's lift contracts for years, and you wrote the memo calling the inspection schedule advisory. You are no longer sure that word will hold up.",
-      "exposure": {
-        "text": "You are disbarred if the board is caught hiding a heavy fact.",
-        "label": "Disbarred if caught hiding",
-        "trigger": {
-          "type": "facts_caught",
-          "weight": 3
-        }
-      },
-      "secrets": [
-        {
-          "id": "attorney_A",
-          "text": "Clean the books: the board admits every fact in round 1.",
-          "label": "Admit every fact in round 1",
-          "check": {
-            "type": "disclosure_choice",
-            "round": 1,
-            "choice": "all"
-          }
-        },
-        {
-          "id": "attorney_B",
-          "text": "Your firm bills Summit $2M a year. One caught fact ends it, so none may be caught.",
-          "label": "No fact gets caught",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "seat": "labor",
-      "name": "Tomas Reyes",
-      "title": "Labor director",
-      "home": "Lift & Lodge Workers Local 12",
-      "motive": "Your members run the lifts, so you know what a worn cable sounds like. You also know that closing a lift in January costs the crew its hours.",
-      "exposure": {
-        "text": "Members vote you out if the pension payment is skipped.",
-        "label": "Pension skipped",
-        "trigger": {
-          "type": "motion_passed",
-          "id": "pension_skip"
-        }
-      },
-      "secrets": [
-        {
-          "id": "labor_A",
-          "text": "Chair 7 closes for inspection before anyone gets hurt.",
-          "label": "Chair 7 closes",
-          "check": {
-            "type": "motion_passed",
-            "id": "close_lift"
-          }
-        },
-        {
-          "id": "labor_B",
-          "text": "Your members' pension fund holds Summit stock. The stock must end above where it started.",
-          "label": "Stock ends above start",
-          "check": {
-            "type": "stock_end_above_start"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "fund",
-      "name": "Grace Whitlow",
-      "title": "Fund partner",
-      "home": "Granite Peak Capital (owns 8%)",
-      "motive": "Granite Peak backed Summit at a price that assumed every lift running all season. You do not want to be the investor who closed one, or the one who left it open.",
-      "exposure": {
-        "text": "Your investors pull their money if the stock ends below where it started.",
-        "label": "Stock ends below start",
-        "trigger": {
-          "type": "stock_end_below_start"
-        }
-      },
-      "secrets": [
-        {
-          "id": "fund_A",
-          "text": "Granite Peak also lent Summit money, and the loan terms hold only if every lift runs. Chair 7 must stay open.",
-          "label": "Chair 7 stays open",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "close_lift"
-            }
-          }
-        },
-        {
-          "id": "fund_B",
-          "text": "Your fund quietly owns a rival ski company. The stock must finish in the bottom half.",
-          "label": "Stock ends in bottom half",
-          "check": {
-            "type": "stock_rank_bottom_half"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "founder_friend",
-      "name": "Hal Brennan",
-      "title": "Founder's friend",
-      "home": "Dana Strand, the founder (college roommate)",
-      "motive": "Dana shared a dorm room with you and a business plan on a napkin. SnowSense is her new bet and she needs the pension money to fund it.",
-      "exposure": {
-        "text": "You lose the seat if the board votes down skipping the pension payment, which Dana wants.",
-        "label": "Pension skip voted down",
-        "trigger": {
-          "type": "founder_motion_failed"
-        }
-      },
-      "secrets": [
-        {
-          "id": "founder_friend_A",
-          "text": "Dana signed off on delaying the Chair 7 inspection. The board must never admit every fact about it in round 1.",
-          "label": "Don't admit every fact in round 1",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "disclosure_choice",
-              "round": 1,
-              "choice": "all"
-            }
-          }
-        },
-        {
-          "id": "founder_friend_B",
-          "text": "SnowSense is Dana's pet project and needs the cash. The pension payment must be skipped.",
-          "label": "Pension skipped",
-          "check": {
-            "type": "motion_passed",
-            "id": "pension_skip"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "community",
-      "name": "June Okafor",
-      "title": "Community seat (Mayor)",
-      "home": "Alder Creek",
-      "motive": "Alder Creek is where Summit began, and half your voters work a lift or a bar that depends on one. You live beside Chair 7 and wave at the people riding it.",
-      "exposure": {
-        "text": "You face a recall if the board is caught hiding a fact.",
-        "label": "Caught hiding",
-        "trigger": {
-          "type": "facts_caught"
-        }
-      },
-      "secrets": [
-        {
-          "id": "community_A",
-          "text": "The pension is paid in full.",
-          "label": "Pension paid",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "pension_skip"
-            }
-          }
-        },
-        {
-          "id": "community_B",
-          "text": "Your family owns the lodge beside Chair 7, and a January closure would cost it the holiday weekend. Chair 7 stays open.",
-          "label": "Chair 7 stays open",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "close_lift"
-            }
-          }
-        }
-      ]
-    }
-  ],
-  "rounds": [
-    {
-      "round": 1,
-      "motions": [
-        {
-          "id": "close_lift",
-          "title": "Close Chair 7 until it is inspected",
-          "short": "Close Chair 7",
-          "motive": "Better a dark lift than a bad day.",
-          "effects": {
-            "shareholders": -2,
-            "workers": -1,
-            "customers": -1,
-            "home": -1,
-            "public": 1
-          },
-          "headline": {
-            "passed": "Summit Peaks shuts Chair 7 for inspection",
-            "failed": "Summit Peaks keeps Chair 7 running"
-          },
-          "flags": {
-            "resolves_issue": true
-          }
-        }
-      ],
-      "issue": {
-        "id": "chair7_overdue",
-        "text": "Chair 7's yearly safety inspection is 14 months overdue and a technician logged wear on one cable. The maker says the wear may be within limits. Nothing has gone wrong, and safety reports go to operations, not the board.",
-        "case_for_silence": "Nothing has failed, the wear may be within limits, and a public warning could empty the mountain over a holiday weekend.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "Chair 7's yearly safety inspection is 14 months overdue.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "A technician logged wear on a cable, and the maker says it may still be within limits.",
-            "weight": 3
-          },
-          {
-            "id": "f3",
-            "text": "Operations knew in March, and safety reports go to operations, not to the board.",
-            "weight": 2
-          },
-          {
-            "id": "f4",
-            "text": "The crew that maintains the lift also signs off on its inspection.",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "round": 2,
-      "motions": [
-        {
-          "id": "pension_skip",
-          "title": "Skip this year's pension payment",
-          "short": "Skip pension payment",
-          "motive": "Probably legal. The fund will recover when the markets do.",
-          "effects": {
-            "shareholders": 2,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "headline": {
-            "passed": "Summit Peaks skips this year's pension payment",
-            "failed": "Summit Peaks board pays the pension in full"
-          },
-          "flags": {
-            "founder_wants": true,
-            "reveal_effects": {
-              "shareholders": 0,
-              "workers": -2,
-              "customers": 0,
-              "home": 0,
-              "public": 0
-            }
-          }
-        }
-      ],
-      "issue": {
-        "id": "pension_gap",
-        "text": "The staff pension is about $60M short under this year's estimate, though two actuaries disagree on the size. Counsel says skipping is probably legal. Staff statements still call the fund secure.",
-        "case_for_silence": "The estimate is contested, counsel says skipping is probably legal, and a scare about the pension could send your best crew to other mountains.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "Under this year's estimate the staff pension is about $60M short.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "Staff statements still describe the pension as secure.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "The board has been told the gap could widen if markets stay down.",
-            "weight": 2
-          },
-          {
-            "id": "f4",
-            "text": "Counsel says skipping a payment this year is probably legal.",
-            "weight": 1
-          }
-        ]
-      }
-    }
-  ],
-  "real": {
-    "cases": [
-      {
-        "round": 1,
-        "event": "Boeing 737 MAX",
-        "years": "2018 to 2022",
-        "line": "Boeing had no board safety committee until 2019, and its directors settled oversight claims for $237.5M."
-      },
-      {
-        "round": 2,
-        "event": "Hostess Brands pensions",
-        "years": "2011 to 2012",
-        "line": "Hostess stopped paying into its bakers' pension in 2011, calling it temporary. It went bankrupt in January 2012 and later shut down."
-      }
-    ],
-    "fix": "Give safety and pension risk a committee that hears bad news directly."
+ "id": "summit_peaks",
+ "name": "Summit Peaks Resorts",
+ "short": "Summit",
+ "industry": "Ski resort group",
+ "blurb": "Public ski company, six mountains, one season pass. Founder Dana Strand built it from a single hill in Alder Creek and holds 30% of the vote. Alder Creek is the oldest mountain and the town's main employer.",
+ "directors": [
+  {
+   "seat": "attorney",
+   "name": "Marisa Kell",
+   "title": "Attorney",
+   "home": "The state bar",
+   "motive": "You know about the engineer's message because a staff lawyer sent it to you last week, and you have not told the board. If you disclose it now you risk the CEO's trust, and if it comes out later you will have sat on it. You want to avoid sanctions and you want to keep your seat, and the congressional committee will ask who knew what by April 15."
+  },
+  {
+   "seat": "labor",
+   "name": "Tomas Reyes",
+   "title": "Labor director",
+   "home": "Lift & Lodge Workers Local 12",
+   "motive": "Your union builds and runs the lifts, and your members stand under them every day. A shutdown means layoffs at Alder Creek, the town's main employer, and your own pension sits in the fund that the layoffs would hit. A lift operator died on Sunday, and your members will blame you if you did not push for safety."
+  },
+  {
+   "seat": "fund",
+   "name": "Grace Whitlow",
+   "title": "Fund partner",
+   "home": "Granite Peak Capital (owns 8%)",
+   "motive": "Your fund owns 8% and your investors expect payouts. The buybacks have kept the price up and your own bonus depends on it. You have watched companies pause payouts and see the stock drop further, but you have also seen what regulators do to a company they think is stalling, and you do not know whether Summit is the paused company or the stalling one. Your partners expect an answer by Monday."
+  },
+  {
+   "seat": "founder_friend",
+   "name": "Hal Brennan",
+   "title": "Founder's friend",
+   "home": "Dana Strand, the founder (college roommate)",
+   "motive": "Dana Strand built Summit from one hill and still holds 30% of the vote. She has told you privately that she believes the CEO and does not want a leadership fight. You are her oldest friend on this board, you skied the first Alder Creek lift with her, and you do not know whether to protect her view or tell her she is wrong."
+  },
+  {
+   "seat": "community",
+   "name": "June Okafor",
+   "title": "Community seat",
+   "home": "Alder Creek (Mayor)",
+   "motive": "You are the Mayor of the town where the second fall happened, and you went to two of the funerals. Alder Creek depends on Summit for jobs and tax revenue, and your re-election is in the fall. You will be asked to speak for the town, and the town is divided about what speaking for it requires. You want the lifts safe and the town employed."
   }
+ ],
+ "briefing": {
+  "intro": "It is March 2019 and a special meeting of the Summit Peaks board has been called. Summit runs six mountains on one season pass, built by Dana Strand from a single hill in Alder Creek. The company has no board committee that looks at safety. Directors are paid in company stock, and Summit is publicly traded. The company earns most of its money from the Series 7 gondola, a lift it designs and sells to other resorts as well as running on its own mountains, and the board has been told that regulators and the press will wait for its decision.",
+  "facts": [
+   "Two Series 7 gondola cabins have fallen from their cables in five months. The first fall, in October at a partner resort, killed 18 riders. The second, last Sunday at Summit's own Alder Creek mountain, killed 12 riders and one lift operator. Government safety inspectors have closed lifts of the same model at other resorts but have not yet ordered Summit's remaining 41 Series 7 lifts to stop, and their preliminary report points to the software while allowing that a worn grip may have played a part.",
+   "After the first fall Summit told its customers that the Series 7 was safe and that the fall was caused by crew error at the partner resort. A software update to the cable grip was promised within six weeks and has been delayed three times. Summit's engineers say the update could be ready in about eleven weeks, but regulators will need to test it, and the earliest approval anyone expects is August.",
+   "The cable grip software reads a single sensor. Summit chose a single sensor to speed up the design, and it sold a second sensor as an optional extra. Operator manuals mention the software in one line and do not say that a wrong sensor reading can push the cabin off the cable. Summit's engineers say operators who knew would have trained differently, and others say no training would have saved the cabin.",
+   "A senior engineer sent an internal message two years ago saying the design had not been tested the way a lift that carries people should be. It went to a supervisor, who answered that schedule came first. The message sits in a file and the board has not seen it. A survey of 300 Summit engineers last year found that 40% did not feel free to raise safety concerns, though the survey was anonymous and fewer than half responded.",
+   "The Series 7, Summit's best-selling product, brings in $2.1 billion of the company's $9 billion in revenue and has a backlog of 4,000 orders. Another 2,000 Series 7 units are in construction and cannot be shipped unless inspectors permit it. Two resort chains have already cancelled orders for 90 lifts, and several others say they will wait for the regulators before deciding.",
+   "If Summit stops building, it must pay suppliers about $1 billion over the next year and lay off thousands, and skilled lift workers who leave might not return. If it keeps building and the inspectors later find another defect, the company could face criminal and civil claims and could lose its operating license, and nobody inside the company can say which risk is larger.",
+   "The company has been spending about $4 billion a year on dividends and share buybacks, and the board approved a new $6 billion buyback authorization in January. Its stock has fallen 12% since the second fall and stands at $380, with 570 million shares outstanding. The fund partners on the board want the buybacks to continue because they signal strength.",
+   "The Chair, who is also the CEO, is respected, has spent thirty years in the lift business, and believes the lift is sound and the software fix will prove it. He has asked the board for time and has said that a recall would send the wrong signal. The audit committee chair adds that the company's internal safety group reports to the CEO's office and not to the board.",
+   "A competitor with an older lift design carries the same rider numbers. It has offered to take Summit's resort customers if Summit leaves them without service, and some resorts have already asked about switching. Summit's sales team thinks most customers would come back after a fix, and the finance team is less sure.",
+   "Regulators in two other countries closed Series 7 lifts last week. The home regulator has taken weeks longer, and Summit's lobbyists say a closure is likely within days. Regulators who find a company slow to act can impose penalties far larger than those for a company that acts first, but a company that grounds its own lifts also admits that they are unsafe.",
+   "Families of the 18 riders killed in October have hired lawyers, and insurers have said that coverage will depend on whether Summit knew of the defect before the second fall. A congressional committee has asked for company documents by April 15. The board has not seen a safety report since the first fall, and directors say the CEO told them each time that engineering was handling it.",
+   "Summit's insurance broker says the company carries $2 billion of liability coverage, which would cover the families' claims at the lower end of the estimates and not at the upper end. The broker has also warned that a decision to keep flying after a known software defect could void part of the coverage, while a decision to ground the lifts could be taken as an admission in court.",
+   "Skiers are still buying season passes for next winter, and early sales are down 9% from last year. Summit's marketing head says a visible safety review would win some of them back, and the Chair says any review will make the numbers worse."
+  ]
+ },
+ "decision": {
+  "lead": "Summit's senior management team has been asked to attend the meeting. The Board Chair, who is also the CEO, plans to open by proposing four alternatives. The board must select one by the end of the meeting:",
+  "options": [
+   {
+    "n": 1,
+    "title": "Stop everything",
+    "text": "Close every Series 7 lift now, halt production and shipments, hire an outside safety review that reports straight to the board, and withhold dividends and buybacks until it finishes."
+   },
+   {
+    "n": 2,
+    "title": "Fix and keep running",
+    "text": "Close only Alder Creek and the lifts that regulators order closed, keep building lifts while the software fix is finished, and release a public statement that the fix will make the Series 7 safe."
+   },
+   {
+    "n": 3,
+    "title": "Keep building and shield the company",
+    "text": "Keep every Series 7 lift open, continue production, rely on inspectors and lobbyists to set the timetable, and defend the company's record in public."
+   },
+   {
+    "n": 4,
+    "title": "Change the leadership",
+    "text": "Separate the Chair and CEO roles at once, form a board safety committee with the power to see all engineering messages, and leave the operating decision to the new committee after a three-week review."
+   }
+  ]
+ },
+ "reveal": {
+  "case": "Boeing 737 MAX, 2019",
+  "text": "The real firm was Boeing, which had two 737 MAX crashes, Lion Air in October 2018 and Ethiopian Airlines in March 2019, killing 346 people between them. After the grounding Boeing cut 737 production from 52 to 42 aircraft a month in April 2019 and then suspended it from January 2020 until May 2020. Its board created an aerospace safety committee only on 25 September 2019. It removed Dennis Muilenburg as Chair on 11 October 2019 while he stayed on as CEO, and his departure as CEO was announced on 23 December 2019. A shareholder suit alleging that the directors ignored safety red flags survived a motion to dismiss in September 2021 and settled that November for $237.5 million, paid by insurers."
+ },
+ "questions": [
+  "Agency theory predicts that managers and owners can want different things. Where did the CEO's interest in a quick fix diverge from the interest of riders, owners and the town, and who on the board could have said so?",
+  "The engineer's message never reached the board. What is the cost of a board that learns about risk only through the CEO, and what monitoring device would fix it?",
+  "Combining the Chair and CEO roles concentrates information in one person. Which option on the table weakened that concentration, and who on your board resisted it?",
+  "Buybacks and dividends were running while the safety question was open. How does a payout to owners signal confidence, and what did your board's vote say about whose interest came first?"
+ ]
 }

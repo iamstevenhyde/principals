@@ -3,7 +3,7 @@
 --
 -- Why The System's pattern and not Parent Trap's: Parent Trap used open anon policies (a join code was the only
 -- gate), which was fine when nothing on a team screen was secret. Principals deals every director a secret
--- objective and an exposure, runs private one-to-one messages, and has a Street whose whole job is to find what
+-- objective and an exposure, runs private one-to-one messages, and (in the earlier design) a Street whose whole job was to find what
 -- boards hide. With open anon policies any student could read every secret and every DM from the browser
 -- console. So, as in The System:
 --  * RLS on every table. Only dc_public (tickers, feed, the outside view) is readable by anon.
@@ -88,7 +88,7 @@ begin
   return jsonb_build_object('code', c, 'hostToken', tok);
 end $$;
 
--- Join, or rejoin with a stored seat token. Joining stays open after the start (late arrivals go to the Street).
+-- Join, or rejoin with a stored seat token. Joining stays open after the start (late arrivals wait unseated).
 create or replace function dc_join(p_code text, p_name text, p_token text default null) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare s dc_seats; tok text; sid text; n text := trim(coalesce(p_name, ''));
@@ -107,7 +107,7 @@ begin
   return jsonb_build_object('seatId', sid, 'token', tok);
 end $$;
 
--- A seat sends one action (vote, chat, Street action...). The host applies it.
+-- A seat sends one action (ballot, lock, chat). The host applies it.
 create or replace function dc_submit(p_code text, p_token text, p_action jsonb) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare s dc_seats;

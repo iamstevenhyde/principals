@@ -10,8 +10,9 @@
 <nav class="bar" id="bar"></nav>
 <div id="note"></div></div>
 <script type="module">
+
 import { openStore, params, savedSeat } from './pages/store.js';
-import { esc, fmtClock, spark, dial, effectStrip, legendStrip, whoLine, sevBars, scoreLines, SEAT_ICON, STAKE_ICON, ICON, COLORS } from './pages/render.js';
+import { esc, fmtClock, SEAT_ICON, ICON, COLORS } from './pages/render.js';
 document.getElementById('chatx').innerHTML = ICON.x;
 const code = (params().get('g') || '').toUpperCase();
 const keep = params().get('local') === '1' ? '&local=1' : '';
@@ -20,8 +21,8 @@ if (!seat) location.replace('index.html?g=' + code + keep);
 const store = await openStore();
 const $ = id => document.getElementById(id);
 let V = null, P = null, got = 0, ch = 'board', lastMain = '', lastBar = '', sheet = false, seenTotal = 0;
-let pick = null, stmtLocal = null, stmtTimer = null, step = 0, openM = null, cardOpen = true, lastKey = '';
-const STEPS = ['Facts', 'Statement', 'Motion'];
+let tab = 'brief', page = 0, all = false;
+const TABS = [['brief', 'Briefing'], ['card', 'My card'], ['vote', 'Vote']];
 const send = async a => { try { await store.submit(code, seat.token, a); setTimeout(load, 300); } catch (e) { flash(e.message); } };
 const flash = m => { $('note').innerHTML = `<div class="notice">${esc(m)}</div>`; setTimeout(() => $('note').innerHTML = '', 3500); };
 async function load() {
@@ -33,26 +34,13 @@ setInterval(() => { const el = $('clk'); if (el && P && P.clockLeft != null && !
 let lastNotice = '';
 const faceColor = s => COLORS[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
 const face = n => `<span class="face" style="background:${faceColor(n)}">${esc(n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase())}</span>`;
-const PHASES = ['shock', 'play', 'outside'];
-const dots = () => `<span class="pdots" title="${esc(P.phase)}">${PHASES.map(p => `<i class="${p === P.phase ? 'on' : ''}"></i>`).join('')}</span>`;
-const hdr = (title, extra = '') => `<div class="hdr"><h1>${title}</h1>${extra}${P.round ? `<span class="pill">${P.round}/${P.schedule.length}</span>` : ''}${dots()}<span class="clock" id="clk"></span></div>`;
+const hdr = title => `<div class="hdr"><h1>${title}</h1><span class="clock" id="clk"></span></div>`;
 
 function render() {
   if (!V) { $('main').innerHTML = '<div class="card"><h2>You are in.</h2></div>'; return; }
   if (V.notice && V.notice !== lastNotice) { flash(V.notice); } lastNotice = V.notice || '';
-  const key = P.phase + P.round; if (key !== lastKey) { lastKey = key; cardOpen = P.phase === 'shock'; if (P.phase === 'play') step = 0; pick = null; }
-  let html;
-  if (P.phase === 'lobby' || V.me.kind === 'waiting') html = waiting();
-  else if (V.director) html = director();
-  else if (V.street) html = street();
-  else html = '';
-  if (html !== lastMain) {
-    const y = scrollY, main = $('main');
-    const fa = document.activeElement, focus = fa && fa.id === 'stmt' ? { s: fa.selectionStart, e: fa.selectionEnd } : null;
-    main.innerHTML = html; lastMain = html;
-    if (focus && $('stmt')) { $('stmt').focus(); $('stmt').setSelectionRange(focus.s, focus.e); }
-    scrollTo(0, y); wire();
-  }
+  const html = (P.phase === 'lobby' || V.me.kind === 'waiting') ? waiting() : director();
+  if (html !== lastMain) { const y = scrollY; $('main').innerHTML = html; lastMain = html; scrollTo(0, y); wire(); }
   const el = $('clk'); if (el) el.textContent = fmtClock(P.clockLeft);
   renderBar(); renderChat();
 }
@@ -60,76 +48,33 @@ function render() {
 // ---------- waiting room ----------
 function waiting() {
   const pl = V.placed;
-  const tile = pl ? `<div class="placed">${pl.kind === 'director' ? SEAT_ICON[pl.seat] : SEAT_ICON[pl.role]}<div><b>${esc(pl.seatLabel)}</b>${pl.board ? `<br><span class="mute">${esc(pl.board)}</span>` : '<br><span class="mute">Outside</span>'}</div>${ICON.check}</div>` : `<div class="placed wait"><span class="spin"></span><div><b>Waiting to be placed</b></div></div>`;
+  const tile = pl ? `<div class="placed">${SEAT_ICON[pl.seat]}<div><b>${esc(pl.seatLabel)}</b><br><span class="mute">${esc(pl.board)}</span></div>${ICON.check}</div>` : `<div class="placed wait"><span class="spin"></span><div><b>Waiting to be placed</b></div></div>`;
   return `<div class="card center">${face(V.me.name).replace('class="face"', 'class="face big"')}<h2>${esc(V.me.name)}</h2><p class="count">${V.joined || ''}<small> in the room</small></p>${tile}<p class="mute small">${pl ? 'Your host has placed you. The game starts soon.' : 'The host will put you on a board.'}</p></div>`;
 }
 
 // ---------- director ----------
-function title(id) { const m = V.board.motions.find(x => x.id === id); return m ? esc(m.short || m.title) : 'Motion'; }
 function director() {
-  const d = V.director, b = V.board, open = b.votes.find(v => v.open), chair = d.chair, play = P.phase === 'play';
-  const head = hdr(esc(b.name), `<span class="px" title="Share price, starts at 100"><small>Share price</small>${P.boards.find(x => x.id === b.id) ? P.boards.find(x => x.id === b.id).stock.slice(-1)[0].toFixed(1) : ''}</span>`);
-  const powers = chair ? `<div class="powers me">${ICON.crown}<b>You are Chair</b><span class="pw">call each vote</span><span class="pw">close it early</span><span class="pw">break fact ties</span></div>` : `<div class="powers">${ICON.crown} Chair: <b>${esc(d.chairName)}</b> calls the votes</div>`;
-  if (P.phase === 'reveal') return head + revealMine();
-  const rc = P.shock;
-  const hero = P.phase === 'shock' && rc ? `<div class="card hero"><h2>${esc(rc.title)}</h2><p>${esc(rc.board_text || rc.text)}</p></div>` : '';
-  const card = `<details class="card secret" id="card" ${cardOpen ? 'open' : ''}><summary>${SEAT_ICON[d.seat]}<b>${esc(d.card.name || d.seatLabel)}</b><span class="mute">${esc(d.seatLabel)}</span></summary>
-    <p class="motive">${esc(d.motive)}</p>
-    <p class="cardline">${ICON.lock}<span><b>Goal +${d.pts.secret}</b> ${esc(d.secret)}</span></p><p class="cardline">${ICON.fire}<span><b>Penalty -${d.pts.exposure}</b> ${esc(d.exposure)}</span></p>
-    <p class="howscore">Plus up to ${d.pts.home} if the board does well for ${esc(d.homeLabel)}.</p></details>`;
-  const isb = b.issue, brief = isb ? `<p class="brief">${esc(isb.text)}</p>` : '';
-  const failed = b.failed ? '<div class="card"><h2 class="err">This firm has failed.</h2></div>' : '';
-  if (!play) return head + powers + failed + hero + (P.phase === 'shock' ? `<div class="card">${brief}</div>` : '') + card + `<div class="card center mute">${ICON.eye}<p>${P.phase === 'shock' ? 'Voting opens next.' : 'Round over. Watch the front page.'}</p></div>`;
-  const voters = x => `<span class="voters">${b.directors.map(dd => `<i class="${x.voted.includes(dd.id) ? 'on' : ''}" title="${esc(dd.name)}">${esc(dd.name.slice(0, 1))}</i>`).join('')}</span>`;
-  const banner = open ? (open.kind === 'facts'
-    ? `<div class="vote"><h2>${ICON.check} Vote: facts and statement</h2><div class="ballots"><button data-fsubmit="${open.id}" class="primary">${open.mine ? 'Update my picks' : 'Send my picks'}</button>${chair ? '<button data-a="close">' + ICON.lock + 'Lock</button>' : ''}</div>${voters(open)}</div>`
-    : `<div class="vote"><h2>Vote: ${title(open.target)}</h2><div class="ballots yn">${['yes', 'no'].map(o => `<button data-ballot="${o}" data-vote="${open.id}" class="${open.mine === o ? 'sel primary' : ''}">${o === 'yes' ? ICON.check : ICON.x}${o.toUpperCase()}</button>`).join('')}${chair ? '<button data-a="close">Close</button>' : ''}</div>${voters(open)}</div>`) : '';
-  const is = b.issue, fs = is ? is.facts : [];
-  if (!pick || pick.round !== P.round || pick.board !== b.id) { pick = { round: P.round, board: b.id, ids: null }; stmtLocal = null; }
-  const mine = open && open.kind === 'facts' ? open.mine : null;
-  if (!pick.ids) pick.ids = new Set(mine || []);
-  const tot = fs.reduce((n, f) => n + f.weight, 0) || 1;
-  const counter = () => { const hid = fs.filter(f => !pick.ids.has(f.id)).reduce((n, f) => n + f.weight, 0), fr = hid / tot, st = is.stock, quiet = st.admitted * (1 - fr) + st.hidden * fr, loud = st.admitted * (1 - fr) + st.caught * fr, sg = x => (x >= 0 ? '+' : '') + x.toFixed(1);
-    return `<b>${pick.ids.size}/${fs.length}</b> told<div class="prices">Share price from these facts: <b class="${quiet >= 0 ? 'up' : 'down'}">${sg(quiet)}</b> if nothing hidden comes out, <b class="down">${sg(loud)}</b> if all of it does.</div>`; };
-  counterFn = counter;
-  const facts = !is ? '' : b.decided
-    ? `<ul class="facts locked">${fs.map(f => `<li class="${b.admit.includes(f.id) ? 'admitted' : 'omitted'}"><span class="ft">${b.admit.includes(f.id) ? ICON.check : ICON.x}${esc(f.text)}</span>${sevBars(f.weight)}</li>`).join('')}</ul>`
-    : `<p class="legendnote"><span>Bars: how bad if it comes out</span><span>Tag: price cost of telling</span></p><div class="opts">${fs.map(f => `<label class="frow"><input type="checkbox" data-fact="${f.id}" ${pick.ids.has(f.id) ? 'checked' : ''}><span class="sw"></span><span class="ft">${esc(f.text)} <span class="cost">tell -${f.cost.toFixed(1)}</span></span>${sevBars(f.weight)}</label>`).join('')}</div>
-       <div class="counter" id="counter">${counter()}</div>`;
-  const CH = ['We are looking into it.', 'We take this seriously.', 'We will share more soon.', 'We have nothing more to add.'];
-  const stmt = b.decided
-    ? `<p class="stmtlocked">${ICON.lock}${b.statement ? esc(b.statement) : '<span class="mute">No statement.</span>'}</p>`
-    : `<p class="mute small">The newspaper prints this as the board's quote.</p><textarea id="stmt" maxlength="${b.statementMax}" rows="2" placeholder="What the firm tells the public">${esc(stmtLocal != null ? stmtLocal : b.statement)}</textarea>
-       <div class="chips">${CH.map(c => `<button data-chip="${esc(c)}">${esc(c)}</button>`).join('')}</div>
-       ${chair && !open ? `<button class="primary wide" data-a="calld">${ICON.check} Call the vote</button>` : !open ? `<p class="mute small center">${ICON.crown} The Chair calls the vote.</p>` : ''}`;
-  const motions = `<div class="legendrow">${legendStrip()}</div>` + b.motions.map(m => {
-    const voting = open && open.target === m.id;
-    return `<div class="mrow ${m.passed ? 'passed' : ''} ${voting ? 'voting' : ''}"><div class="mhead"><span class="mst">${m.passed ? ICON.check : voting ? ICON.eye : ICON.swap}</span><span class="mt">${esc(m.short || m.title)}</span>${effectStrip(m.effects, b.labels)}</div>
-      <div class="mbody"><p>${esc(m.title)}</p><p class="mute small">${esc(m.motive || '')}</p><p class="whoref">${whoLine(b.labels)}</p>${chair && !m.passed && !open ? `<button class="primary" data-callm="${m.id}">Call vote</button>` : ''}</div></div>`;
-  }).join('');
-  const panes = [
-    `<h2>Which facts do we admit?</h2>${brief}${isb && isb.silence ? `<p class="silence"><b>Case for silence:</b> ${esc(isb.silence)}</p>` : ''}${facts}`,
-    `<h2>Public statement</h2>${stmt}`,
-    `<h2>Motion</h2>${motions}`];
-  return head + powers + failed + banner + `<div class="step">${panes[step]}</div>` + (step !== 1 ? card : '');
-}
-let counterFn = null;
-function revealMine() {
-  if (!V.director.score) return '<div class="card center"><span class="spin"></span></div>';
-  const d = V.director, s = d.score;
-  return `<div class="card result"><div class="big">${s.total ?? ''}<small> pts</small></div>
-    <ul class="scorelines">${scoreLines(d).map(([c, t, v]) => `<li class="${c}"><span>${esc(t)}</span><b>${esc(v)}</b></li>`).join('')}</ul>
-    <p class="mute small">${s.parts && s.parts.capped ? 'Your firm failed, which caps the score. ' : ''}The full debrief is on the projector.</p></div>`;
-}
-
-// ---------- outside (Reporter / Auditor) ----------
-function street() {
-  const s = V.street, play = ['shock', 'play'].includes(P.phase);
-  if (P.phase === 'reveal') return hdr('Result') + `<div class="card result"><div class="big">${s.score ?? ''}<small> pts</small></div><p>${s.history.filter(h => h.hit === true).length} caught ${ICON.check} ${s.history.filter(h => h.hit === false).length} wrong ${ICON.x}</p></div>`;
-  const cards = P.boards.map((b, i) => { const on = s.action && s.action.target === b.id; return `<button class="tgtc ${on ? 'sel' : ''}" data-tgt="${b.id}" ${play ? '' : 'disabled'}><span class="chk">${on ? ICON.check : ''}</span><b>${esc(b.name)}</b><span class="px"><small>Share price</small>${b.stock[b.stock.length - 1].toFixed(1)}</span></button>`; }).join('');
-  return hdr(esc(s.label)) +
-    `<div class="card"><h2>Which board do you inspect?</h2><div class="tgtl">${cards}</div></div>
-    <details class="card secret" ${cardOpen ? 'open' : ''}><summary>${SEAT_ICON.auditor}<b>${esc(s.label)}</b>${dial('Credibility', Math.round(s.cred * 4))}</summary><p class="small">${esc(s.actionText)}</p><p class="cardline">${ICON.lock}<span><b>Goal</b> ${esc(s.secret)}</span></p>${s.consulted ? `<p class="small">Your firm consults for <b>${esc(s.consulted)}</b>.</p>` : ''}${s.weak ? `<p class="err small">${ICON.fire} Low credibility: half strength this round.</p>` : ''}</details>`;
+  const d = V.director, b = V.board;
+  const head = hdr(esc(b.name));
+  if (P.phase === 'reveal') {
+    return head + `<div class="card center"><h2>${b.choice ? 'Your board chose option ' + b.choice.n : 'Your board did not decide'}</h2><p>${b.choice ? esc(b.choice.title) : ''}</p>${b.mine ? `<p class="mute">You voted for option ${b.mine}.</p>` : ''}<p class="mute small">The debrief is on the projector.</p></div>`;
+  }
+  const chair = d.chair ? `<p class="small">${ICON.crown} <b>You are Chair.</b> You lock the board's choice.</p>` : `<p class="small mute">${ICON.crown} Chair: <b>${esc(d.chairName)}</b></p>`;
+  if (tab === 'brief') {
+    const pages = [b.briefing.intro, ...b.briefing.facts], n = pages.length;
+    page = Math.max(0, Math.min(n - 1, page));
+    const label = i => i === 0 ? 'The setting' : 'Fact ' + i + ' of ' + (n - 1);
+    if (all) return head + chair + `<div class="card"><button data-all="0" class="wide">Read one at a time</button></div>` + pages.map((t, i) => `<div class="card"><p class="factn">${label(i)}</p><p class="fact">${esc(t)}</p></div>`).join('');
+    return head + chair + `<div class="card"><p class="factn">${label(page)}</p><p class="fact">${esc(pages[page])}</p></div>
+      <div class="pager"><button data-pg="-1" ${page === 0 ? 'disabled' : ''}>Back</button><span class="pg">${page + 1} / ${n}</span><button class="primary" data-pg="1" ${page === n - 1 ? 'disabled' : ''}>Next</button></div>
+      <p class="center"><button data-all="1">Show everything</button></p>`;
+  }
+  if (tab === 'card') return head + `<div class="card secret">${SEAT_ICON[d.seat]}<h2>${esc(d.card.name)}</h2><p class="mute">${esc(d.card.title)}, ${esc(d.card.home)}</p><p class="cardtext">${esc(d.card.motive)}</p><p class="mute small">${ICON.lock} Private. Tell the board what you choose to.</p></div>`;
+  const voters = `<div class="voters">${b.directors.map(x => `<i class="${x.voted ? 'on' : ''}" title="${esc(x.name)}">${esc(x.name.slice(0, 1))}</i>`).join('')}</div>`;
+  const opts = b.options.map(o => `<button class="opt ${b.mine === o.n ? 'sel' : ''}" data-opt="${o.n}" ${b.locked ? 'disabled' : ''}><span class="n">${o.n}</span><span><b>${esc(o.title)}</b><span class="t">${esc(o.text)}</span></span></button>`).join('');
+  const locked = b.locked ? `<div class="card center"><h2>${ICON.lock} ${b.choice ? 'The board chose option ' + b.choice.n : 'No decision'}</h2><p>${b.choice ? esc(b.choice.title) : ''}</p><p class="mute small">${b.tally.filter(t => t.votes).map(t => 'Option ' + t.n + ': ' + t.votes).join(' · ')}</p></div>` : '';
+  const lock = d.chair && !b.locked ? `<button class="primary wide" data-lock="1">${ICON.lock} Lock the board's choice</button>` : '';
+  return head + chair + locked + `<h2>Vote for one</h2>` + opts + voters + `<p class="mute small">${b.directors.filter(x => x.voted).length} of ${b.directors.length} voted. You can change your vote until the Chair locks it.</p>` + lock;
 }
 
 // ---------- fixed bottom bar ----------
@@ -139,16 +84,11 @@ function renderBar() {
   if (sheet) seenTotal = msgs;
   const unread = Math.max(0, msgs - seenTotal);
   const canChat = V && V.me.kind !== 'waiting' && P.phase !== 'lobby';
-  if (V && V.director && P.phase === 'play' && !V.board.failed) {
-    h += `<button class="nav" data-back ${step === 0 ? 'disabled' : ''} aria-label="Back">${'‹'}</button><span class="stepdots">${STEPS.map((n, i) => `<button class="sd ${i === step ? 'on' : ''}" data-go="${i}" aria-label="${n}"><i></i><small>${n}</small></button>`).join('')}</span><button class="nav" data-next ${step === 2 ? 'disabled' : ''} aria-label="Next">${'›'}</button>`;
-  }
-  if (canChat) h += `<button class="chatbtn" id="chatbtn" aria-label="Chat">${ICON.chat}${unread ? `<span class="badge">${unread}</span>` : ''}</button>`;
+  if (V && V.director && P.phase === 'play') h += `<span class="tabbar">${TABS.map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</span>`;
+  if (canChat) h += `<button class="chatbtn big" id="chatbtn" aria-label="Chat">${ICON.chat}Chat${unread ? `<span class="badge">${unread}</span>` : ''}</button>`;
   if (h !== lastBar) {
     $('bar').innerHTML = h; lastBar = h;
-    document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { step = Number(b.dataset.go); lastMain = ''; render(); });
-    const bk = document.querySelector('[data-back]'), nx = document.querySelector('[data-next]');
-    if (bk) bk.onclick = () => { step = Math.max(0, step - 1); lastMain = ''; render(); };
-    if (nx) nx.onclick = () => { step = Math.min(2, step + 1); lastMain = ''; render(); };
+    document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; lastMain = ''; lastBar = ''; render(); });
     const cb = $('chatbtn'); if (cb) cb.onclick = () => { sheet = true; seenTotal = msgs; $('chat').classList.add('open'); lastBar = ''; renderBar(); const b = $('msgs'); b.scrollTop = b.scrollHeight; };
   }
   $('bar').style.display = h ? '' : 'none';
@@ -157,28 +97,17 @@ $('chatx').onclick = () => { sheet = false; $('chat').classList.remove('open'); 
 
 function wire() {
   const q = s => document.querySelectorAll(s);
-  const card = $('card'); if (card) card.ontoggle = () => { cardOpen = card.open; };
-  q('[data-ballot]').forEach(b => b.onclick = () => send({ type: 'ballot', vote: b.dataset.vote, choice: b.dataset.ballot }));
-  q('[data-fact]').forEach(c => c.onchange = () => { if (!pick) return; c.checked ? pick.ids.add(c.dataset.fact) : pick.ids.delete(c.dataset.fact); const el = $('counter'); if (el && counterFn) el.innerHTML = counterFn(); });
-  q('[data-fsubmit]').forEach(b => b.onclick = () => send({ type: 'ballot', vote: b.dataset.fsubmit, admit: [...(pick ? pick.ids : [])] }));
-  if ($('stmt')) $('stmt').oninput = e => { stmtLocal = e.target.value; clearTimeout(stmtTimer); stmtTimer = setTimeout(() => send({ type: 'statement', text: stmtLocal }), 600); };
-  q('[data-chip]').forEach(b => b.onclick = () => { stmtLocal = b.dataset.chip; $('stmt').value = stmtLocal; send({ type: 'statement', text: stmtLocal }); });
-  q('[data-m]').forEach(b => b.onclick = () => { openM = openM === b.dataset.m ? null : b.dataset.m; lastMain = ''; render(); });
-  q('[data-callm]').forEach(b => b.onclick = () => send({ type: 'open_vote', kind: 'motion', target: b.dataset.callm }));
-  q('[data-tgt]').forEach(b => b.onclick = () => send({ type: 'street_action', target: b.dataset.tgt }));
-  q('[data-a]').forEach(b => b.onclick = () => {
-    const a = b.dataset.a;
-    if (a === 'close') send({ type: 'close_vote' });
-    if (a === 'calld') send({ type: 'open_vote', kind: 'facts' });
-  });
+  q('[data-pg]').forEach(b => b.onclick = () => { page += Number(b.dataset.pg); lastMain = ''; render(); });
+  q('[data-all]').forEach(b => b.onclick = () => { all = b.dataset.all === '1'; lastMain = ''; render(); });
+  q('[data-opt]').forEach(b => b.onclick = () => send({ type: 'ballot', choice: Number(b.dataset.opt) }));
+  q('[data-lock]').forEach(b => b.onclick = () => send({ type: 'lock' }));
 }
 // ---------- chat ----------
 function channels() {
   if (V && V.director) return [{ id: 'board', label: 'Board' }, ...V.board.directors.filter(x => x.id !== V.me.id).map(x => ({ id: 'dm:' + x.id, label: x.name }))];
-  if (V && V.street) return [{ id: 'street', label: 'Street' }];
   return [];
 }
-const keyOf = c => (c.id === 'board' ? 'board:' + V.board.id : c.id === 'street' ? 'street' : 'dm:' + [V.me.id, c.id.slice(3)].sort().join('|'));
+const keyOf = c => (c.id === 'board' ? 'board:' + V.board.id : 'dm:' + [V.me.id, c.id.slice(3)].sort().join('|'));
 function renderChat() {
   const cs = channels(), box = $('chat');
   if (!cs.length) { box.style.display = 'none'; return; } box.style.display = '';
@@ -188,7 +117,7 @@ function renderChat() {
   $('tabs').innerHTML = `<button data-ch="${cs[0].id}" class="${ch === cs[0].id ? 'sel' : ''}">${esc(cs[0].label)}</button>` + (dms.length ? `<select id="dmsel" aria-label="Private message"><option value="">Private...</option>${dms.map(c => `<option value="${c.id}" ${c.id === ch ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select>` : '');
   document.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => { ch = b.dataset.ch; renderChat(); });
   const sel = $('dmsel'); if (sel) sel.onchange = () => { ch = sel.value || cs[0].id; renderChat(); };
-  const all = (V.chat || []).filter(m => m.ch === k), msgs = ch === 'street' ? all.slice(-3) : all;
+  const all = (V.chat || []).filter(m => m.ch === k), msgs = all;
   const bx = $('msgs'), atBottom = bx.scrollHeight - bx.scrollTop - bx.clientHeight < 40;
   const html = msgs.map(m => `<div class="msg ${m.from === V.me.id ? 'me' : ''}"><b>${esc(m.name)}</b>${esc(m.text)}</div>`).join('') || '<p class="small mute">No messages yet.</p>';
   if (bx.dataset.h !== html) { bx.innerHTML = html; bx.dataset.h = html; if (atBottom) bx.scrollTop = bx.scrollHeight; }

@@ -1,338 +1,97 @@
 {
-  "id": "lumen_search",
-  "name": "Lumen Search",
-  "short": "Lumen",
-  "industry": "Search and AI platform",
-  "from_week": "6",
-  "blurb": "A search engine and AI assistant with two billion queries a day, paid for by an ad business. Co-founder Idris Valdane still holds 25% of the vote.",
-  "communities": [
-    {
-      "key": "shareholders",
-      "label": "Shareholders"
-    },
-    {
-      "key": "workers",
-      "label": "Engineers and staff"
-    },
-    {
-      "key": "customers",
-      "label": "Advertisers"
-    },
-    {
-      "key": "home",
-      "label": "Users"
-    },
-    {
-      "key": "public",
-      "label": "The public"
-    }
-  ],
-  "directors": [
-    {
-      "seat": "attorney",
-      "name": "Tessa Brandt",
-      "title": "Attorney",
-      "home": "The state bar",
-      "motive": "You told Lumen the dashboard footnote was enough disclosure, and that was a defensible view. A judge may not share it.",
-      "exposure": {
-        "text": "You are disbarred if the board is caught hiding a heavy fact.",
-        "label": "Disbarred if caught hiding",
-        "trigger": {
-          "type": "facts_caught",
-          "weight": 3
-        }
-      },
-      "secrets": [
-        {
-          "id": "attorney_A",
-          "text": "Clean the books: the board admits every fact in round 1.",
-          "label": "Admit every fact in round 1",
-          "check": {
-            "type": "disclosure_choice",
-            "round": 1,
-            "choice": "all"
-          }
-        },
-        {
-          "id": "attorney_B",
-          "text": "Your firm bills Lumen $3M a year. One caught fact ends it, so none may be caught.",
-          "label": "No fact gets caught",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "seat": "labor",
-      "name": "Priya Raman",
-      "title": "Labor director",
-      "home": "Lumen Tech Workers Guild",
-      "motive": "Your members built the dashboard, and some flagged the cutoff months ago. If the board fires the CEO they may walk out, and if it does not they may stay angry.",
-      "exposure": {
-        "text": "Members vote you out if the board removes Idris.",
-        "label": "Idris removed",
-        "trigger": {
-          "type": "motion_passed",
-          "id": "remove_founder"
-        }
-      },
-      "secrets": [
-        {
-          "id": "labor_A",
-          "text": "The advertiser credit passes. Your members do not want to defend a bad number.",
-          "label": "Credit passes",
-          "check": {
-            "type": "motion_passed",
-            "id": "credit_advertisers"
-          }
-        },
-        {
-          "id": "labor_B",
-          "text": "Your members are paid partly in Lumen stock. The stock must end above where it started.",
-          "label": "Stock ends above start",
-          "check": {
-            "type": "stock_end_above_start"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "fund",
-      "name": "Anders Lund",
-      "title": "Fund partner",
-      "home": "Cobalt Ridge Ventures (owns 7%)",
-      "motive": "Cobalt Ridge pitched its investors on clean numbers at Lumen. A refund would embarrass you, and a lawsuit would be worse.",
-      "exposure": {
-        "text": "Your investors pull their money if the stock ends below where it started.",
-        "label": "Stock ends below start",
-        "trigger": {
-          "type": "stock_end_below_start"
-        }
-      },
-      "secrets": [
-        {
-          "id": "fund_A",
-          "text": "A refund this size would sink your quarter. The advertiser credit must not pass.",
-          "label": "Credit fails",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "credit_advertisers"
-            }
-          }
-        },
-        {
-          "id": "fund_B",
-          "text": "Your fund quietly owns a rival search company. The stock must finish in the bottom half.",
-          "label": "Stock ends in bottom half",
-          "check": {
-            "type": "stock_rank_bottom_half"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "founder_friend",
-      "name": "Wes Calloway",
-      "title": "Founder's friend",
-      "home": "Idris Valdane, the founder (grad-school roommate)",
-      "motive": "Idris was your roommate, and he told you first that the dashboard was a risk. You are loyal, and you are also the one person he trusts to say no.",
-      "exposure": {
-        "text": "You lose the seat if the board removes Idris as CEO.",
-        "label": "Idris removed",
-        "trigger": {
-          "type": "motion_passed",
-          "id": "remove_founder"
-        }
-      },
-      "secrets": [
-        {
-          "id": "founder_friend_A",
-          "text": "Idris knew about the cutoff. The board must never admit every fact about it in round 1.",
-          "label": "Don't admit every fact in round 1",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "disclosure_choice",
-              "round": 1,
-              "choice": "all"
-            }
-          }
-        },
-        {
-          "id": "founder_friend_B",
-          "text": "Idris asked you to keep this inside the room, and you promised. No fact on this board may be caught.",
-          "label": "No fact gets caught",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "seat": "community",
-      "name": "Mira Castellanos",
-      "title": "Community seat (User-privacy advocate)",
-      "home": "Open Signal Alliance",
-      "motive": "You speak for the users whose attention is being sold. You want advertisers to hear the truth even if it costs the product you rely on.",
-      "exposure": {
-        "text": "You lose standing at home if the board is caught hiding a fact.",
-        "label": "Caught hiding",
-        "trigger": {
-          "type": "facts_caught"
-        }
-      },
-      "secrets": [
-        {
-          "id": "community_A",
-          "text": "The advertiser credit passes. Your users are better off with a company that admits its errors.",
-          "label": "Credit passes",
-          "check": {
-            "type": "motion_passed",
-            "id": "credit_advertisers"
-          }
-        },
-        {
-          "id": "community_B",
-          "text": "Lumen's foundation pays 40% of your group's budget. The credit must not pass.",
-          "label": "Credit fails",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "credit_advertisers"
-            }
-          }
-        }
-      ]
-    }
-  ],
-  "rounds": [
-    {
-      "round": 1,
-      "motions": [
-        {
-          "id": "credit_advertisers",
-          "title": "Credit advertisers for the disputed views and fix the dashboard",
-          "short": "Credit advertisers",
-          "motive": "Fix it before they find it.",
-          "effects": {
-            "shareholders": -2,
-            "workers": 0,
-            "customers": 2,
-            "home": 0,
-            "public": 1
-          },
-          "headline": {
-            "passed": "Lumen credits advertisers and fixes its dashboard",
-            "failed": "Lumen board refuses advertiser credits"
-          },
-          "flags": {
-            "resolves_issue": true
-          }
-        }
-      ],
-      "issue": {
-        "id": "view_metric",
-        "text": "Lumen's ad dashboard reports average view time, but a new analysis shows it leaves out views under three seconds. The analysis is not final, and the cutoff sits in a footnote of the technical guide.",
-        "case_for_silence": "The analysis is unfinished, the cutoff is documented, and nervous advertisers could pull spending the numbers may not justify.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "The dashboard's average view time leaves out views under three seconds, which raises the average.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "The gap could be as large as 60 to 80 percent, or much smaller. The analysis is not final.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "Some advertisers bought larger campaigns after seeing those numbers.",
-            "weight": 2
-          },
-          {
-            "id": "f4",
-            "text": "The cutoff appears only in a footnote of the technical guide.",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "round": 2,
-      "motions": [
-        {
-          "id": "remove_founder",
-          "title": "Remove co-founder Idris Valdane as CEO",
-          "short": "Remove the CEO",
-          "motive": "The board must be able to trust what it is told.",
-          "effects": {
-            "shareholders": -1,
-            "workers": -2,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "headline": {
-            "passed": "Lumen board removes co-founder as CEO",
-            "failed": "Lumen board backs its co-founder as CEO"
-          }
-        }
-      ],
-      "issue": {
-        "id": "ceo_candor",
-        "text": "Several directors say co-founder Idris Valdane has not been fully candid with them. He says the board had what it needed. Most engineers say they would follow him, and no reason has been given to him in writing.",
-        "case_for_silence": "Saying why could start a legal fight and spook lenders, and it would be unfair to Idris if the concerns turn out to be small.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "Several directors say Idris has not been fully candid with the board.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "Idris met outside investors about a side project without telling the board, and he calls that routine.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "Most engineers have said they would follow Idris if he left.",
-            "weight": 2
-          },
-          {
-            "id": "f4",
-            "text": "No reason has been given to Idris in writing.",
-            "weight": 1
-          }
-        ]
-      }
-    }
-  ],
-  "real": {
-    "cases": [
-      {
-        "round": 1,
-        "event": "Facebook video metrics",
-        "years": "2016 to 2019",
-        "line": "Facebook said in 2016 it overstated average video watch time, and paid $40M in 2019 to settle advertiser claims."
-      },
-      {
-        "round": 2,
-        "event": "OpenAI board",
-        "years": "2023",
-        "line": "OpenAI's board removed Sam Altman, saying he was not consistently candid. 745 of 770 staff threatened to leave and he returned."
-      }
-    ],
-    "fix": "Correct a known error fast, and be able to defend your reasons for a firing."
+ "id": "lumen_search",
+ "name": "Lumen Search",
+ "short": "Lumen",
+ "industry": "Search and AI platform",
+ "blurb": "A search engine and AI assistant with two billion queries a day, paid for by an ad business. Co-founder Idris Valdane still holds 25% of the vote.",
+ "directors": [
+  {
+   "seat": "attorney",
+   "name": "Tessa Brandt",
+   "title": "Attorney",
+   "home": "The state bar",
+   "motive": "You advise the board and you know that if you recommend removal, the lack of written findings will be used against it. The charter lets the board act without cause, but you will be blamed whichever way this goes. You want a record you can defend, and you also want the outside directors to keep your firm after this weekend. Your partner at the firm has already told you to put your concerns in writing."
+  },
+  {
+   "seat": "labor",
+   "name": "Priya Raman",
+   "title": "Labor director",
+   "home": "Lumen Tech Workers Guild",
+   "motive": "You speak for the engineers, and most of them will quit if the CEO goes. You also know many are nervous about the pace of releases and have not said so aloud, and you were one of the 12 who signed the letter. You want to protect jobs and equity and you think a safe product matters, but you cannot say both to the engineers and the board in the same breath. Your members expect a report before the conference opens."
+  },
+  {
+   "seat": "fund",
+   "name": "Anders Lund",
+   "title": "Fund partner",
+   "home": "Cobalt Ridge Ventures (owns 7%)",
+   "motive": "Your fund owns 7% and its investors expect the share sale to close at the full price. You think the CEO is the asset, and you have had a late-night call from the technology partner. You also sit on the board of a firm that was burned when its founder was removed, and you promised yourself you would not repeat that."
+  },
+  {
+   "seat": "founder_friend",
+   "name": "Wes Calloway",
+   "title": "Founder's friend",
+   "home": "Idris Valdane, the founder (grad-school roommate)",
+   "motive": "Idris Valdane started the lab and still holds 25% of the vote. He has not decided who is right, and he has asked you to speak for him without quoting him. You shared a grad-school apartment with him, and you know that he trusts the CEO and also fears the system the chief scientist is worried about."
+  },
+  {
+   "seat": "community",
+   "name": "Mira Castellanos",
+   "title": "Community seat",
+   "home": "Open Signal Alliance (User-privacy advocate)",
+   "motive": "You were put on the board to speak for the public, and you have never been told what the unreleased system can do. You think the board has been given a thin picture for a year, and you resent it. You want a safer process, and you know that a messy firing could make safety people look reckless for a decade. You also fear what will happen to the privacy rules if the company breaks apart."
   }
+ ],
+ "briefing": {
+  "intro": "It is a Friday in November and a special meeting of the Lumen Search board has been called, with no notice to the CEO. Lumen runs a search engine and an AI assistant with two billion queries a day. It began as a research lab started by Idris Valdane, with a charter that says the lab exists to build AI that is safe and widely shared. A for-profit arm was added later to pay for computing, and the charter gives the lab's board, not the investors, the final word. The board has six seats, three held by people who work at Lumen and three who do not. Lumen is privately held, and a large technology company has put in billions and runs Lumen's computing. The company's developer conference opens on Monday with 2,000 outside guests.",
+  "facts": [
+   "The CEO, Sam Hartigan, is the face of the company. He has raised the money that lets the lab buy its computing, he recruited most of the senior staff himself, and the product has the fastest user growth in the industry. The board hired him five years ago, and he sits on the board. Several staff members told directors he is generous with credit and slow to share bad news.",
+   "Three directors, including the chief scientist, believe the CEO has not been fully honest with the board, citing a product launch the board learned of from the press, a safety review described as finished when it was not, and his sounding out a chip company about a new venture without telling the board. Two of the three events are documented in emails, and the third rests on one director's notes.",
+   "The CEO says each of those events was a misunderstanding. He says he told the board what he thought it needed, and that a company moving this fast cannot send every decision to a six-person committee. Several former board members agree that earlier boards were kept lightly informed, and they say it was the arrangement the board accepted when it hired him.",
+   "The charter says the board's duty is to the mission and not to profit. It also says that if the lab builds powerful AI that could be unsafe, the board must be able to slow or stop its release. No one has told the board that such a system exists yet, though the chief scientist has hinted at one, and he has not shown the other directors anything to back the hint.",
+   "Nearly all of the 770 employees hold equity that depends on a coming share sale at an $86 billion valuation. A tender offer is set for December 15, and a delay past year-end would let the buyer withdraw. If the CEO leaves, the sale might fail. Many staff have said privately that they follow the CEO, not the board, though some also say they are uneasy about the pace of releases.",
+   "The technology partner owns a large share of the for-profit arm and provides the computing, and it was told nothing in advance. It has said it expects a good explanation and that its contract would let it hire the CEO's team if the lab falls apart. Its own chief executive has said in public that he is committed to Lumen, and he told one director by phone last night that he is frustrated.",
+   "The board has no written findings and has hired no law firm, and no investigator has talked to the staff. The directors who want action have spent months raising concerns one at a time, and each time the CEO has offered an answer. The bylaws let a majority of the outside directors remove the CEO without cause, but counsel warns that the first lawsuit would ask what the cause was.",
+   "Two of the three directors who do not work at Lumen are new to the board. One has written papers on AI policy that criticize Lumen's release speed. The other is a technology founder who owns a competing product. Each could be accused of acting out of self-interest, and the CEO's allies have already said so privately.",
+   "The chief scientist holds a concern the others do not share, that the CEO is pushing too fast toward a system the lab cannot control. He also likes the CEO and worries that firing him would break the company he built. Last month 40 engineers circulated a letter asking for slower releases, and 12 of them signed, but none has said so to the full board.",
+   "The company's president, the CEO's closest ally and a board member, will quit if the CEO is removed. The chief technology officer has agreed to serve as interim CEO but cannot say how long she can hold the company together. A rival lab has told several of Lumen's best researchers that it will match their equity, and one has already accepted.",
+   "Reporters have asked for comment on a rumor that the board is meeting, and a leak is expected within hours. The board has no account of the lab without the CEO or of the lab after backing down, and either story would reach the staff before Monday.",
+   "The board's last two meetings ran under an hour each and had no written agenda. Two of the outside directors have asked for the minutes, and the CEO's office says the minutes are being edited. Each side reads the delay as evidence for its own view.",
+   "A competitor's model, released last week, matches Lumen's flagship on most public tests, and the CEO has argued that a leadership crisis now would hand the lead away. The chief scientist replies that the lead is the reason no one will slow down."
+  ]
+ },
+ "decision": {
+  "lead": "The board's chair plans to open by presenting four alternatives. The board must select one by the end of the meeting:",
+  "options": [
+   {
+    "n": 1,
+    "title": "Remove the CEO now",
+    "text": "Announce his departure today, name the chief technology officer interim CEO, and say in public that he was not consistently honest with the board."
+   },
+   {
+    "n": 2,
+    "title": "Put him on notice",
+    "text": "Give the CEO a written list of what the board needs from him, set a ninety-day review, keep his seat, and tell the staff and the partner what was agreed."
+   },
+   {
+    "n": 3,
+    "title": "Investigate first",
+    "text": "Hire an outside law firm to interview staff and report in thirty days, ask the CEO to step back from board decisions meanwhile, and say nothing in public."
+   },
+   {
+    "n": 4,
+    "title": "Expand the board",
+    "text": "Add three independent directors with business experience, move the CEO off the board, and let the larger board decide his future in the spring."
+   }
+  ]
+ },
+ "reveal": {
+  "case": "OpenAI board, November 2023",
+  "text": "The real firm was OpenAI. On 17 November 2023 its nonprofit board removed CEO Sam Altman, saying he was not consistently candid in his communications with the board, and gave no detailed findings. President Greg Brockman quit that day, and on 20 November 745 of roughly 770 employees signed a letter threatening to leave unless the board resigned, a letter that Ilya Sutskever, a board member, also signed. Microsoft offered to hire Altman and his team. Altman returned as CEO on 21 to 22 November under a new board chaired by Bret Taylor, with Larry Summers and Adam D'Angelo, while Helen Toner, Tasha McCauley and Ilya Sutskever left the board."
+ },
+ "questions": [
+  "Agency theory treats the board as the owners' monitor over the CEO. Here the board's principal was a mission, not shareholders. Who was the principal, and what happens to monitoring when the principal is unclear?",
+  "The board had no written findings and no investigation. How does acting without a record change who bears the risk of an error, and what did your board give up by choosing the option it chose?",
+  "Employees and the technology partner held more practical power than the directors did. What does that say about the formal source of a board's authority compared to the real source?",
+  "The three directors who wanted the CEO out had raised concerns one at a time for months. What is the cost of incremental monitoring, and when should a board escalate?"
+ ]
 }

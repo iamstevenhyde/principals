@@ -10,7 +10,7 @@
 </style></head><body><div class="proj" id="app"><p class="mute">Loading.</p></div>
 <script type="module">
 import { openStore, params } from './pages/store.js';
-import { esc, fmtClock, frontPage, revealScreen } from './pages/render.js';
+import { esc, fmtClock, boardTiles, revealScreen } from './pages/render.js';
 const app = document.getElementById('app');
 const code = (params().get('g') || '').toUpperCase();
 const store = await openStore();
@@ -31,12 +31,7 @@ function render() {
   }
   qrDone = false;
   if (P.phase === 'reveal') { app.innerHTML = revealScreen(P.reveal); return; }
-  if (P.phase === 'shock') {
-    app.innerHTML = `<section class="paper shockpage"><header class="mast"><span class="edn">Round ${P.round} of ${P.schedule.length}</span><h1>The Principal Times</h1><span class="clock" id="clk">${fmtClock(P.clockLeft)}</span></header>
-      <div class="bigshock"><h2>${esc(P.shock ? P.shock.title : '')}</h2><p>${esc(P.shock ? P.shock.text : '')}</p></div></section>`;
-    return;
-  }
-  app.innerHTML = frontPage(P);
+  app.innerHTML = boardTiles(P);
   const el = document.getElementById('clk'); if (el) el.textContent = fmtClock(P.clockLeft);
 }
 </script></body></html>

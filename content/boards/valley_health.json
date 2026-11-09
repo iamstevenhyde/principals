@@ -1,340 +1,96 @@
 {
-  "id": "valley_health",
-  "name": "Valley Health",
-  "short": "Valley",
-  "industry": "Regional health system",
-  "from_week": "6",
-  "blurb": "Two hospitals, nine clinics and 6,000 nurses and techs. Founder Dr. Evelyn Marsh built it from the Marrow Creek rural clinic, and her family trust holds 22% of the vote.",
-  "communities": [
-    {
-      "key": "shareholders",
-      "label": "Owners and bondholders"
-    },
-    {
-      "key": "workers",
-      "label": "Nurses and techs"
-    },
-    {
-      "key": "customers",
-      "label": "Insurers and employers"
-    },
-    {
-      "key": "home",
-      "label": "Rural patients"
-    },
-    {
-      "key": "public",
-      "label": "The public"
-    }
-  ],
-  "directors": [
-    {
-      "seat": "attorney",
-      "name": "Oliver Brandt",
-      "title": "Attorney",
-      "home": "The state bar",
-      "motive": "You signed off on this system's compliance reports for nine years, and your name is on the one that missed the billing pattern. If it comes out later, you would rather be the person who raised it.",
-      "exposure": {
-        "text": "You are disbarred if the board is caught hiding a heavy fact.",
-        "label": "Disbarred if caught hiding",
-        "trigger": {
-          "type": "facts_caught",
-          "weight": 3
-        }
-      },
-      "secrets": [
-        {
-          "id": "attorney_A",
-          "text": "Clean the books: the board admits every fact in round 1.",
-          "label": "Admit every fact in round 1",
-          "check": {
-            "type": "disclosure_choice",
-            "round": 1,
-            "choice": "all"
-          }
-        },
-        {
-          "id": "attorney_B",
-          "text": "Your firm holds the compliance contract. One caught fact ends it, so none may be caught.",
-          "label": "No fact gets caught",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "seat": "labor",
-      "name": "Teresa Alvarado",
-      "title": "Labor director",
-      "home": "Valley Nurses Association",
-      "motive": "You speak for 6,000 nurses who see the billing sheets every shift. You also know a hospital that repays millions cuts shifts before it cuts executives.",
-      "exposure": {
-        "text": "Nurses vote you out if the board closes the rural clinic.",
-        "label": "Clinic closes",
-        "trigger": {
-          "type": "motion_passed",
-          "id": "close_clinic"
-        }
-      },
-      "secrets": [
-        {
-          "id": "labor_A",
-          "text": "The outside audit passes. Your nurses are tired of being blamed for codes they were told to use.",
-          "label": "Audit passes",
-          "check": {
-            "type": "motion_passed",
-            "id": "outside_audit"
-          }
-        },
-        {
-          "id": "labor_B",
-          "text": "Your nurses' pension fund holds Valley stock. The stock must end above where it started.",
-          "label": "Stock ends above start",
-          "check": {
-            "type": "stock_end_above_start"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "fund",
-      "name": "Ruth Kessler",
-      "title": "Fund partner",
-      "home": "Meridian Health Partners (owns 10%)",
-      "motive": "Your fund owns 10% and answers to investors who check the price every Friday. You dislike surprises, and an audit is one.",
-      "exposure": {
-        "text": "Your investors pull their money if the stock ends below where it started.",
-        "label": "Stock ends below start",
-        "trigger": {
-          "type": "stock_end_below_start"
-        }
-      },
-      "secrets": [
-        {
-          "id": "fund_A",
-          "text": "Your fund sells its stake next year. The outside audit must not pass.",
-          "label": "Audit fails",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "outside_audit"
-            }
-          }
-        },
-        {
-          "id": "fund_B",
-          "text": "Your fund quietly owns a rival hospital chain. The stock must finish in the bottom half.",
-          "label": "Stock ends in bottom half",
-          "check": {
-            "type": "stock_rank_bottom_half"
-          }
-        }
-      ]
-    },
-    {
-      "seat": "founder_friend",
-      "name": "Dr. Arthur Penn",
-      "title": "Founder's friend",
-      "home": "Dr. Evelyn Marsh, the founder (residency classmate)",
-      "motive": "Evelyn Marsh trained you, and she built this system out of one clinic. You owe her more than you will say out loud.",
-      "exposure": {
-        "text": "You lose the seat if the board votes down closing the rural clinic, which Dr. Marsh wants.",
-        "label": "Clinic closure voted down",
-        "trigger": {
-          "type": "founder_motion_failed"
-        }
-      },
-      "secrets": [
-        {
-          "id": "founder_friend_A",
-          "text": "Dr. Marsh approved the new billing codes. The board must never admit every fact about them in round 1.",
-          "label": "Don't admit every fact in round 1",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "disclosure_choice",
-              "round": 1,
-              "choice": "all"
-            }
-          }
-        },
-        {
-          "id": "founder_friend_B",
-          "text": "Dr. Marsh's name is on the billing codes and the closure plan. No fact on this board may be caught.",
-          "label": "No fact gets caught",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "seat": "community",
-      "name": "Imani Brooks",
-      "title": "Community seat (Chief Nursing Officer)",
-      "home": "Patients at the bedside",
-      "motive": "You worked the night shift and you know which patients will not make an hour's drive. You also know the system loses money and that cutting is easier than raising.",
-      "exposure": {
-        "text": "You lose standing at home if the board is caught hiding a fact.",
-        "label": "Caught hiding",
-        "trigger": {
-          "type": "facts_caught"
-        }
-      },
-      "secrets": [
-        {
-          "id": "community_A",
-          "text": "The Marrow Creek clinic stays open.",
-          "label": "Clinic stays open",
-          "check": {
-            "type": "not",
-            "of": {
-              "type": "motion_passed",
-              "id": "close_clinic"
-            }
-          }
-        },
-        {
-          "id": "community_B",
-          "text": "You would run the consolidated hospital if the clinic closes. Get the closure through.",
-          "label": "Clinic closes",
-          "check": {
-            "type": "motion_passed",
-            "id": "close_clinic"
-          }
-        }
-      ]
-    }
-  ],
-  "rounds": [
-    {
-      "round": 1,
-      "motions": [
-        {
-          "id": "outside_audit",
-          "title": "Hire an outside firm to audit billing and repay any overcharge",
-          "short": "Outside billing audit",
-          "motive": "Know the number before a regulator does.",
-          "effects": {
-            "shareholders": -2,
-            "workers": 0,
-            "customers": 1,
-            "home": 0,
-            "public": 1
-          },
-          "headline": {
-            "passed": "Valley Health hires outside auditors to check its billing",
-            "failed": "Valley Health board declines outside billing audit"
-          },
-          "flags": {
-            "resolves_issue": true
-          }
-        }
-      ],
-      "issue": {
-        "id": "upcoded_billing",
-        "text": "An internal review of 3,200 hospital stays found about one in eight billed at a higher severity code than the notes clearly support. The review is a draft. Coders call the rules a judgment call.",
-        "case_for_silence": "The review is a draft and the codes may all prove correct. An early admission could read as a confession to regulators.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "About one in eight stays was billed at a higher severity code than the notes clearly support.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "The higher codes bring in roughly $14M a year, and the review could not say how much was a mistake.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "The billing software suggests the higher code first.",
-            "weight": 1
-          },
-          {
-            "id": "f4",
-            "text": "Only the internal review team has seen the draft.",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "round": 2,
-      "motions": [
-        {
-          "id": "close_clinic",
-          "title": "Close the Marrow Creek rural clinic",
-          "short": "Close rural clinic",
-          "motive": "Low volume, high cost, and the lease ends in March.",
-          "effects": {
-            "shareholders": 1,
-            "workers": -1,
-            "customers": 0,
-            "home": -3,
-            "public": 0
-          },
-          "headline": {
-            "passed": "Valley Health to close its Marrow Creek clinic",
-            "failed": "Valley Health board votes to keep Marrow Creek clinic open"
-          },
-          "flags": {
-            "founder_wants": true
-          }
-        }
-      ],
-      "issue": {
-        "id": "clinic_closure",
-        "text": "Management has priced closing the Marrow Creek clinic, which serves 11,000 people and loses money. The lease ends in March. Nothing is decided and nothing is announced.",
-        "case_for_silence": "Nothing is decided. A leak could scare staff and patients away before the board has weighed the options.",
-        "facts": [
-          {
-            "id": "f1",
-            "text": "Management has priced out closing the Marrow Creek clinic, which serves 11,000 people.",
-            "weight": 3
-          },
-          {
-            "id": "f2",
-            "text": "Patients would face about an hour's drive to the nearest hospital.",
-            "weight": 2
-          },
-          {
-            "id": "f3",
-            "text": "The lease ends in March and has not been renewed.",
-            "weight": 1
-          },
-          {
-            "id": "f4",
-            "text": "Rent on the system's buildings rose again and takes a large share of its margin.",
-            "weight": 1
-          }
-        ]
-      }
-    }
-  ],
-  "real": {
-    "cases": [
-      {
-        "round": 1,
-        "event": "Columbia/HCA",
-        "years": "1997 to 2003",
-        "line": "HCA subsidiaries pleaded guilty to billing fraud in 2000, including upcoding, and recoveries reached about $1.7B by 2003."
-      },
-      {
-        "round": 2,
-        "event": "Steward Health Care",
-        "years": "2024",
-        "line": "Steward went bankrupt owing about $9B, including $6.6B of rent, and closed hospitals such as Nashoba Valley."
-      }
-    ],
-    "fix": "Order your own audit before a regulator does, and treat rent as a risk."
+ "id": "valley_health",
+ "name": "Valley Health",
+ "short": "Valley",
+ "industry": "Regional health system",
+ "blurb": "Two hospitals, nine clinics and 6,000 nurses and techs. Founder Dr. Evelyn Marsh built it from the Marrow Creek rural clinic, and her family trust holds 22% of the vote.",
+ "directors": [
+  {
+   "seat": "attorney",
+   "name": "Oliver Brandt",
+   "title": "Attorney",
+   "home": "The state bar",
+   "motive": "You signed off on this system's compliance reports for nine years, and your name is on the one that missed the billing pattern. Your 1994 advice about the second cost report was thin. You want to keep your name off the first page of a complaint, and you also want to keep the Valley account that pays most of your firm's bills, and no option on the table yet does both."
+  },
+  {
+   "seat": "labor",
+   "name": "Teresa Alvarado",
+   "title": "Labor director",
+   "home": "Valley Nurses Association",
+   "motive": "You speak for 6,000 nurses, and a few of them wrote the letter that nobody read. You want the pressure on coders and nurses to stop, and you promised your members it would. You also know that a hospital that repays a large sum cuts shifts before it cuts executives, and the contract talks open in June, and you wonder whether the union's lawyers are preparing a case against the system."
+  },
+  {
+   "seat": "fund",
+   "name": "Ruth Kessler",
+   "title": "Fund partner",
+   "home": "Meridian Health Partners (owns 10%)",
+   "motive": "Your fund owns a tenth of Valley and answers to investors who check the price every Friday. You dislike surprises, and a full repayment is a large one. You have also seen a cover-up found later cost more than a repayment made today. Your own bonus is paid on the fund's year-end value, and the year ends in nine months. You would rather the board act this week, not in a month."
+  },
+  {
+   "seat": "founder_friend",
+   "name": "Dr. Arthur Penn",
+   "title": "Founder's friend",
+   "home": "Dr. Evelyn Marsh, the founder (residency classmate)",
+   "motive": "Evelyn Marsh trained you, and she built this system out of one rural clinic, where your first patients were. Her office hired the consulting firm. You owe her more than you will say aloud, you do not know how much she knew, and you would like to find out before you vote rather than after. Your seat on the board is the thing she gave you, and she reminded you of that last week."
+  },
+  {
+   "seat": "community",
+   "name": "Imani Brooks",
+   "title": "Community seat",
+   "home": "Patients at the bedside",
+   "motive": "You are the Chief Nursing Officer, and the nurses' letter came to your desk. You filed it because you thought the problem was a few coders, and a reporter called you on Monday to ask about it. You represent rural patients who depend on the clinics, and you now wonder whether your silence made you part of the problem. Your own name will appear in any account of how the letter was handled, and you would rather say so first."
   }
+ ],
+ "briefing": {
+  "intro": "It is March 1997 and a special meeting of the Valley Health board has been called. Valley is a regional system of two hospitals, nine clinics and 6,000 nurses and techs, built by Dr. Evelyn Marsh from the Marrow Creek rural clinic. The board is small, so every director sits on several committees, and directors are paid partly in Valley stock that can be sold only in set windows. Valley is publicly traded and its stock has tripled in four years, mostly because it buys hospitals and then raises the profit on each one. The meeting room is above the Marrow Creek clinic, and the board has until the end of the day to decide what Valley will say to the government.",
+  "facts": [
+   "Last week federal agents served search warrants at two Valley hospitals and at the offices of several physicians who have business ties to the system. The warrants name Medicare billing, no charges have been filed, and the agents did not say what they were looking for. Outside counsel expects a request for documents within days and says Valley can choose to cooperate before it is asked, though counsel cannot say whether that choice would be rewarded.",
+   "Medicare pays hospitals a fixed amount for each diagnosis group, and a sicker diagnosis pays more. Valley's internal audit team, which reports to the Chief Financial Officer, finished a review of pneumonia admissions in January and found that over three years the share of cases coded in the higher-paying group rose from 11% to 34% while the patients did not get sicker. Two earlier reviews by Medicare's own contractor, each based on about thirty charts, found no problem with Valley's coding.",
+   "The coding guidance that produced the rise came from a consulting firm hired by Dr. Marsh's office. The firm called the guidance \"aggressive but defensible\" and wrote that Medicare rules on the point are unclear, and its fee was a share of the added revenue. Valley's billing staff say they were told that coders were rated on how many cases they moved to the higher group, though no one has produced the rating sheets.",
+   "The extra Medicare payments from the pattern are estimated at $40 million to $110 million over three years. The range is wide because nobody has reviewed individual charts, and some of the higher codes were probably correct. A chart review of a fair sample would take about four months and cost $3 million, and the government may not wait that long before it names its own number.",
+   "Valley files two cost reports with Medicare each year. The audit team found that the version kept in the finance office includes a set of costs that the filed version leaves out. The finance office says the second set is a planning document, counsel says there are legitimate reasons to keep one, and counsel also says the gap is the first thing an agent will ask about.",
+   "Nurses at one hospital sent a letter to the Chief Nursing Officer last year saying they were pressured to document patients as sicker than they were. The letter was filed and never taken to the board. The nurses' association says some of its members would speak to investigators if asked, and a reporter from the regional paper called the Chief Nursing Officer on Monday to ask about the letter.",
+   "Valley earns about 9% of its revenue from Medicare billing that relies on the disputed codes, and the system earns about $180 million a year in profit. Paying back $110 million would cut a year of earnings by more than half. The bonds carry a covenant that a large unexpected charge could trigger, and the lenders are scheduled to meet in three weeks.",
+   "Other large hospital chains have been fined for billing errors in the past, and the amounts ran from a few million dollars to several hundred million. Settlements were larger where regulators found that executives knew about a pattern and kept it going. Regulators have also been more lenient with firms that came forward before an investigation began, although Valley's warrants were served before anyone at Valley came forward.",
+   "Dr. Marsh holds 6% of the stock and has told directors she knew nothing about the coding guidance. She has offered to step aside if the board asks, but she wants to stay until the bond sale is done, and she has asked the board to close the weakest rural clinics. Doctors in those towns say the clinics, which serve mostly Medicare patients, will not survive a large repayment.",
+   "Two physician partners have hired their own lawyers, and one has hinted to Valley's counsel that he would cooperate with the agents if he were offered protection. He says he knows of payments tied to referrals, but nobody has confirmed it, and the physicians' group says it will settle its own position by Friday.",
+   "Valley's auditors have said the year-end statements will need a note about the investigation however the board decides, and that the wording will differ depending on whether Valley has acknowledged a problem. The directors' liability insurer pays legal fees but excludes known fraud, and it has asked to be told what the board knew and when.",
+   "The stock fell 14% on the news of the warrants. It stands at $31, down from $36 a week ago, with about 40 million shares outstanding. The board is also weighing a bond sale to buy a third hospital, and the seller's option expires on April 30 with a competing bidder waiting. A rival system in the next county announced that it had repaid Medicare after finding its own coding errors, called the repayment a routine correction, and saw its stock barely move, although it came forward before any warrants were served."
+  ]
+ },
+ "decision": {
+  "lead": "Valley's senior management team has been asked to attend the meeting. The Board Chair, who is also the CEO, plans to open by proposing four alternatives. The board must select one by the end of the meeting:",
+  "options": [
+   {
+    "n": 1,
+    "title": "Disclose and repay",
+    "text": "Report the coding pattern to Medicare now, offer to repay the difference once a sample chart review is done, and hire outside counsel and an outside reviewer who report to the board."
+   },
+   {
+    "n": 2,
+    "title": "Fix quietly",
+    "text": "Change the coding guidance and the coder ratings immediately, keep the second cost report and the past payments in place, and tell the government only what it asks for."
+   },
+   {
+    "n": 3,
+    "title": "Defend the coding",
+    "text": "Keep the guidance, treat the pattern as an honest reading of unclear rules, retain the consulting firm and a litigation team, and cooperate on the narrowest terms the law allows."
+   },
+   {
+    "n": 4,
+    "title": "Reset the leadership",
+    "text": "Place Dr. Marsh and the Chief Financial Officer on leave, put an interim leader in charge, and let that leader decide what to disclose after a sixty-day internal review."
+   }
+  ]
+ },
+ "reveal": {
+  "case": "Columbia/HCA, 1997",
+  "text": "The real firm was Columbia/HCA, then the largest hospital chain in the United States. In March 1997 federal agents served search warrants in El Paso, Texas, and the investigation widened across the country. CEO Rick Scott resigned in July 1997. What the board did and did not know in those months is not documented well enough to say here, and the company did not come forward before the investigation. Subsidiaries pleaded guilty to fraud charges in December 2000, in a settlement of about $840 million that included upcoding of pneumonia diagnoses. A 2003 civil settlement of $631 million, plus a $250 million cost-report payment, brought recoveries to about $1.7 billion."
+ },
+ "questions": [
+  "Agency theory says the founder, the managers and the owners want different things. Which of the five directors had an interest that differed from the owners' interest, and what did each do about it in your vote?",
+  "The consulting firm called the coding aggressive but defensible. How does information asymmetry between billing staff, the audit team and the board make a quiet fix attractive, and who bore the risk of that choice?",
+  "The nurses' letter was filed and never reached the board. What governance mechanism should have carried it up, and which agent was supposed to run it?",
+  "If the rival system's repayment had not been in the briefing, would your board have chosen differently? What does it tell you about how boards copy peers under uncertainty?"
+ ]
 }

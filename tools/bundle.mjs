@@ -12,9 +12,7 @@ export function loadContent() {
   const read = p => JSON.parse(readFileSync(p, 'utf8'));
   return {
     boards: files.map(f => read(join(bdir, f))),
-    street: existsSync(join(dir, 'street.json')) ? read(join(dir, 'street.json')) : { roles: [] },
-    rounds: existsSync(join(dir, 'rounds.json')) ? read(join(dir, 'rounds.json')) : [],
-    standing: existsSync(join(dir, 'standing_motions.json')) ? read(join(dir, 'standing_motions.json')) : null,
+    game: existsSync(join(dir, 'game.json')) ? read(join(dir, 'game.json')) : null,
   };
 }
 if (process.argv[1] && process.argv[1].endsWith('bundle.mjs')) {

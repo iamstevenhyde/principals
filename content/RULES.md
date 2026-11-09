@@ -1,60 +1,32 @@
 # Content rules vocabulary
 
-Principals "Option B": two rounds (The Warning, The Hard Choice), five boards, exactly ONE headline motion per board per round (a yes/no vote), one private conflicted card per director with a two-sentence motive, a fact vote plus one public statement, and one outside role (the Auditor). The game plays the press: the projector shows an auto-written newspaper front page, and a background press roll can find hidden facts. There are no budgets, no standing motions, no Reporter, no resigning, no executive session, no leaks, no suits, no insider sales, no Activist or short seller, no board visits and no seat leagues.
+Principals, one-round design (Nov 2026): one decision round, five boards, no scoring. Each board has a ~950-word briefing (a setting paragraph plus 12 to 14 fact bullets), four numbered options, five role cards with personal motives, a real-case reveal and four debrief questions. The flow follows the Jensen Pharma exercise: read the briefing and your private role card, discuss, the board votes for one option, then the debrief reveals the real case. There is no Auditor, no outside role, no press, no newspaper, no stock price, no secret goals, no second round. The approved source for all board text is ONE_ROUND_PACKETS_20261109.html (two repeats fixed afterwards, see below).
 
-Every `trigger` (director exposure) and `check` (director secret, Street secret) is a small JSON object with a `type`. All are evaluated once, at the reveal, against the final game log for that director's board. "Board" means the director's board at the end of the game. Rules are pure true/false. A trigger that is true means the exposure FIRED. A check that is true means the secret objective was MET. A motion that was voted down or never voted on is "not passed", so `not` of `motion_passed` covers both.
+## Board file (content/boards/*.json)
 
-## Rule types (director triggers and checks)
+- `id`, `name`, `short` (one word, used on the debrief), `industry`, `blurb`.
+- `directors`: five entries, one per seat in this order: `attorney`, `labor`, `fund`, `founder_friend`, `community`. Each has `seat`, `name`, `title`, `home` (who they speak for) and `motive` (the private role card, 55 to 80 words, "you" voice, a personal stake that pulls against the board's interest).
+- `briefing`: `{intro, facts[]}`. `intro` is the setting. `facts` are the bullets. Facts may pull in opposite directions and many are unconfirmed on purpose. All figures inside are fictional for the disguised firm.
+- `decision`: `{lead, options[]}`. `options` are `{n, title, text}`, numbered 1 to 4. None is clearly right.
+- `reveal`: `{case, text}`. The real case. Shown only in the debrief.
+- `questions`: four debrief questions, shown only in the debrief.
 
-- `motion_passed` `{id}`: a motion with this id passed in either round.
-- `motion_passed_any` `{ids:[...]}`: at least one listed motion passed.
-- `tag_passed` `{tag, round?}`: at least one passed motion carries `tag` in `flags.tags` (optionally only in `round`).
-- `staff_cut_pct_gt` `{value}`: the SUM of `flags.staff_cut_pct` over all passed motions is greater than `value`.
-- `payout_m_gte` `{value}`: in some single round, the SUM of `flags.payout_m` over motions passed that round is at least `value` ($M).
-- `disclosure_choice` `{round, choice}`: the board's locked facts in `round` were `choice`: `all` (every fact admitted), `some`, or `none`. "Board failed to decide" counts as the previous round's level (round 1: `none`).
-- `facts_caught` `{min?, weight?, round?}`: the Auditor or the press caught omitted facts. Default is at least one caught fact. `min` asks for that many caught facts. `weight` asks for caught facts whose weights total at least that. `round` optional.
-- `stock_end_below_start`, `stock_end_above_start`: final stock vs starting stock.
-- `stock_rank_bottom_half`: final stock rank is in the bottom half of the boards in play (rank > ceil(boards/2)).
-- `founder_motion_failed`: a motion with `flags.founder_wants` was voted on and failed.
-- `all` `{of:[...]}`, `any` `{of:[...]}`, `not` `{of:rule}`: combinators.
+The sentence "The board is small, so every director sits on several committees" appears once, in Valley Health. It was removed from the other boards. Thread & Co. was trimmed from 15 to 12 fact bullets (dropped the actress, merged the senior-buyers bullet and the insurer bullet into neighbors; no figure was lost except the actress contract).
 
-## Street checks (street.json secrets only)
+## content/game.json
 
-- `street_never_caught_on` `{board:"consulted"}`: the member never landed a true hit on the board dealt to them as "consulted" (the Auditor's firm).
+`{title, text, board_text}`: the one line shown on the projector while the boards meet.
 
-## Board file fields (content/boards/*.json)
+## Phases
 
-- Field `short`: one-word board name for the front page and the debrief tables.
-- Field `real`: `{cases:[{round, event, years, line}], fix}`. The real governance event behind each round and one fix line. Shown only in the debrief. Sources and caveats are in content/REAL_CASES.md.
-- Each director: `motive` (two sentences, "you" voice, shown on the card), `exposure {text, label, trigger}`, and two `secrets {id, text, label, check}`. `label` is a six-word version used on the debrief screen. Points are fixed in config/scoring.js: goal +50, penalty -35, up to +15 for the board's rank with the director's home group.
-- Each motion: `title` (the full question), `short` (three words), `motive` (one-line pitch), `effects`, `flags`, and `headline {passed, failed}`, the front-page headline for each outcome. A motion that is never voted on prints "[Board] board stalls with no decision".
+1. Lobby. Students join on phones. The host assigns each to a board seat (or Assign automatically) and marks the Chair. Anyone unplaced when the host starts is dealt a seat. Five seats per board; with more than five students on a board, extras share a seat (a second player on the same role card). Fewer than five drops seats in the order in config/scoring.js.
+2. Play (default 15 minutes, host-settable). Each phone has three tabs: Briefing (one page at a time, or all at once), My card (private), Vote. Chat is a large labelled button on every screen: a board channel plus private messages inside the board. Everyone votes for one numbered option and can change it until the Chair locks. The projector shows each board's "n of m have voted" and the choice once locked.
+3. Reveal (debrief). The host presses Next screen (or arrow keys). Screen 1 lists each board's choice and vote count. Then each board gets two screens: "what happened" (the real case) and "discuss" (the four questions).
 
-## Motion flags
+## The vote
 
-- `effects`: integer -3..+3 per community key (`shareholders`, `workers`, `customers`, `home`, `public`). Applied the round the motion passes. Players see a fixed strip of five stakeholder icons with the same five words on every board (Owners, Workers, Customers, Community, Public) and up and down arrows, never the numbers. The board's own names for the five groups appear in a small line under the open motion.
-- `reveal_effects`: same shape as `effects`, applied only at the reveal and hidden until then.
-- `lag_payback`: community deltas applied one round after the motion passes.
-- `coin_flip`: `{chance, effects, when:"next_round"}` rolled once; effects apply only on success.
-- `if_found`: community deltas applied only if the Auditor or press catches a hidden fact.
-- `resolves_issue`: `true` removes the harm penalty of that round's company issue if it is later caught (the dishonesty penalty still applies); `"partial"` halves it.
-- `raises_detect`: added to the Auditor's detection probability for the company issue (current round and later).
-- `staff_cut_pct`: percent of frontline staff cut. Read by `staff_cut_pct_gt`.
-- `payout_m`: $M paid to owners. Read by `payout_m_gte`.
-- `tags`: free labels read by `tag_passed`.
-- `founder_wants`: the founder wants this passed. Read by `founder_motion_failed`.
+Plurality of ballots. A tie follows the Chair's ballot when it is among the tied options, otherwise the lowest option number. If the clock ends first, every unlocked board is locked the same way; a board with no ballots shows "No decision". Only the Chair can lock early. Ballots are visible as "voted / not yet" dots, never as who chose what, until the debrief.
 
-## Rounds and the vote
+## Not in this design
 
-A motion needs a Chair to call it and more yes than no ballots among the board's directors. Any director can vote; the Chair can close the vote early. Each round a board votes on its one motion and on the facts (below). The round length is set by the host in minutes (default 8, `timers.play` in config/scoring.js).
-
-## Company issues (content/boards/*.json, rounds[].issue)
-
-Each issue is `{id, text, case_for_silence, facts}`. `text` is a briefing of about 45 words that stays honestly uncertain (a draft review, a contested estimate), so hiding a fact feels defensible. `case_for_silence` is the one-sentence argument for keeping quiet, shown on the facts step. `facts` is 3 to 5 entries of `{id, text, weight}`. `weight` 1 to 3 is how bad the fact is if it comes out (the phone shows one to three bars with the label "how bad if it comes out"). Heavier facts are also easier to find: weight sets the Auditor's per-fact detection chance (`factDetect`) and the fact's share of the stock move (`factStock`). The phone shows the cost of admitting each fact ("tell -0.8" share price points) and the range of the price move from the facts. Each director switches on the facts the board should admit, a fact is admitted when more than half of the ballots switch it on (a tie follows the Chair's ballot), and the Chair locks the vote. The board's one shared statement text (400 characters) locks with it and is printed on the front page as the board's quote. Admitting every fact is level `all`, none is `none`, anything between is `some`. Omitted facts can be caught by an Auditor inspect (each omitted fact rolls on its own) or by the press (a small background roll per fact, `pressDetect`).
-
-## Waiting room and assignment
-
-Students join on their phones and wait. The host assigns each of them to a board seat (Attorney, Labor director, Fund partner, Founder's friend, Community seat) or to the outside as Auditor, by hand or with Assign automatically, and can mark the Chair. Anyone still unplaced when the host starts is dealt a seat. Phones show the placement as soon as the host makes it.
-
-## Projector
-
-Play: the front page of The Principal Times. Each board's story fills in as it decides: headline from its motion result, "told n of m" squares, the statement as the pull quote, share price with its change, and an Auditor or press catch below. Debrief (host presses Next screen, or arrow keys): Reactions, Side by side, Governance, Fixes (real cases), then one Ethics screen per board. Each screen stays under about 150 words.
+Facts vote, public statement, motions, effects, stock, Street roles, Auditor, press roll, front page, community ranking, secret goals, exposures, points. The engine no longer has a rules evaluator.
