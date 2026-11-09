@@ -3,25 +3,21 @@
 <title>Principals</title><link rel="icon" href="data:,"><link rel="stylesheet" href="pages/style.css">
 </head><body><div class="wrap phone" id="shell">
 <div class="play"><main id="main"><p class="mute">Loading.</p></main>
-<aside class="card chatbox sheet" id="chat"><div class="sheethd"><b>Chat</b><button id="chatx" aria-label="Close chat">__X__</button></div>
-<div class="tabs" id="tabs"></div><div class="msgs" id="msgs"></div>
-<div class="quick" id="quick"><button data-q="Agree">Agree</button><button data-q="Not sure yet">Not sure</button><button data-q="Let's vote">Let's vote</button></div>
-<div class="chatin"><input id="msg" maxlength="400" placeholder="Message" autocomplete="off"><button class="primary" id="send">Send</button></div></aside></div>
+</div>
 <nav class="bar" id="bar"></nav>
 <div id="note"></div></div>
 <script type="module">
 
 import { openStore, params, savedSeat } from './pages/store.js';
 import { esc, fmtClock, SEAT_ICON, ICON, COLORS } from './pages/render.js';
-document.getElementById('chatx').innerHTML = ICON.x;
 const code = (params().get('g') || '').toUpperCase();
 const keep = params().get('local') === '1' ? '&local=1' : '';
 const seat = savedSeat(code);
 if (!seat) location.replace('index.html?g=' + code + keep);
 const store = await openStore();
 const $ = id => document.getElementById(id);
-let V = null, P = null, got = 0, ch = 'board', lastMain = '', lastBar = '', sheet = false, seenTotal = 0;
-let tab = 'brief', page = 0, all = false;
+let V = null, P = null, got = 0, lastMain = '', lastBar = '';
+let tab = 'brief';
 const TABS = [['brief', 'Briefing'], ['card', 'My card'], ['vote', 'Vote']];
 const send = async a => { try { await store.submit(code, seat.token, a); setTimeout(load, 300); } catch (e) { flash(e.message); } };
 const flash = m => { $('note').innerHTML = `<div class="notice">${esc(m)}</div>`; setTimeout(() => $('note').innerHTML = '', 3500); };
@@ -42,7 +38,7 @@ function render() {
   const html = (P.phase === 'lobby' || V.me.kind === 'waiting') ? waiting() : director();
   if (html !== lastMain) { const y = scrollY; $('main').innerHTML = html; lastMain = html; scrollTo(0, y); wire(); }
   const el = $('clk'); if (el) el.textContent = fmtClock(P.clockLeft);
-  renderBar(); renderChat();
+  renderBar();
 }
 
 // ---------- waiting room ----------
@@ -61,13 +57,7 @@ function director() {
   }
   const chair = d.chair ? `<p class="small">${ICON.crown} <b>You are Chair.</b> You lock the board's choice.</p>` : `<p class="small mute">${ICON.crown} Chair: <b>${esc(d.chairName)}</b></p>`;
   if (tab === 'brief') {
-    const pages = [b.briefing.intro, ...b.briefing.facts], n = pages.length;
-    page = Math.max(0, Math.min(n - 1, page));
-    const label = i => i === 0 ? 'The setting' : 'Fact ' + i + ' of ' + (n - 1);
-    if (all) return head + chair + `<div class="card"><button data-all="0" class="wide">Read one at a time</button></div>` + pages.map((t, i) => `<div class="card"><p class="factn">${label(i)}</p><p class="fact">${esc(t)}</p></div>`).join('');
-    return head + chair + `<div class="card"><p class="factn">${label(page)}</p><p class="fact">${esc(pages[page])}</p></div>
-      <div class="pager"><button data-pg="-1" ${page === 0 ? 'disabled' : ''}>Back</button><span class="pg">${page + 1} / ${n}</span><button class="primary" data-pg="1" ${page === n - 1 ? 'disabled' : ''}>Next</button></div>
-      <p class="center"><button data-all="1">Show everything</button></p>`;
+    return head + `<div class="card briefcard"><p class="fact">${esc(b.briefing.intro)}</p>${b.briefing.facts.map(f => `<p class="fact">${esc(f)}</p>`).join('')}</div>`;
   }
   if (tab === 'card') return head + `<div class="card secret">${SEAT_ICON[d.seat]}<h2>${esc(d.card.name)}</h2><p class="mute">${esc(d.card.title)}, ${esc(d.card.home)}</p><p class="cardtext">${esc(d.card.motive)}</p><p class="mute small">${ICON.lock} Private. Tell the board what you choose to.</p></div>`;
   const voters = `<div class="voters">${b.directors.map(x => `<i class="${x.voted ? 'on' : ''}" title="${esc(x.name)}">${esc(x.name.slice(0, 1))}</i>`).join('')}</div>`;
@@ -80,49 +70,17 @@ function director() {
 // ---------- fixed bottom bar ----------
 function renderBar() {
   let h = '';
-  const msgs = V && V.chat ? V.chat.filter(m => m.from !== V.me.id).length : 0;
-  if (sheet) seenTotal = msgs;
-  const unread = Math.max(0, msgs - seenTotal);
-  const canChat = V && V.me.kind !== 'waiting' && P.phase !== 'lobby';
   if (V && V.director && P.phase === 'play') h += `<span class="tabbar">${TABS.map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</span>`;
-  if (canChat) h += `<button class="chatbtn big" id="chatbtn" aria-label="Chat">${ICON.chat}Chat${unread ? `<span class="badge">${unread}</span>` : ''}</button>`;
   if (h !== lastBar) {
     $('bar').innerHTML = h; lastBar = h;
     document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; lastMain = ''; lastBar = ''; render(); });
-    const cb = $('chatbtn'); if (cb) cb.onclick = () => { sheet = true; seenTotal = msgs; $('chat').classList.add('open'); lastBar = ''; renderBar(); const b = $('msgs'); b.scrollTop = b.scrollHeight; };
   }
   $('bar').style.display = h ? '' : 'none';
 }
-$('chatx').onclick = () => { sheet = false; $('chat').classList.remove('open'); };
 
 function wire() {
   const q = s => document.querySelectorAll(s);
-  q('[data-pg]').forEach(b => b.onclick = () => { page += Number(b.dataset.pg); lastMain = ''; render(); });
-  q('[data-all]').forEach(b => b.onclick = () => { all = b.dataset.all === '1'; lastMain = ''; render(); });
   q('[data-opt]').forEach(b => b.onclick = () => send({ type: 'ballot', choice: Number(b.dataset.opt) }));
   q('[data-lock]').forEach(b => b.onclick = () => send({ type: 'lock' }));
 }
-// ---------- chat ----------
-function channels() {
-  if (V && V.director) return [{ id: 'board', label: 'Board' }, ...V.board.directors.filter(x => x.id !== V.me.id).map(x => ({ id: 'dm:' + x.id, label: x.name }))];
-  return [];
-}
-const keyOf = c => (c.id === 'board' ? 'board:' + V.board.id : 'dm:' + [V.me.id, c.id.slice(3)].sort().join('|'));
-function renderChat() {
-  const cs = channels(), box = $('chat');
-  if (!cs.length) { box.style.display = 'none'; return; } box.style.display = '';
-  if (!cs.find(c => c.id === ch)) ch = cs[0].id;
-  const cur = cs.find(c => c.id === ch), k = keyOf(cur);
-  const dms = cs.filter(c => c.id.startsWith('dm:'));
-  $('tabs').innerHTML = `<button data-ch="${cs[0].id}" class="${ch === cs[0].id ? 'sel' : ''}">${esc(cs[0].label)}</button>` + (dms.length ? `<select id="dmsel" aria-label="Private message"><option value="">Private...</option>${dms.map(c => `<option value="${c.id}" ${c.id === ch ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select>` : '');
-  document.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => { ch = b.dataset.ch; renderChat(); });
-  const sel = $('dmsel'); if (sel) sel.onchange = () => { ch = sel.value || cs[0].id; renderChat(); };
-  const all = (V.chat || []).filter(m => m.ch === k), msgs = all;
-  const bx = $('msgs'), atBottom = bx.scrollHeight - bx.scrollTop - bx.clientHeight < 40;
-  const html = msgs.map(m => `<div class="msg ${m.from === V.me.id ? 'me' : ''}"><b>${esc(m.name)}</b>${esc(m.text)}</div>`).join('') || '<p class="small mute">No messages yet.</p>';
-  if (bx.dataset.h !== html) { bx.innerHTML = html; bx.dataset.h = html; if (atBottom) bx.scrollTop = bx.scrollHeight; }
-}
-$('send').onclick = () => { const t = $('msg').value.trim(); if (!t) return; $('msg').value = ''; send({ type: 'chat', ch, text: t }); };
-$('msg').onkeydown = e => { if (e.key === 'Enter') $('send').click(); };
-document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => send({ type: 'chat', ch, text: b.dataset.q }));
 </script></body></html>

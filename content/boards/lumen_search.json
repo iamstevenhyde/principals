@@ -10,57 +10,48 @@
    "name": "Tessa Brandt",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You advise the board and you know that if you recommend removal, the lack of written findings will be used against it. The charter lets the board act without cause, but you will be blamed whichever way this goes. You want a record you can defend, and you also want the outside directors to keep your firm after this weekend. Your partner at the firm has already told you to put your concerns in writing."
+   "motive": "You advise the board, and if you recommend removal, the lack of written findings will be used against it. You want a record you can defend, and you want the outside directors to keep your firm after this weekend."
   },
   {
    "seat": "labor",
    "name": "Priya Raman",
    "title": "Labor director",
    "home": "Lumen Tech Workers Guild",
-   "motive": "You speak for the engineers, and most of them will quit if the CEO goes. You also know many are nervous about the pace of releases and have not said so aloud, and you were one of the 12 who signed the letter. You want to protect jobs and equity and you think a safe product matters, but you cannot say both to the engineers and the board in the same breath. Your members expect a report before the conference opens."
+   "motive": "You speak for the engineers, most of whom will quit if the CEO goes, and you were one of the 12 who signed the letter asking for slower releases. You want to protect jobs and equity and believe safety matters, but you cannot say both in one breath."
   },
   {
    "seat": "fund",
    "name": "Anders Lund",
    "title": "Fund partner",
    "home": "Cobalt Ridge Ventures (owns 7%)",
-   "motive": "Your fund owns 7% and its investors expect the share sale to close at the full price. You think the CEO is the asset, and you have had a late-night call from the technology partner. You also sit on the board of a firm that was burned when its founder was removed, and you promised yourself you would not repeat that."
+   "motive": "Your fund owns 7% and its investors expect the share sale to close at full price. You think the CEO is the asset and took a late-night call from the technology partner. You also sit on a board burned by a founder's removal, and you promised yourself never again."
   },
   {
    "seat": "founder_friend",
    "name": "Wes Calloway",
    "title": "Founder's friend",
    "home": "Idris Valdane, the founder (grad-school roommate)",
-   "motive": "Idris Valdane started the lab and still holds 25% of the vote. He has not decided who is right, and he has asked you to speak for him without quoting him. You shared a grad-school apartment with him, and you know that he trusts the CEO and also fears the system the chief scientist is worried about."
+   "motive": "Idris Valdane was your grad-school roommate. He has not decided who is right and asked you to speak for him without quoting him. You know he trusts the CEO and also fears the system the chief scientist is worried about."
   },
   {
    "seat": "community",
    "name": "Mira Castellanos",
    "title": "Community seat",
    "home": "Open Signal Alliance (User-privacy advocate)",
-   "motive": "You were put on the board to speak for the public, and you have never been told what the unreleased system can do. You think the board has been given a thin picture for a year, and you resent it. You want a safer process, and you know that a messy firing could make safety people look reckless for a decade. You also fear what will happen to the privacy rules if the company breaks apart."
+   "motive": "You were put on this board to speak for the public and have never been told what the unreleased system can do. You want a safer process, but a messy firing could make safety people look reckless for a decade."
   }
  ],
  "briefing": {
-  "intro": "It is a Friday in November and a special meeting of the Lumen Search board has been called, with no notice to the CEO. Lumen runs a search engine and an AI assistant with two billion queries a day. It began as a research lab started by Idris Valdane, with a charter that says the lab exists to build AI that is safe and widely shared. A for-profit arm was added later to pay for computing, and the charter gives the lab's board, not the investors, the final word. The board has six seats, three held by people who work at Lumen and three who do not. Lumen is privately held, and a large technology company has put in billions and runs Lumen's computing. The company's developer conference opens on Monday with 2,000 outside guests.",
+  "intro": "Lumen Search runs a search engine and AI assistant with two billion queries a day. Its charter puts safe, widely shared AI ahead of profit and gives the board the final word. It is a Friday in November, the board is meeting without notice to the CEO, and a developer conference opens Monday.",
   "facts": [
-   "The CEO, Sam Hartigan, is the face of the company. He has raised the money that lets the lab buy its computing, he recruited most of the senior staff himself, and the product has the fastest user growth in the industry. The board hired him five years ago, and he sits on the board. Several staff members told directors he is generous with credit and slow to share bad news.",
-   "Three directors, including the chief scientist, believe the CEO has not been fully honest with the board, citing a product launch the board learned of from the press, a safety review described as finished when it was not, and his sounding out a chip company about a new venture without telling the board. Two of the three events are documented in emails, and the third rests on one director's notes.",
-   "The CEO says each of those events was a misunderstanding. He says he told the board what he thought it needed, and that a company moving this fast cannot send every decision to a six-person committee. Several former board members agree that earlier boards were kept lightly informed, and they say it was the arrangement the board accepted when it hired him.",
-   "The charter says the board's duty is to the mission and not to profit. It also says that if the lab builds powerful AI that could be unsafe, the board must be able to slow or stop its release. No one has told the board that such a system exists yet, though the chief scientist has hinted at one, and he has not shown the other directors anything to back the hint.",
-   "Nearly all of the 770 employees hold equity that depends on a coming share sale at an $86 billion valuation. A tender offer is set for December 15, and a delay past year-end would let the buyer withdraw. If the CEO leaves, the sale might fail. Many staff have said privately that they follow the CEO, not the board, though some also say they are uneasy about the pace of releases.",
-   "The technology partner owns a large share of the for-profit arm and provides the computing, and it was told nothing in advance. It has said it expects a good explanation and that its contract would let it hire the CEO's team if the lab falls apart. Its own chief executive has said in public that he is committed to Lumen, and he told one director by phone last night that he is frustrated.",
-   "The board has no written findings and has hired no law firm, and no investigator has talked to the staff. The directors who want action have spent months raising concerns one at a time, and each time the CEO has offered an answer. The bylaws let a majority of the outside directors remove the CEO without cause, but counsel warns that the first lawsuit would ask what the cause was.",
-   "Two of the three directors who do not work at Lumen are new to the board. One has written papers on AI policy that criticize Lumen's release speed. The other is a technology founder who owns a competing product. Each could be accused of acting out of self-interest, and the CEO's allies have already said so privately.",
-   "The chief scientist holds a concern the others do not share, that the CEO is pushing too fast toward a system the lab cannot control. He also likes the CEO and worries that firing him would break the company he built. Last month 40 engineers circulated a letter asking for slower releases, and 12 of them signed, but none has said so to the full board.",
-   "The company's president, the CEO's closest ally and a board member, will quit if the CEO is removed. The chief technology officer has agreed to serve as interim CEO but cannot say how long she can hold the company together. A rival lab has told several of Lumen's best researchers that it will match their equity, and one has already accepted.",
-   "Reporters have asked for comment on a rumor that the board is meeting, and a leak is expected within hours. The board has no account of the lab without the CEO or of the lab after backing down, and either story would reach the staff before Monday.",
-   "The board's last two meetings ran under an hour each and had no written agenda. Two of the outside directors have asked for the minutes, and the CEO's office says the minutes are being edited. Each side reads the delay as evidence for its own view.",
-   "A competitor's model, released last week, matches Lumen's flagship on most public tests, and the CEO has argued that a leadership crisis now would hand the lead away. The chief scientist replies that the lead is the reason no one will slow down."
+   "CEO Sam Hartigan raised the money, recruited most senior staff and drove the fastest user growth in the industry. Three directors say he was not fully honest with the board: a launch learned from the press, a safety review called finished when it was not, and a side venture. Two events are in emails, and one rests on a director's notes.",
+   "The board has no written findings, no law firm and no investigator. Counsel warns that the first lawsuit would ask what the cause was.",
+   "Nearly all 770 employees hold equity tied to a share sale at an $86 billion valuation in December, and many say they follow the CEO, not the board. The president will quit if he goes, and a rival lab is offering to match researchers' equity.",
+   "The technology partner that supplies the computing was told nothing and could hire the CEO's team if the lab falls apart. A leak is expected within hours."
   ]
  },
  "decision": {
-  "lead": "The board's chair plans to open by presenting four alternatives. The board must select one by the end of the meeting:",
+  "lead": "Pick one.",
   "options": [
    {
     "n": 1,
@@ -86,12 +77,63 @@
  },
  "reveal": {
   "case": "OpenAI board, November 2023",
-  "text": "The real firm was OpenAI. On 17 November 2023 its nonprofit board removed CEO Sam Altman, saying he was not consistently candid in his communications with the board, and gave no detailed findings. President Greg Brockman quit that day, and on 20 November 745 of roughly 770 employees signed a letter threatening to leave unless the board resigned, a letter that Ilya Sutskever, a board member, also signed. Microsoft offered to hire Altman and his team. Altman returned as CEO on 21 to 22 November under a new board chaired by Bret Taylor, with Larry Summers and Adam D'Angelo, while Helen Toner, Tasha McCauley and Ilya Sutskever left the board."
+  "text": "The real firm was OpenAI. Its nonprofit board removed CEO Sam Altman in November 2023 without detailed findings. Of roughly 770 employees, 745 signed a letter threatening to leave, Microsoft offered to hire him, and he returned within days under a new board."
  },
  "questions": [
-  "Agency theory treats the board as the owners' monitor over the CEO. Here the board's principal was a mission, not shareholders. Who was the principal, and what happens to monitoring when the principal is unclear?",
-  "The board had no written findings and no investigation. How does acting without a record change who bears the risk of an error, and what did your board give up by choosing the option it chose?",
-  "Employees and the technology partner held more practical power than the directors did. What does that say about the formal source of a board's authority compared to the real source?",
-  "The three directors who wanted the CEO out had raised concerns one at a time for months. What is the cost of incremental monitoring, and when should a board escalate?"
- ]
+  "Why did three directors distrust the CEO?",
+  "No written findings. Why does that matter?",
+  "Remove him or keep him? What tipped you?",
+  "Employees, investors, the public. Who should the board serve?"
+ ],
+ "press": [
+  {
+   "n": 1,
+   "headline": "Lumen Board Removes CEO",
+   "story": "The board said he was not consistently honest and named the technology chief interim CEO. Engineers began threatening to leave, and the technology partner offered to hire his team.",
+   "stock": {
+    "symbol": "Valuation",
+    "from": 86,
+    "to": 74,
+    "pct": -14
+   }
+  },
+  {
+   "n": 2,
+   "headline": "Lumen Board Puts CEO on Notice and Keeps Him",
+   "story": "The CEO gets a written list of expectations and a ninety-day review. Staff were relieved, while safety critics asked what had really changed.",
+   "stock": {
+    "symbol": "Valuation",
+    "from": 86,
+    "to": 85.1,
+    "pct": -1
+   }
+  },
+  {
+   "n": 3,
+   "headline": "Lumen Hires Law Firm to Investigate Its CEO",
+   "story": "The CEO steps back from board decisions for thirty days while lawyers interview staff. The board said nothing publicly, leaks filled the gap, and the December buyer asked for a timeline.",
+   "stock": {
+    "symbol": "Valuation",
+    "from": 86,
+    "to": 80.8,
+    "pct": -6
+   }
+  },
+  {
+   "n": 4,
+   "headline": "Lumen Adds Three Directors, Removes CEO From Board",
+   "story": "The larger board will decide his future in spring. His closest ally on the board called it a demotion, and rival labs began calling researchers.",
+   "stock": {
+    "symbol": "Valuation",
+    "from": 86,
+    "to": 78.3,
+    "pct": -9
+   }
+  }
+ ],
+ "ticker": {
+  "symbol": "Valuation",
+  "start": 86,
+  "unit": "$B valuation"
+ }
 }

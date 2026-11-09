@@ -10,57 +10,48 @@
    "name": "Marisa Kell",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You know about the engineer's message because a staff lawyer sent it to you last week, and you have not told the board. If you disclose it now you risk the CEO's trust, and if it comes out later you will have sat on it. You want to avoid sanctions and you want to keep your seat, and the congressional committee will ask who knew what by April 15."
+   "motive": "A staff lawyer sent you an engineer's warning message last week, and you have not told the board. Disclosing it risks the CEO's trust, and hiding it risks your seat when the congressional committee asks who knew what."
   },
   {
    "seat": "labor",
    "name": "Tomas Reyes",
    "title": "Labor director",
    "home": "Lift & Lodge Workers Local 12",
-   "motive": "Your union builds and runs the lifts, and your members stand under them every day. A shutdown means layoffs at Alder Creek, the town's main employer, and your own pension sits in the fund that the layoffs would hit. A lift operator died on Sunday, and your members will blame you if you did not push for safety."
+   "motive": "Your union builds and runs the lifts, and a lift operator died on Sunday. A shutdown means layoffs in Alder Creek, and your own pension sits in the fund those layoffs would hit. Your members will blame you if you did not push for safety."
   },
   {
    "seat": "fund",
    "name": "Grace Whitlow",
    "title": "Fund partner",
    "home": "Granite Peak Capital (owns 8%)",
-   "motive": "Your fund owns 8% and your investors expect payouts. The buybacks have kept the price up and your own bonus depends on it. You have watched companies pause payouts and see the stock drop further, but you have also seen what regulators do to a company they think is stalling, and you do not know whether Summit is the paused company or the stalling one. Your partners expect an answer by Monday."
+   "motive": "Your fund owns 8% and your bonus depends on a share price the buybacks keep up. Pausing payouts could push the stock lower, but regulators punish companies that look like they are stalling. Your partners want an answer by Monday."
   },
   {
    "seat": "founder_friend",
    "name": "Hal Brennan",
    "title": "Founder's friend",
    "home": "Dana Strand, the founder (college roommate)",
-   "motive": "Dana Strand built Summit from one hill and still holds 30% of the vote. She has told you privately that she believes the CEO and does not want a leadership fight. You are her oldest friend on this board, you skied the first Alder Creek lift with her, and you do not know whether to protect her view or tell her she is wrong."
+   "motive": "Dana Strand is your college roommate, and you skied the first Alder Creek lift with her. She believes the CEO and does not want a leadership fight. You do not know whether to protect her view or tell her she is wrong."
   },
   {
    "seat": "community",
    "name": "June Okafor",
    "title": "Community seat",
    "home": "Alder Creek (Mayor)",
-   "motive": "You are the Mayor of the town where the second fall happened, and you went to two of the funerals. Alder Creek depends on Summit for jobs and tax revenue, and your re-election is in the fall. You will be asked to speak for the town, and the town is divided about what speaking for it requires. You want the lifts safe and the town employed."
+   "motive": "You are Mayor of Alder Creek, where the second fall happened, and you went to two of the funerals. The town depends on Summit for jobs and taxes, you face re-election in the fall, and the town is divided about what speaking for it requires."
   }
  ],
  "briefing": {
-  "intro": "It is March 2019 and a special meeting of the Summit Peaks board has been called. Summit runs six mountains on one season pass, built by Dana Strand from a single hill in Alder Creek. The company has no board committee that looks at safety. Directors are paid in company stock, and Summit is publicly traded. The company earns most of its money from the Series 7 gondola, a lift it designs and sells to other resorts as well as running on its own mountains, and the board has been told that regulators and the press will wait for its decision.",
+  "intro": "Summit Peaks runs six ski mountains on one season pass and earns most of its money from the Series 7 gondola, a lift it also sells to other resorts. The board has no safety committee, and founder Dana Strand holds 30% of the vote.",
   "facts": [
-   "Two Series 7 gondola cabins have fallen from their cables in five months. The first fall, in October at a partner resort, killed 18 riders. The second, last Sunday at Summit's own Alder Creek mountain, killed 12 riders and one lift operator. Government safety inspectors have closed lifts of the same model at other resorts but have not yet ordered Summit's remaining 41 Series 7 lifts to stop, and their preliminary report points to the software while allowing that a worn grip may have played a part.",
-   "After the first fall Summit told its customers that the Series 7 was safe and that the fall was caused by crew error at the partner resort. A software update to the cable grip was promised within six weeks and has been delayed three times. Summit's engineers say the update could be ready in about eleven weeks, but regulators will need to test it, and the earliest approval anyone expects is August.",
-   "The cable grip software reads a single sensor. Summit chose a single sensor to speed up the design, and it sold a second sensor as an optional extra. Operator manuals mention the software in one line and do not say that a wrong sensor reading can push the cabin off the cable. Summit's engineers say operators who knew would have trained differently, and others say no training would have saved the cabin.",
-   "A senior engineer sent an internal message two years ago saying the design had not been tested the way a lift that carries people should be. It went to a supervisor, who answered that schedule came first. The message sits in a file and the board has not seen it. A survey of 300 Summit engineers last year found that 40% did not feel free to raise safety concerns, though the survey was anonymous and fewer than half responded.",
-   "The Series 7, Summit's best-selling product, brings in $2.1 billion of the company's $9 billion in revenue and has a backlog of 4,000 orders. Another 2,000 Series 7 units are in construction and cannot be shipped unless inspectors permit it. Two resort chains have already cancelled orders for 90 lifts, and several others say they will wait for the regulators before deciding.",
-   "If Summit stops building, it must pay suppliers about $1 billion over the next year and lay off thousands, and skilled lift workers who leave might not return. If it keeps building and the inspectors later find another defect, the company could face criminal and civil claims and could lose its operating license, and nobody inside the company can say which risk is larger.",
-   "The company has been spending about $4 billion a year on dividends and share buybacks, and the board approved a new $6 billion buyback authorization in January. Its stock has fallen 12% since the second fall and stands at $380, with 570 million shares outstanding. The fund partners on the board want the buybacks to continue because they signal strength.",
-   "The Chair, who is also the CEO, is respected, has spent thirty years in the lift business, and believes the lift is sound and the software fix will prove it. He has asked the board for time and has said that a recall would send the wrong signal. The audit committee chair adds that the company's internal safety group reports to the CEO's office and not to the board.",
-   "A competitor with an older lift design carries the same rider numbers. It has offered to take Summit's resort customers if Summit leaves them without service, and some resorts have already asked about switching. Summit's sales team thinks most customers would come back after a fix, and the finance team is less sure.",
-   "Regulators in two other countries closed Series 7 lifts last week. The home regulator has taken weeks longer, and Summit's lobbyists say a closure is likely within days. Regulators who find a company slow to act can impose penalties far larger than those for a company that acts first, but a company that grounds its own lifts also admits that they are unsafe.",
-   "Families of the 18 riders killed in October have hired lawyers, and insurers have said that coverage will depend on whether Summit knew of the defect before the second fall. A congressional committee has asked for company documents by April 15. The board has not seen a safety report since the first fall, and directors say the CEO told them each time that engineering was handling it.",
-   "Summit's insurance broker says the company carries $2 billion of liability coverage, which would cover the families' claims at the lower end of the estimates and not at the upper end. The broker has also warned that a decision to keep flying after a known software defect could void part of the coverage, while a decision to ground the lifts could be taken as an admission in court.",
-   "Skiers are still buying season passes for next winter, and early sales are down 9% from last year. Summit's marketing head says a visible safety review would win some of them back, and the Chair says any review will make the numbers worse."
+   "Two Series 7 cabins have fallen from their cables in five months. The first killed 18 riders at a partner resort, and the second, last Sunday at Summit's Alder Creek mountain, killed 12 riders and a lift operator. Regulators have closed the model elsewhere but not yet Summit's 41 lifts.",
+   "A software fix has slipped three times and could be ready in about eleven weeks, with approval not before August. The cable grip reads a single sensor, and an engineer warned two years ago the design was undertested. The board never saw the message.",
+   "The Series 7 brings in $2.1 billion of $9 billion in revenue. Stopping would cost about $1 billion in supplier payments and thousands of jobs, while running on risks criminal claims, a lost license and voided insurance. Nobody inside can say which risk is larger.",
+   "The CEO, who is also Chair, believes the lift is sound and says a recall sends the wrong signal. The stock is $380, down 12%, and Summit spends $4 billion a year on dividends and buybacks. A congressional committee wants documents by April 15."
   ]
  },
  "decision": {
-  "lead": "Summit's senior management team has been asked to attend the meeting. The Board Chair, who is also the CEO, plans to open by proposing four alternatives. The board must select one by the end of the meeting:",
+  "lead": "Pick one.",
   "options": [
    {
     "n": 1,
@@ -86,12 +77,63 @@
  },
  "reveal": {
   "case": "Boeing 737 MAX, 2019",
-  "text": "The real firm was Boeing, which had two 737 MAX crashes, Lion Air in October 2018 and Ethiopian Airlines in March 2019, killing 346 people between them. After the grounding Boeing cut 737 production from 52 to 42 aircraft a month in April 2019 and then suspended it from January 2020 until May 2020. Its board created an aerospace safety committee only on 25 September 2019. It removed Dennis Muilenburg as Chair on 11 October 2019 while he stayed on as CEO, and his departure as CEO was announced on 23 December 2019. A shareholder suit alleging that the directors ignored safety red flags survived a motion to dismiss in September 2021 and settled that November for $237.5 million, paid by insurers."
+  "text": "The real firm was Boeing, after two 737 MAX crashes killed 346 people in 2018 and 2019. Boeing cut production, created a board safety committee only in September 2019, and removed Dennis Muilenburg as Chair in October and as CEO in December. A shareholder suit over ignored safety warnings settled for $237.5 million."
  },
  "questions": [
-  "Agency theory predicts that managers and owners can want different things. Where did the CEO's interest in a quick fix diverge from the interest of riders, owners and the town, and who on the board could have said so?",
-  "The engineer's message never reached the board. What is the cost of a board that learns about risk only through the CEO, and what monitoring device would fix it?",
-  "Combining the Chair and CEO roles concentrates information in one person. Which option on the table weakened that concentration, and who on your board resisted it?",
-  "Buybacks and dividends were running while the safety question was open. How does a payout to owners signal confidence, and what did your board's vote say about whose interest came first?"
- ]
+  "Why did Summit save money on one sensor?",
+  "The engineer's warning never reached the board. Who blocked it?",
+  "Ground every lift or keep running? Pick one.",
+  "Should the CEO also be Chair? Yes or no?"
+ ],
+ "press": [
+  {
+   "n": 1,
+   "headline": "Summit Peaks Grounds All Series 7 Lifts",
+   "story": "Summit closed every Series 7 lift and suspended dividends and buybacks pending an independent safety review. Suppliers face about $1 billion in lost orders, and a rival lift maker is already calling Summit's customers.",
+   "stock": {
+    "symbol": "SMPK",
+    "from": 380,
+    "to": 350,
+    "pct": -8
+   }
+  },
+  {
+   "n": 2,
+   "headline": "Summit Closes Alder Creek, Keeps Other Series 7 Lifts Running",
+   "story": "The company says its software fix will make the lift safe, with approval not expected before August. Families' lawyers said the decision to keep running after two falls will be central in court.",
+   "stock": {
+    "symbol": "SMPK",
+    "from": 380,
+    "to": 327,
+    "pct": -14
+   }
+  },
+  {
+   "n": 3,
+   "headline": "Summit Peaks Defends Its Record as Lifts Keep Running",
+   "story": "Summit left every Series 7 lift open and is leaving the timetable to inspectors. Within days the home regulator ordered closures, and insurers said coverage may be void.",
+   "stock": {
+    "symbol": "SMPK",
+    "from": 380,
+    "to": 296,
+    "pct": -22
+   }
+  },
+  {
+   "n": 4,
+   "headline": "Summit Peaks Splits Chair and CEO, Forms Safety Committee",
+   "story": "A new board committee can see all engineering messages and will decide on the lifts after three weeks. Investors welcomed the governance change but asked what happens to the lifts in those weeks.",
+   "stock": {
+    "symbol": "SMPK",
+    "from": 380,
+    "to": 365,
+    "pct": -4
+   }
+  }
+ ],
+ "ticker": {
+  "symbol": "SMPK",
+  "start": 380,
+  "unit": "$"
+ }
 }

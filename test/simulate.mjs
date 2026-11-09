@@ -28,6 +28,6 @@ ok(v.board.locked && v.board.tally && !JSON.stringify(v).includes('auditor'), 'l
 ok(tick(st, 1000 + 900 * 1000 + 1) && st.phase === 'reveal', 'timer ends the meeting and opens the debrief');
 ok(Object.values(st.boards).every(x => x.locked), 'every board is locked at the reveal');
 const pv = publicView(st, 0);
-ok(pv.reveal && pv.reveal.steps === 1 + 2 * Object.keys(st.boards).length, 'debrief has an overview plus two screens per board');
-ok(pv.reveal.boards.every(x => x.reveal && x.questions.length === 4), 'every board has its real-case reveal and 4 questions');
+ok(pv.reveal && pv.reveal.steps === 1 + 3 * Object.keys(st.boards).length, 'debrief has an overview plus three screens per board');
+ok(pv.reveal.boards.every(x => x.reveal && x.questions.length === 4 && !x.questions.join().includes('TODO')), 'every board has its real-case reveal and 4 questions');
 process.exit(fails ? 1 : 0);

@@ -230,3 +230,10 @@ textarea#stmt{width:100%;resize:vertical}
 .voters{display:flex;gap:6px;margin:6px 0}.voters i{width:26px;height:26px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-style:normal;font-size:.8rem}.voters i.on{background:var(--up);color:#fff}
 nav.bar{height:auto;overflow:visible;background:var(--card)}
 .tabbar button{padding:0 4px;white-space:nowrap}
+
+.paper{border-top:4px double var(--ink);border-bottom:1px solid var(--ink);padding:.6em 0;max-width:70ch}.hl{font-family:Georgia,serif;font-size:clamp(26px,3.2vw,52px);line-height:1.15;margin:.2em 0}.ticker{font-size:clamp(24px,2.8vw,46px);font-weight:700;margin-top:1em}.ticker.dn{color:var(--down)}.ticker.up{color:var(--up)}
+.fact{font-size:1rem;line-height:1.4;margin:0 0 .55em}.cardtext{font-size:1.05rem;line-height:1.5}.briefcard{padding:12px 14px}
+.phone{padding-top:6px;padding-bottom:64px}.phone .hdr{margin-bottom:4px}.phone .card{margin-bottom:6px}
+.phone .fact{font-size:.88rem;line-height:1.32;margin:0 0 .4em}.phone .cardtext{font-size:.98rem;line-height:1.42}
+.phone .opt{min-height:0;margin-bottom:5px;padding:7px 9px;gap:8px}.phone .opt .n{font-size:1.1rem}.phone .opt b{font-size:.95rem}.phone .opt span.t{font-size:.82rem;line-height:1.25}
+.phone h2{font-size:1.05rem;margin:4px 0}.phone .small{font-size:.8rem;margin:2px 0}

@@ -58,27 +58,18 @@ try {
   // Phase: briefing
   await proj.screenshot({ path: join(shots, '3_projector_meeting.png') });
   await phones[0].screenshot({ path: join(shots, '4_phone0_briefing.png') });
-  await phones[0].click('[data-pg="1"]'); await phones[0].click('[data-pg="1"]');
-  ok((await phones[0].textContent('#main')).includes('Fact 2 of'), 'briefing pages one fact at a time');
-  await phones[0].screenshot({ path: join(shots, '4b_phone0_fact.png') });
+  const fit = async (p, label) => { const m = await p.evaluate(() => ({ h: document.documentElement.scrollHeight, w: innerHeight })); ok(m.h <= m.w, label + ' fits one 390x844 screen without scrolling (' + m.h + ' of ' + m.w + 'px)'); };
+  await fit(phones[0], 'briefing');
   await phones[1].screenshot({ path: join(shots, '4_phone1_briefing.png') });
   // Phase: private cards (different text on each device)
-  for (const [i, p] of phones.entries()) { await p.click('[data-tab="card"]'); await p.waitForTimeout(300); await p.screenshot({ path: join(shots, `5_phone${i}_card.png`) }); }
+  for (const [i, p] of phones.entries()) { await p.click('[data-tab="card"]'); await p.waitForTimeout(300); await fit(p, 'role card'); await p.screenshot({ path: join(shots, `5_phone${i}_card.png`) }); }
   const c0 = await phones[0].textContent('#main'), c1 = await phones[1].textContent('#main');
   ok(c0.includes('Oliver Brandt') && c1.includes('Teresa Alvarado') && c0 !== c1, 'each phone sees only its own private role card');
-  // Phase: chat (prominent button) both ways
-  await phones[0].click('#chatbtn'); await phones[0].fill('#msg', 'I lean toward option 1. What does your card say?'); await phones[0].click('#send');
-  await phones[0].waitForTimeout(600); await phones[0].screenshot({ path: join(shots, '6_phone0_chat.png') });
-  await phones[1].waitForTimeout(1800);
-  ok((await phones[1].textContent('#chatbtn')).includes('Chat'), 'chat is a labelled button');
-  await phones[1].click('#chatbtn'); await phones[1].waitForTimeout(400);
-  ok((await phones[1].textContent('#msgs')).includes('I lean toward option 1'), 'chat message crosses to the other device');
-  await phones[1].screenshot({ path: join(shots, '6_phone1_chat.png') });
-  await phones[1].click('#chatx'); await phones[0].click('#chatx');
+  ok((await phones[0].$('#chatbtn')) === null, 'no chat button');
   // Phase: vote
   for (const p of phones) await p.click('[data-tab="vote"]');
   await phones[0].click('[data-opt="1"]'); await phones[1].click('[data-opt="1"]');
-  await phones[0].waitForTimeout(1200);
+  await phones[0].waitForTimeout(1200); await fit(phones[0], 'vote tab');
   await phones[0].screenshot({ path: join(shots, '7_phone0_vote.png') });
   await phones[1].screenshot({ path: join(shots, '7_phone1_vote.png') });
   ok((await phones[1].$('[data-lock]')) === null && (await phones[0].$('[data-lock]')) !== null, 'only the Chair sees the lock button');
@@ -94,14 +85,16 @@ try {
   await proj.screenshot({ path: join(shots, '9_projector_debrief_overview.png') });
   await phones[0].screenshot({ path: join(shots, '9_phone0_debrief.png') });
   const nSteps = await admin.evaluate(() => window.__host.state.boards && Object.keys(window.__host.state.boards).length);
-  let sawValleyCase = false, sawQs = false;
-  for (let k = 1; k <= 2 * nSteps; k++) {
+  let sawValleyCase = false, sawQs = false, sawPress = false;
+  for (let k = 1; k <= 3 * nSteps; k++) {
     await admin.click('#rnext'); await admin.waitForTimeout(1500);
     const t = await proj.textContent('#app');
+    if (t.includes('Valley Health: the morning after')) { sawPress = t.includes('VLYH') && t.includes('%'); await proj.screenshot({ path: join(shots, '10a_projector_newspaper.png') }); }
     if (t.includes('Valley Health: what happened')) { sawValleyCase = t.includes('Columbia/HCA'); await proj.screenshot({ path: join(shots, '10_projector_real_case.png') }); }
-    if (t.includes('Valley Health: discuss')) { sawQs = t.includes('information asymmetry'); await proj.screenshot({ path: join(shots, '11_projector_questions.png') }); }
+    if (t.includes('Valley Health: discuss')) { sawQs = t.includes('Disclose or defend'); await proj.screenshot({ path: join(shots, '11_projector_questions.png') }); }
   }
   ok(sawValleyCase, 'debrief reveals the real case (Columbia/HCA)');
+  ok(sawPress, 'projector shows newspaper headline and stock move before the real case');
   ok(sawQs, 'debrief shows the discussion questions');
   ok(errs.length === 0, 'no page or console errors' + (errs.length ? ': ' + errs.slice(0, 3).join(' | ') : ''));
 } finally { await browser.close(); srv.kill(); }

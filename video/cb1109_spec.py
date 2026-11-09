@@ -1,0 +1,29 @@
+import json
+S = [
+dict(kicker='Catch-back · Nov 9', head='What is left for you', points=['Eleven things', 'Most urgent first', 'One card each'], imgs=[],
+ say="Good morning, Steven. This is what is left for you, with the most urgent first, and one card for each."),
+dict(kicker='JMP review', head='Settle the conflicts', points=['Merged notes page is ready', 'Settle the conflicts and open questions', 'Due about Nov 14'], imgs=[],
+ say="First, the JMP review of the AI washing paper. The merged notes page is ready, and what remains is for you to settle the conflicts between the notes and answer the open questions. This one is due around November fourteenth."),
+dict(kicker='Rec letter', head='UT Dallas for Jawadul', points=['Due Nov 15', 'Link is in the Nov 7 email', 'UTA is done', 'WSU may need a retry'], imgs=[],
+ say="Second, the UT Dallas recommendation letter for Jawadul. It is due November fifteenth, and the link is in the admissions email from November seventh. The UTA letter is done, and Washington State may still need another try in GradCAS."),
+dict(kicker='JME with Bob', head='Approve or submit R3', points=['Bob, Jack, Sally', 'Jack says the draft is ready', 'Due about Nov 18'], imgs=[],
+ say="Third, the third revision for the Journal of Management Education with Bob, Jack and Sally. Jack says the draft is ready, so your job is to approve it or submit it, by about November eighteenth."),
+dict(kicker='Showcase', head='Send one assignment', points=['AI-Aware Assignments Showcase', 'Send one assignment', 'By Nov 18'], imgs=[],
+ say="Fourth, the AI-Aware Assignments Showcase. They need one assignment from you by November eighteenth."),
+dict(kicker='Amazon nuclear case', head='Approve the decisions', points=['Ivey copyedit comments walked', 'You approve the decisions', 'Then Claude applies them'], imgs=[],
+ say="Fifth, the Amazon nuclear case copyedit from Ivey. Every comment has been walked through, so you only need to approve the decisions, and then Claude applies them."),
+dict(kicker='I&I paper', head='Read, then send', points=['Version 15', 'The rewritten paragraph', 'The team email draft'], imgs=[],
+ say="Sixth, the innovation and industry paper, version fifteen. Read the rewritten paragraph and the draft email to the team, and then send it."),
+dict(kicker='Same Tools', head='Reply to Ray and Nils', points=['Absorptive capacity moderates headcount', 'It does not moderate productivity', 'Reply to Ray and Nils'], imgs=[],
+ say="Seventh, Same Tools. Absorptive capacity moderates headcount but not productivity, and Ray and Nils are waiting on your reply."),
+dict(kicker='Alisa ecosystem paper', head='Pick a version', points=['Version B, with three conditions', 'or Version A', 'Tell Alisa, Chad, Sanwar your bandwidth', 'Proposal due January'], imgs=[],
+ say="Eighth, the ecosystem paper with Alisa. Pick Version B with its three conditions, or Version A, and tell Alisa, Chad and Sanwar how much bandwidth you have. The proposal is due in January."),
+dict(kicker='CEO Characteristics', head="Read Dana's comments", points=["Dana's comments", 'Read them with Mike and Steve'], imgs=[],
+ say="Ninth, the CEO characteristics paper. Read Dana's comments together with Mike and Steve."),
+dict(kicker='Principal game', head='Read one board', points=['Round packets at Jensen length', 'Read one board for tone', 'Then Claude wires it in', 'And redoes the video'], imgs=[],
+ say="Tenth, the Principals game. The round packets are now at Jensen length. Read one board for tone, and then Claude wires it in and redoes the video."),
+dict(kicker='Southfork', head='Carmen is waiting', points=['Reply draft is in Gmail', 'Review it', 'Send it'], imgs=[],
+ say="Last, Carmen at Southfork. A reply draft is waiting in Gmail, so review it and send it. That is everything, and thanks for watching."),
+]
+json.dump(dict(slides=S), open('cb1109.json','w',encoding='utf-8'), indent=1)
+open('cb1109_script.txt','w',encoding='utf-8').write('\n\n'.join(s['say'] for s in S))

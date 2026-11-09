@@ -35,8 +35,14 @@ export function revealScreen(R) {
     const rows = R.boards.map(b => `<tr><th>${esc(b.short)}</th><td>${b.choice ? `<b>Option ${b.choice.n}</b> ${esc(b.choice.title)}` : '<i>No decision</i>'}</td><td>${b.tally.filter(t => t.votes).map(t => `${t.n}: ${t.votes}`).join(' &nbsp; ')}</td></tr>`).join('');
     return wrap('What each board chose', `<table class="cmp"><thead><tr><th></th><th>Choice</th><th>Votes by option</th></tr></thead><tbody>${rows}</tbody></table>`);
   }
-  const b = R.boards[Math.floor((step - 1) / 2)]; if (!b) return wrap('The end', '');
+  const b = R.boards[Math.floor((step - 1) / 3)]; if (!b) return wrap('The end', '');
   const chose = b.choice ? `Your board chose option ${b.choice.n}: ${esc(b.choice.title)}.` : 'Your board did not decide.';
-  if ((step - 1) % 2 === 0) return wrap(b.name + ': what happened', `<p class="chose">${chose}</p><h3>${esc(b.reveal ? b.reveal.case : '')}</h3><p class="real">${esc(b.reveal ? b.reveal.text : '')}</p>`);
+  if ((step - 1) % 3 === 0) {
+    const p = b.press, t = b.ticker;
+    if (!p) return wrap(b.name + ': the press', `<p class="chose">${chose}</p><p class="real">No decision, so no story today.</p>`);
+    const dn = p.stock.pct < 0, unit = t && t.unit === '$' ? '$' : '', tail = t && t.unit !== '$' ? 'B' : '';
+    return wrap(b.name + ': the morning after', `<p class="chose">${chose}</p><article class="paper"><h3 class="hl">${esc(p.headline)}</h3><p class="real">${esc(p.story)}</p></article><p class="ticker ${dn ? 'dn' : 'up'}">${esc(p.stock.symbol)} ${unit}${p.stock.from}${tail} to ${unit}${p.stock.to}${tail} (${p.stock.pct > 0 ? '+' : ''}${p.stock.pct}%)</p>`);
+  }
+  if ((step - 1) % 3 === 1) return wrap(b.name + ': what happened', `<p class="chose">${chose}</p><h3>${esc(b.reveal ? b.reveal.case : '')}</h3><p class="real">${esc(b.reveal ? b.reveal.text : '')}</p>`);
   return wrap(b.name + ': discuss', `<p class="chose">${chose}</p><ol class="qs">${b.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ol>`);
 }

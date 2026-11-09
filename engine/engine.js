@@ -161,7 +161,6 @@ function applyInner(st, a, t) {
   if (a.type === 'join') { join(st, { id: a.by, name: a.name }); return null; }
   const s = st.seats[a.by];
   if (!s) return 'Not seated yet.';
-  if (a.type === 'chat') return chat(st, s, a, t);
   if (st.phase !== 'play') return 'The board meeting is over.';
   const b = st.boards[s.board];
   switch (a.type) {
@@ -179,18 +178,6 @@ function applyInner(st, a, t) {
     }
     default: return 'Unknown action.';
   }
-}
-function chat(st, s, a, t) {
-  const text = String(a.text || '').trim().slice(0, 400); if (!text) return 'Empty message.';
-  let ch = a.ch;
-  if (ch === 'board') ch = 'board:' + s.board;
-  else if (ch && ch.startsWith('dm:')) {
-    const other = st.seats[ch.slice(3)];
-    if (!other || other.board !== s.board || other.id === s.id) return 'Private messages stay inside your board.';
-    ch = 'dm:' + [s.id, other.id].sort().join('|');
-  } else return 'Pick a channel.';
-  st.chat.push({ seq: ++st.seq, t, phase: st.phase, ch, from: s.id, name: s.name, board: s.board || null, text });
-  return null;
 }
 function hostAction(st, a, t) {
   switch (a.type) {
@@ -221,8 +208,8 @@ function hostAction(st, a, t) {
 }
 
 // ---------- views ----------
-// Debrief screens: one overview, then for each board a "what happened" screen and a "discuss" screen.
-export const revealSteps = st => 1 + 2 * Object.keys(st.boards).length;
+// Debrief screens: one overview, then for each board a newspaper reaction, a "what happened" screen and a "discuss" screen.
+export const revealSteps = st => 1 + 3 * Object.keys(st.boards).length;
 const tallyList = b => ((b.content.decision || {}).options || []).map(o => ({ n: o.n, title: o.title, votes: b.tally[o.n] || 0 }));
 export function publicView(st, t) {
   const out = {
@@ -251,7 +238,7 @@ export function seatView(st, id, t) {
     briefing: bc.briefing, lead: (bc.decision || {}).lead || '', options: (bc.decision || {}).options || [],
     directors: directorsOf(st, b.id).map(d => ({ id: d.id, name: d.name, seat: d.seat, seatLabel: SEAT_LABEL[d.seat], cardName: d.card.name, title: d.card.title, chair: d.id === b.chair, voted: !!b.ballots[d.id] })),
     mine: b.ballots[id] || null, locked: b.locked, choice: o ? { n: o.n, title: o.title } : null, tally: b.locked ? tallyList(b) : null,
-  }, chat: st.chat.filter(c => c.ch === 'board:' + b.id || (c.ch.startsWith('dm:') && c.ch.slice(3).split('|').includes(id))).slice(-300) };
+  }};
 }
 
 // ---------- reveal ----------
@@ -262,7 +249,7 @@ export function revealView(st) {
     boards: boards.map(b => {
       const o = b.choice ? optionOf(b, b.choice) : null;
       return { id: b.id, name: b.content.name, short: b.content.short || b.content.name, chair: (st.seats[b.chair] || {}).name || '',
-        choice: o ? { n: o.n, title: o.title } : null, tally: tallyList(b), reveal: b.content.reveal || null, questions: b.content.questions || [],
+        choice: o ? { n: o.n, title: o.title } : null, press: o ? ((b.content.press || []).find(x => x.n === o.n) || null) : null, ticker: b.content.ticker || null, tally: tallyList(b), reveal: b.content.reveal || null, questions: b.content.questions || [],
         directors: directorsOf(st, b.id).map(d => ({ name: d.name, seat: SEAT_LABEL[d.seat], title: d.card.title, vote: b.ballots[d.id] || null, chair: b.chair === d.id })) };
     }),
   };

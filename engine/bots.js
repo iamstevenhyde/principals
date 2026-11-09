@@ -7,7 +7,6 @@ export function botStep(view, rand) {
   if (!me || me.kind === 'waiting' || P.phase !== 'play') return out;
   const pick = a => a[Math.floor(rand() * a.length)];
   const b = view.board;
-  if (rand() < 0.02) out.push({ type: 'chat', ch: 'board', text: pick(LINES) });
   if (!b.locked && !b.mine && rand() < 0.05) out.push({ type: 'ballot', choice: pick(b.options).n });
   if (view.director.chair && !b.locked && b.directors.every(d => d.voted) && rand() < 0.1) out.push({ type: 'lock' });
   return out;
