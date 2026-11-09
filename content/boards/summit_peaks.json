@@ -92,7 +92,7 @@
         },
         {
           "id": "labor_B",
-          "text": "You were granted stock options last year. The stock must end above where it started.",
+          "text": "Your members' pension fund holds Summit stock. The stock must end above where it started.",
           "label": "Stock ends above start",
           "check": {
             "type": "stock_end_above_start"
@@ -116,7 +116,7 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Your loan terms hold only if the lifts run. Chair 7 must stay open.",
+          "text": "Granite Peak also lent Summit money, and the loan terms hold only if every lift runs. Chair 7 must stay open.",
           "label": "Chair 7 stays open",
           "check": {
             "type": "not",
@@ -275,7 +275,7 @@
           "id": "pension_skip",
           "title": "Skip this year's pension payment",
           "short": "Skip pension payment",
-          "motive": "Legal. The fund will recover when the markets do.",
+          "motive": "Probably legal. The fund will recover when the markets do.",
           "effects": {
             "shareholders": 2,
             "workers": 0,
@@ -301,8 +301,8 @@
       ],
       "issue": {
         "id": "pension_gap",
-        "text": "The staff pension is about $60M short under this year's estimate, though two actuaries disagree on the size. Skipping a payment is legal. Staff statements still call the fund secure.",
-        "case_for_silence": "The estimate is contested, skipping is legal, and a scare about the pension could send your best crew to other mountains.",
+        "text": "The staff pension is about $60M short under this year's estimate, though two actuaries disagree on the size. Counsel says skipping is probably legal. Staff statements still call the fund secure.",
+        "case_for_silence": "The estimate is contested, counsel says skipping is probably legal, and a scare about the pension could send your best crew to other mountains.",
         "facts": [
           {
             "id": "f1",
@@ -321,7 +321,7 @@
           },
           {
             "id": "f4",
-            "text": "Skipping a payment this year is legal.",
+            "text": "Counsel says skipping a payment this year is probably legal.",
             "weight": 1
           }
         ]
@@ -338,9 +338,9 @@
       },
       {
         "round": 2,
-        "event": "Sears pensions",
-        "years": "2019",
-        "line": "The PBGC moved to take over two Sears pension plans about $1.4B short."
+        "event": "Hostess Brands pensions",
+        "years": "2011 to 2012",
+        "line": "Hostess stopped paying into its bakers' pension in 2011, calling it temporary. It went bankrupt in January 2012 and later shut down."
       }
     ],
     "fix": "Give safety and pension risk a committee that hears bad news directly."

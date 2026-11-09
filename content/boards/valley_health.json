@@ -92,7 +92,7 @@
         },
         {
           "id": "labor_B",
-          "text": "You were granted stock options last year. The stock must end above where it started.",
+          "text": "Your nurses' pension fund holds Valley stock. The stock must end above where it started.",
           "label": "Stock ends above start",
           "check": {
             "type": "stock_end_above_start"
@@ -165,7 +165,7 @@
         },
         {
           "id": "founder_friend_B",
-          "text": "You sit on two other boards. No scandal anywhere you sit, so no fact on this board may be caught.",
+          "text": "Dr. Marsh's name is on the billing codes and the closure plan. No fact on this board may be caught.",
           "label": "No fact gets caught",
           "check": {
             "type": "not",

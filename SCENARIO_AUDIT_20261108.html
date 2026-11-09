@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Principals Scenario Audit</title>
+<style>
+:root{--bg:#fbf8f1;--ink:#1d1d1b;--card:#fff;--mute:#5a5a55;--ok:#2f6b3a;--warn:#9a5b00;--bad:#9b2c2c;--line:#ddd6c8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b19;--ink:#efece4;--card:#262623;--mute:#b5b1a6;--line:#3b3a35}}
+body{background:var(--bg);color:var(--ink);font:19px/1.65 Verdana,Arial,sans-serif;letter-spacing:.02em;margin:0;padding:24px 16px;max-width:880px;margin:auto}
+h1{font-size:1.6em;margin:.2em 0}h2{font-size:1.25em;margin:0 0 .4em}h3{font-size:1em;margin:1em 0 .3em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:18px 0}
+.v{border-left:8px solid var(--ok)}.tag{font-weight:bold}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}.ba div{padding:8px 10px;border-radius:6px;border:1px solid var(--line)}
+.b{background:rgba(155,44,44,.07)}.a{background:rgba(47,107,58,.08)}.cite{color:var(--mute);font-size:.88em}
+@media(max-width:600px){.ba{grid-template-columns:1fr}}
+li{margin:.3em 0}
+</style></head><body>
+<h1>Principals: scenario and motive audit</h1>
+<p class="cite">8 Nov 2026, for class Tue 11/10. Repo commit after 5268582, not pushed.</p>
+
+<div class="card v"><h2>Verdict</h2>
+<p><b>Ready to play after small fixes.</b> All ten dilemmas are two-sided, and every "case for silence" can be defended out loud. The problems were in the private cards: one real case that did not match (Sears), one secret that contradicted itself, and three cards that were copied word for word across boards and had nothing to do with that board.</p>
+<p>I changed 20 lines in 5 boards and replaced one real case. Engine rules, ids and checks are unchanged. Tests pass.</p></div>
+
+<div class="card"><h2>Sources used</h2>
+<h3>From the HydeVault wiki</h3>
+<ul>
+<li>Schell, <i>Art of Game Design</i>: Lens #32 Meaningful Choices (p. 181), #33 Triangularity (p. 182), #10 Resonance (p. 87), #20 Judgment (p. 159), #37 Cooperation (p. 218).</li>
+<li>Salen and Zimmerman, <i>Rules of Play</i>: meaningful play, discernible and integrated (PDF pp. 47-53); social play and roles (PDF pp. 453-481).</li>
+<li>Design wiki principles: meaningful-choices, mindless-choices (Hick's law), staging-one-idea-per-beat; checklist audit-game.md items 19 and 22.</li>
+</ul>
+<h3>Gap</h3><p>The wiki has almost nothing on role-play, larp or debriefing. These three outside sources were checked by web search:</p>
+<ul>
+<li><b>Primary, read from the PDF Steven downloaded:</b> Crookall, D. (2010). "Serious games, debriefing, and simulation/gaming as a discipline." <i>Simulation &amp; Gaming</i> 41(6), 898-920, doi 10.1177/1046878110390784. The download is named 2011, but the PDF itself prints 2010, vol. 41(6). Debriefing is "the occasion and activity for the reflection on and the sharing of the game experience to turn it into learning" (p. 907).</li>
+<li>Bowman (2010), <i>The Functions of Role-Playing Games</i>, McFarland. Role-play builds community, problem solving and identity exploration.</li>
+<li>Bleed (term from Emily Care Boss; studied by Montola 2010): feelings spill between player and character, which is why a role-play needs a clear step out of role.</li>
+</ul></div>
+
+<div class="card"><h2>Across all boards</h2>
+<h3 class="bad">Labor director "stock options" card, same on every board</h3>
+<p>A union director being granted stock options is unlikely, and the line was identical on five boards, so it did not resonate with any of them. <span class="cite">Schell Lens #10 Resonance, p. 87; Salen and Zimmerman "integrated" meaningful play, pp. 47-53.</span> Kept the goal (stock ends above start) and gave each board a reason tied to the members.</p>
+<div class="ba"><div class="b">Before: You were granted stock options last year.</div><div class="a">After (Summit): Your members' pension fund holds Summit stock. Similar lines on the other four boards.</div></div>
+<h3 class="bad">Founder's friend "two other boards" card (Valley, Lumen, Thread)</h3>
+<p>The seat is defined by loyalty to the founder, but this card had nothing to do with the founder. <span class="cite">Salen and Zimmerman, social roles derived from the system, pp. 453-481.</span> Each now ties to the founder. Same check: no fact may be caught.</p>
+<h3 class="ok">Kept</h3>
+<ul><li>Roles interlock: the Attorney, Community and Founder's friend pull against each other on disclosure, and the Labor and Fund seats pull against each other on the motion, so no seat wins alone. <span class="cite">Schell Lens #37, p. 218.</span></li>
+<li>Fund "owns a rival" card is the same on every board. It works as a quiet saboteur and makes the Auditor matter, so I kept it. Watch whether it reads as a dead role (it can only vote).</li>
+<li>Load: one motion, four facts, one motive and one secret per player fits 8 minutes. <span class="cite">mindless-choices, Hick's law.</span></li></ul>
+<h3 class="warn">Debrief screens, checked against Crookall (2010)</h3>
+<ul>
+<li><b>Time.</b> Crookall writes that "the learning comes from the debriefing, not from" the game (p. 907), and that in his own games "the debriefing is longer and more engaging for participants than the game itself" (p. 908). Two 8-minute rounds against five-plus screens of about 150 words each risks a short, read-aloud debrief. <b>Fix in class:</b> plan at least 16 minutes of debrief, equal to play, and treat the screens as prompts for talk, not slides to read.</li>
+<li><b>Start design from the debrief.</b> "Game design should start with the place where the participants are going to learn, that is, with the debriefing" (p. 908). Each board's dilemma now maps to one governance idea on its Fixes line (safety committee, raw numbers, defensible reasons, building audits, own audit first). The Hostess swap matters here: the Summit debrief line now describes the same act the players voted on.</li>
+<li><b>Use the game's own data.</b> Crookall wants data collected during play to feed the debrief (p. 908). The front page, the "told n of m" squares and Side by side already do this, which is the game's strongest debrief feature. Keep them.</li>
+<li><b>Sharing.</b> Debriefing includes chances "to share written thoughts and feelings" (p. 909). The Reactions screen covers this. Crookall does not set an order for feelings versus concepts, so the screen order is Steven's call, not his rule.</li>
+<li><b>Step out of role (not from Crookall).</b> Some cards ask students to hide a safety risk. Before Reactions, say "put the card down and speak as yourself." Source: bleed, Montola 2010, via secondary sources only.</li>
+</ul></div>
+
+<div class="card"><h2>Summit Peaks</h2>
+<p><b>Round 1 (Chair 7, Boeing):</b> two-sided, silence is defensible, maps well (safety news not reaching the board). No change.</p>
+<p><b>Round 2 (skip pension):</b> <span class="bad">real case did not match.</span> The game skips a payment; Sears never claimed that. Replaced with Hostess, which did stop pension contributions in 2011, called it temporary, and filed for bankruptcy in January 2012.</p>
+<div class="ba"><div class="b">Before: Sears pensions, 2019. The PBGC moved to take over two Sears pension plans about $1.4B short.</div><div class="a">After: Hostess Brands pensions, 2011 to 2012. Hostess stopped paying into its bakers' pension in 2011, calling it temporary. It went bankrupt in January 2012 and later shut down.</div></div>
+<p>"Skipping is legal" was stated as fact. For Hostess, experts only said it was probably legal, and the honest version is more ambiguous, which is what the facts step needs.</p>
+<div class="ba"><div class="b">Before: Skipping a payment is legal. (briefing, fact, silence and motion pitch)</div><div class="a">After: Counsel says skipping is probably legal.</div></div>
+<p class="cite">Principle: faithful mapping, and ambiguity that keeps silence defensible (Schell Lens #32, p. 181).</p>
+<div class="ba"><div class="b">Fund secret: Your loan terms hold only if the lifts run.</div><div class="a">After: Granite Peak also lent Summit money, and the loan terms hold only if every lift runs.</div></div>
+<p class="cite">An equity fund with "loan terms" needed one clause of explanation (plausibility).</p></div>
+
+<div class="card"><h2>Heartland Beef</h2>
+<p><b>Round 1 (quotas, Wells Fargo)</b> and <b>Round 2 (TraceMark, Theranos)</b> are both two-sided and map faithfully.</p>
+<div class="ba"><div class="b">Attorney secret: Your firm earns fees when regulators look into Heartland. One caught fact ends it.</div><div class="a">After: Your firm bills Heartland $2M a year for its contract work. One caught fact ends it.</div></div>
+<p class="cite"><span class="bad">Contradiction.</span> A firm paid for regulatory probes would gain from a caught fact. Players must be able to read the incentive. Salen and Zimmerman, "discernible," pp. 47-53.</p>
+<div class="ba"><div class="b">Community secret: You run a feedlot that gains when small ranchers lose their contracts. The quotas stay.</div><div class="a">After: Buyers chasing quota pay your 4,000-head feedlot the best price in the county. The quotas stay.</div></div>
+<p class="cite">The old link from quotas to lost contracts was never explained. Plausibility.</p>
+<div class="ba"><div class="b">Labor exposure: Members vote you out if the board spends $60M on TraceMark.</div><div class="a">After: Members vote you out if $60M goes to TraceMark while their raise stays frozen.</div></div>
+<p class="cite">The penalty now has a reason the player can argue. Schell Lens #20 Judgment, p. 159.</p>
+<div class="ba"><div class="b">Founder's friend: No fact about it [TraceMark] may be caught.</div><div class="a">After: Walt's name is on the TraceMark deal and on the quota memo. No fact on this board may be caught.</div></div>
+<p class="cite">The check covers every fact in both rounds, so the text now says so.</p></div>
+
+<div class="card"><h2>Lumen Search</h2>
+<p><b>Round 1 (view-time cutoff, Facebook)</b> and <b>Round 2 (remove founder, OpenAI)</b> are strong. Round 2 is the best-balanced dilemma in the game.</p>
+<div class="ba"><div class="b">Community secret: Honest numbers come before honest privacy.</div><div class="a">After: Your users are better off with a company that admits its errors.</div></div>
+<p class="cite">The old line did not make sense. Discernible meaning, Salen and Zimmerman pp. 47-53.</p>
+<div class="ba"><div class="b">Founder's friend: You sit on two other boards.</div><div class="a">After: Idris asked you to keep this inside the room, and you promised.</div></div></div>
+
+<div class="card"><h2>Thread &amp; Co.</h2>
+<p><b>Round 1 (recycled label, H&amp;M)</b> and <b>Round 2 (factory cracks, Rana Plaza)</b> are two-sided. The $18M invoice is fiction, which is fine since the debrief line only states the collapse.</p>
+<div class="ba"><div class="b">Community motive: Karvan's largest factory employs 2,000 people, and so does your cousin's.</div><div class="a">After: Karvan's largest factory employs 2,000 of your neighbors, and your cousin owns it.</div></div>
+<p class="cite">The old line was confusing and did not match the cousin secret.</p>
+<div class="ba"><div class="b">Community exposure: caught hiding a fact about the factory.</div><div class="a">After: caught hiding a fact.</div></div>
+<p class="cite">The trigger fires on any caught fact, label included. Text now matches the rule (Schell Lens #20, p. 159).</p>
+<div class="ba"><div class="b">Founder's friend: You sit on two other boards.</div><div class="a">After: Elodie's name is on the label and on the supplier contracts.</div></div></div>
+
+<div class="card"><h2>Valley Health</h2>
+<p><b>Round 1 (upcoding, HCA):</b> faithful and two-sided. <b>Round 2 (close Marrow Creek, Steward):</b> playable, but the real link is loose: Steward's story is rent, and the game's question is a closure. Fact f4 (rent) carries the link. <span class="warn">Flag only, not changed.</span> Mention rent out loud at the debrief.</p>
+<div class="ba"><div class="b">Founder's friend: You sit on two other boards.</div><div class="a">After: Dr. Marsh's name is on the billing codes and the closure plan.</div></div></div>
+
+<div class="card"><h2>Tests</h2>
+<p>node tools/bundle.mjs: 5 boards bundled. node test/simulate.mjs 20: ALL CHECKS PASSED. node test/headless.mjs: 50 ok, 0 FAIL, exit 0. Gallery: 44 shots captured, gallery rebuilt (8 steps).</p></div>
+</body></html>

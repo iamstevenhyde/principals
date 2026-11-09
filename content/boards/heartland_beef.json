@@ -55,7 +55,7 @@
         },
         {
           "id": "attorney_B",
-          "text": "Your firm earns fees when regulators look into Heartland. One caught fact ends it, so none may be caught.",
+          "text": "Your firm bills Heartland $2M a year for its contract work. One caught fact ends it, so none may be caught.",
           "label": "No fact gets caught",
           "check": {
             "type": "not",
@@ -73,7 +73,7 @@
       "home": "Meatcutters Local 88",
       "motive": "Your members cut the beef, and the buyers who push quotas are their neighbors. You have seen what a missed quota does to a family.",
       "exposure": {
-        "text": "Members vote you out if the board spends $60M on TraceMark.",
+        "text": "Members vote you out if $60M goes to TraceMark while their raise stays frozen.",
         "label": "TraceMark funded",
         "trigger": {
           "type": "motion_passed",
@@ -92,7 +92,7 @@
         },
         {
           "id": "labor_B",
-          "text": "You were granted stock options last year. The stock must end above where it started.",
+          "text": "Your members' retirement plan holds Heartland stock. The stock must end above where it started.",
           "label": "Stock ends above start",
           "check": {
             "type": "stock_end_above_start"
@@ -162,7 +162,7 @@
         },
         {
           "id": "founder_friend_B",
-          "text": "Walt's name is on the TraceMark deal. No fact about it may be caught.",
+          "text": "Walt's name is on the TraceMark deal and on the quota memo. No fact on this board may be caught.",
           "label": "No fact gets caught",
           "check": {
             "type": "not",
@@ -205,7 +205,7 @@
         },
         {
           "id": "community_B",
-          "text": "You run a 4,000-head feedlot that gains when small ranchers lose their contracts. The quotas stay.",
+          "text": "Buyers chasing quota pay your 4,000-head feedlot the best price in the county. The quotas stay.",
           "label": "Quotas stay",
           "check": {
             "type": "not",

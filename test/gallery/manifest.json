@@ -81,7 +81,7 @@
   "file": "013_team.png",
   "view": "team",
   "step": "Round 1 · play",
-  "label": "1 Facts: switches and severity bars"
+  "label": "1 Facts: switches, bars, price cost"
  },
  {
   "file": "014_team.png",
@@ -105,7 +105,7 @@
   "file": "017_team.png",
   "view": "team",
   "step": "Round 1 · play",
-  "label": "3 Motions: one row each"
+  "label": "3 Motion: the one headline vote"
  },
  {
   "file": "018_team.png",
@@ -183,7 +183,7 @@
   "file": "030_team.png",
   "view": "team",
   "step": "Round 2 · play",
-  "label": "1 Facts: switches and severity bars"
+  "label": "1 Facts: switches, bars, price cost"
  },
  {
   "file": "031_team.png",
@@ -207,52 +207,58 @@
   "file": "034_team.png",
   "view": "team",
   "step": "Round 2 · play",
-  "label": "3 Motions: one row each"
+  "label": "3 Motion: the one headline vote"
  },
  {
-  "file": "035_outside.png",
+  "file": "035_team.png",
+  "view": "team",
+  "step": "Round 2 · play",
+  "label": "Motion vote open"
+ },
+ {
+  "file": "036_outside.png",
   "view": "outside",
   "step": "Round 2 · play",
   "label": "Outside picks a target"
  },
  {
-  "file": "036_team.png",
+  "file": "037_team.png",
   "view": "team",
   "step": "Round 2 · outside",
   "label": "Team (director)"
  },
  {
-  "file": "037_outside.png",
+  "file": "038_outside.png",
   "view": "outside",
   "step": "Round 2 · outside",
   "label": "Outside player"
  },
  {
-  "file": "038_projector.png",
+  "file": "039_projector.png",
   "view": "projector",
   "step": "Round 2 · outside",
   "label": "Projector"
  },
  {
-  "file": "039_team.png",
+  "file": "040_team.png",
   "view": "team",
   "step": "Reveal",
   "label": "Team (director)"
  },
  {
-  "file": "040_outside.png",
+  "file": "041_outside.png",
   "view": "outside",
   "step": "Reveal",
   "label": "Outside player"
  },
  {
-  "file": "041_projector.png",
+  "file": "042_projector.png",
   "view": "projector",
   "step": "Reveal",
   "label": "Projector"
  },
  {
-  "file": "042_admin.png",
+  "file": "043_admin.png",
   "view": "admin",
   "step": "Reveal",
   "label": "Host at end"

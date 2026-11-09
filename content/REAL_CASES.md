@@ -29,11 +29,14 @@ Fictional names stay in play. The real case appears only at the debrief (Fixes s
 - Final judgment Mar 2022 (search). https://lieffcabraser.com/securities/boeing/
 - Death counts (189 + 157 = 346) are search-only and are not on a slide.
 
-**Round 2: Sears pension plans. PARTLY verified. The game motion skips a payment; the real case does not claim that.**
-- Used on screen: the PBGC moved to take over two Sears pension plans about $1.4B short.
-- 1 Feb 2019: PBGC asked to take over two plans, about $1.4B underfunded, 64% funded (search). https://www.pbgc.gov/news/press/pr19-01
-- Nov 2017: PBGC and Sears agreed about $500M in extra funding with real-estate liens (search). https://content.govdelivery.com/accounts/USPBGC/bulletins/1c33573
-- UNVERIFIED and not used: any skipped or waived contribution; any Sears board knowledge. Kodak was checked and not used.
+**Round 2: Hostess Brands pensions (replaced Sears, 8 Nov 2026 scenario audit). PARTLY verified.**
+- Why replaced: the game motion skips a pension payment, and no source showed Sears doing that. Hostess did.
+- Used on screen: Hostess stopped paying into its bakers' pension in 2011, calling it temporary. It went bankrupt in January 2012 and later shut down.
+- Aug 2011 letter from CEO Brian Driscoll called the halt a "temporarily suspend[ed]" step and a "necessary bridge"; the union dates the halt to July 2011 (search). https://www.tdu.org/media_hostess-maneuver-deprived-pension
+- About $22.1M of missed payments to the main bakers' fund in the five months before the filing; experts said it probably did not break federal law (search, WSJ via TDU reprint).
+- Chapter 11 filed 11 Jan 2012, citing pension and benefit costs (search). https://www.themanufacturer.com/articles/twinkies-maker-files-for-bankruptcy/
+- After the bankruptcy judge imposed a new contract, the bakers struck and Hostess moved to liquidate in Nov 2012 (search). https://www.just-food.com/news/us-hostess-repeats-liquidation-warning-after-strike/
+- Not used: any claim about what individual Hostess directors knew. Sears (PBGC takeover, 2019) dropped.
 
 ## Lumen Search
 
