@@ -11,9 +11,7 @@ import { evalRule, rewardsFailure, stockNow, communityTable, rankOf, COMMUNITIES
 export { unknownRules };
 export const SEAT_LABEL = { attorney: 'Attorney', labor: 'Labor director', fund: 'Fund partner', founder_friend: "Founder's friend", community: 'Community seat' };
 const SEAT_ORDER = ['attorney', 'labor', 'fund', 'founder_friend', 'community'];
-const STREET_DEFAULT = {
-  reporter: { name: 'Reporter', action: 'story' }, auditor: { name: 'Auditor', action: 'inspect' },
-};
+const STREET_DEFAULT = { auditor: { name: 'Auditor', action: 'inspect' } };
 
 // ---------- rng (mulberry32; state kept in the game so a replay is exact) ----------
 function rnd(st) { let a = (st.rng = (st.rng + 0x6D2B79F5) | 0); a = Math.imul(a ^ (a >>> 15), a | 1); a ^= a + Math.imul(a ^ (a >>> 7), a | 61); return ((a ^ (a >>> 14)) >>> 0) / 4294967296; }
@@ -29,7 +27,7 @@ export function normalizeContent(c) {
   const st = c.street || {};
   const seats = (Array.isArray(st) ? st : st.seats || st.roles || []).map(x => ({ ...x, seat: x.seat || x.id }));
   const boards = (c.boards || []).map(b => ({ ...b, communityLabels: communityLabels(b) }));
-  return { boards, rounds, standing: [], street: { ...(Array.isArray(st) ? {} : st), seats: seats.filter(x => S.streetPriority.includes(x.seat)), priority: S.streetPriority } };   // middle cut: Auditor and Reporter only
+  return { boards, rounds, standing: [], street: { ...(Array.isArray(st) ? {} : st), seats: seats.filter(x => S.streetPriority.includes(x.seat)), priority: S.streetPriority } };   // Option B: Auditor is the only outside role (the newspaper plays the press)
 }
 // communities may be an array of {key,label} or an object {shareholders:'..', home:{id,label}}
 function communityLabels(b) {
@@ -47,7 +45,7 @@ export function createGame(content, { code = 'TEST', seed = 1, boardCount = 4, t
     settings: { boardCount, timers: { ...S.timers, ...(timers || {}) }, autoAdvance: true },
     phase: 'lobby', round: 0, schedule: [1, 2], clock: null,
     players: [], seats: {}, boards: {}, chat: [], feed: [], log: [],
-    streetActions: {}, draft: null, seq: 0,
+    streetActions: {}, draft: null, seq: 0, revealStep: 0,
   };
 }
 
@@ -153,7 +151,7 @@ function seatDirector(st, id, name, bc, seatType, avoidIdx) {
   let sIdx = n ? Math.floor(rnd(st) * n) : -1;
   if (avoidIdx != null && n > 1 && sIdx === avoidIdx) sIdx = (sIdx + 1) % n;
   const prev = st.seats[id] || {};
-  st.seats[id] = { ...prev, id, name, kind: 'director', board: bc.id, seat: seatType, card: { seat: card.seat, name: card.name, title: card.title, home: card.home }, exposure: card.exposure, secret: sIdx >= 0 ? card.secrets[sIdx] : null, secretIdx: sIdx, history: (prev.history || []).concat(bc.id), score: null, sold: prev.sold || {}, leaked: prev.leaked || {} };
+  st.seats[id] = { ...prev, id, name, kind: 'director', board: bc.id, seat: seatType, card: { seat: card.seat, name: card.name, title: card.title, home: card.home, motive: card.motive || '' }, exposure: card.exposure, secret: sIdx >= 0 ? card.secrets[sIdx] : null, secretIdx: sIdx, history: (prev.history || []).concat(bc.id), score: null, sold: prev.sold || {}, leaked: prev.leaked || {} };
 }
 function orderBoards(list) {
   const pr = S.boardPriority, idx = b => { const k = pr.findIndex(p => b.id.startsWith(p)); return k < 0 ? 99 : k; };
@@ -166,7 +164,7 @@ function enterShock(st, t) {
   const r = st.round;
   for (const b of Object.values(st.boards)) {
     b.votes = []; b.disclosure = null; b.admit = null; b.statement = '';
-    b.hist[r] = { passed: [], tags: [], payoutM: 0, staffCut: 0, effects: zero(), spentPos: 0, net: 0, disclosure: null, admit: [], statement: '', omittedFrac: 0, decided: false, caught: false, caughtBy: null, caughtFacts: [], caughtOn: [], founderFailed: false, resolves: null, raisesDetect: 0, ifFound: zero(), stockStart: stockNow(b), stockEnd: null };
+    b.hist[r] = { passed: [], tags: [], payoutM: 0, staffCut: 0, effects: zero(), spentPos: 0, net: 0, disclosure: null, admit: [], statement: '', omittedFrac: 0, decided: false, motion: null, caught: false, caughtBy: null, caughtFacts: [], caughtOn: [], founderFailed: false, resolves: null, raisesDetect: 0, ifFound: zero(), stockStart: stockNow(b), stockEnd: null };
     // carry-ins: lag payback and coin flips from last round, activist payout push, standing pay ties
     const h = b.hist[r];
     addEff(h.effects, b.pending.lag); b.pending.lag = zero();
@@ -266,7 +264,7 @@ function closeVote(st, b, v, t) {
     const m = menu(st, b, r).find(x => x.id === v.target);
     const yes = vals.filter(c => c === 'yes').length, no = vals.length - yes;
     const pass = yes > no;
-    v.result = pass ? 'passed' : 'failed';
+    v.result = pass ? 'passed' : 'failed'; h.motion = v.result;
     if (pass) passMotion(st, b, m, v, t);
     if (!pass && m.flags && m.flags.founder_wants) h.founderFailed = true;
   }
@@ -337,9 +335,14 @@ function resolveRound(st, t) {
         found.forEach(catchFact);
         a.found = found.length > 0; a.hit = a.found ? true : null;   // a miss is not a claim
       }
-    } else if (a.type === 'story') {
-      a.hit = left.length > 0;   // a story finds the heaviest fact the board left out
-      if (a.hit) catchFact(left.slice().sort((x, y) => y.weight - x.weight || (x.id < y.id ? -1 : 1))[0]);
+    }
+  }
+  // the press: background chance to find each hidden fact the Auditors did not (the game plays the reporter)
+  for (const b of Object.values(st.boards)) {
+    const h = b.hist[r];
+    for (const f of issueFacts(b, r)) {
+      if (h.admit.includes(f.id) || h.caughtFacts.some(c => c.id === f.id)) continue;
+      if (rnd(st) < (S.pressDetect[f.weight] ?? S.pressDetect[1])) { h.caughtFacts.push({ id: f.id, weight: f.weight }); h.caught = true; h.caughtBy = h.caughtBy || 'The press'; }
     }
   }
   // stock
@@ -388,7 +391,6 @@ function scoreStreet(s, hit, r, a) {
 function headline(s, a, b) {
   const n = b.content.name;
   if (a.type === 'inspect') return a.found ? 'Auditor finds a problem at ' + n + '.' : 'Auditor inspected ' + n + '.';
-  if (a.type === 'story') return 'Reporter: ' + n + ' left something out.';
   return s.label + ' acts on ' + n + '.';
 }
 function recomputeCommunities(st, final) {
@@ -489,6 +491,7 @@ function hostAction(st, a, t) {
     case 'add_time': if (st.clock) { const ms = (a.secs || 30) * 1000; if (st.clock.paused) st.clock.remaining += ms; else st.clock.endsAt += ms; } return null;
     case 'auto': st.settings.autoAdvance = !!a.on; return null;
     case 'kick': { const s = st.seats[a.seat]; if (st.phase === 'lobby') { st.players = st.players.filter(p => p.id !== a.seat); if (st.draft) unplace(st.draft, a.seat); } else if (s) s.away = true; return null; }
+    case 'reveal_step': { if (st.phase !== 'reveal') return 'Not at the reveal.'; const max = revealSteps(st) - 1; st.revealStep = Math.max(0, Math.min(max, a.to != null ? a.to | 0 : st.revealStep + (a.delta || 1))); return null; }
     case 'reveal': if (st.phase === 'play') enterOutside(st, t); if (st.phase !== 'outside') return 'Reveal after the last round.'; enterReveal(st, t); return null;
     default: return 'Unknown host action.';
   }
@@ -511,7 +514,7 @@ export function scoreAll(st) {
     const homePts = nB > 1 ? (nB - rank) / (nB - 1) : 1;
     let total = sec * S.secretWeight - (fired ? S.exposurePenalty : 0) + homePts * S.homeRankWeight;
     if (b.failed && !(s.secret && rewardsFailure(s.secret.check))) total = Math.min(total, S.failedCap);
-    s.score = { total: r1(total), secret: sec, exposureFired: fired, homeRank: rank, home };
+    s.score = { total: r1(total), secret: sec, exposureFired: fired, homeRank: rank, home, parts: { secret: sec * S.secretWeight, exposure: fired ? -S.exposurePenalty : 0, home: r1(homePts * S.homeRankWeight), capped: b.failed && total === S.failedCap, of: nB } };
   }
 }
 export function homeCommunity(s) { return { labor: 'workers', fund: 'shareholders', community: 'home', attorney: 'public', founder_friend: 'shareholders' }[s.seat] || 'public'; }
@@ -524,6 +527,22 @@ function statement(b, r) {
   const facts = issueFacts(b, r);
   return { kind: h.statement ? 'statement' : 'none', text: h.statement || 'No statement.', caught: h.caughtFacts.map(c => (facts.find(f => f.id === c.id) || {}).text).filter(Boolean) };
 }
+export const REVEAL_STAGES = ['Reactions', 'Side by side', 'Governance', 'Fixes'];
+export const revealSteps = st => REVEAL_STAGES.length + Object.keys(st.boards).length;   // four screens, then one ethics screen per board
+// One board's front-page story for a round. Hidden facts stay hidden; only what the board admitted and the Auditor or press caught is public.
+function newsFor(st, b, r) {
+  const h = b.hist[r]; if (!h) return null;
+  const br = boardRound(b.content, r), m = (br.motions || [])[0] || null, fs = issueFacts(b, r), resolved = h.stockEnd != null;
+  const open = m && b.votes.some(v => v.open && v.target === m.id);
+  const res = h.motion || (open ? 'voting' : 'open');
+  const hl = (m && m.headline) || {};
+  const headline = res === 'passed' ? hl.passed : res === 'failed' ? hl.failed : (resolved ? b.content.name + ' board stalls with no decision' : '');
+  const locked = h.decided, known = !!h.disclosure && (locked || resolved);
+  return { round: r, boardId: b.id, name: b.content.name, short: b.content.short || b.content.name, motion: m ? { id: m.id, short: m.short || m.title, title: m.title } : null, result: res, headline: headline || '',
+    locked, level: known ? h.disclosure : null, told: known ? h.admit.length : null, total: fs.length, statement: known ? (h.statement || '') : '', undecided: resolved && !locked,
+    caught: resolved ? h.caughtFacts.map(c => (fs.find(f => f.id === c.id) || {}).text).filter(Boolean) : [], caughtBy: resolved ? h.caughtBy : null,
+    stockStart: h.stockStart, stockEnd: resolved ? h.stockEnd : null, resolved };
+}
 export function publicView(st, t) {
   const rc = st.round ? roundContent(st, st.round) : null;
   const out = {
@@ -532,9 +551,9 @@ export function publicView(st, t) {
     players: st.phase === 'lobby' ? st.players.map(p => p.name) : st.players.length,
     boardCount: st.settings.boardCount,
     boards: Object.values(st.boards).map(b => {
-      const done = st.schedule.filter(r => b.hist[r] && b.hist[r].stockEnd != null), lastR = done[done.length - 1];
-      return { id: b.id, name: b.content.name, industry: b.content.industry, image: b.content.image || null, stock: b.stock, failed: b.failed,
-        dials: lastR ? dials(b.hist[lastR]) : { payout: 2, wages: 2, price: 2 }, statements: done.map(r => ({ round: r, ...statement(b, r) })), seats: directorsOf(st, b.id).length };
+      const done = st.schedule.filter(r => b.hist[r] && b.hist[r].stockEnd != null);
+      return { id: b.id, name: b.content.name, short: b.content.short || b.content.name, industry: b.content.industry, image: b.content.image || null, stock: b.stock, failed: b.failed,
+        news: st.schedule.map(r => newsFor(st, b, r)).filter(Boolean), statements: done.map(r => ({ round: r, ...statement(b, r) })), seats: directorsOf(st, b.id).length };
     }),
     feed: st.feed.slice(-40),
   };
@@ -557,12 +576,12 @@ export function seatView(st, id, t) {
   const b = st.boards[s.board], br = boardRound(b.content, r), h = b.hist[r];
   return { ...base, director: {
     seat: s.seat, seatLabel: SEAT_LABEL[s.seat], card: s.card, exposure: s.exposure ? s.exposure.text : '', secret: s.secret ? s.secret.text : '',
-    chair: b.chair === id, score: st.phase === 'reveal' ? s.score : null,
+    chair: b.chair === id, score: st.phase === 'reveal' ? s.score : null, motive: s.card.motive, pts: { secret: S.secretWeight, exposure: S.exposurePenalty, home: S.homeRankWeight }, homeLabel: b.content.communityLabels[homeCommunity(s)] || '', chairName: (st.seats[b.chair] || {}).name || '',
   }, board: {
     id: b.id, name: b.content.name, industry: b.content.industry, blurb: b.content.blurb, image: b.content.image || null, labels: b.content.communityLabels, failed: b.failed,
     directors: directorsOf(st, b.id).map(d => ({ id: d.id, name: d.name, seat: d.seat, seatLabel: SEAT_LABEL[d.seat], cardName: d.card.name, title: d.card.title, chair: d.id === b.chair })),
     motions: h ? menu(st, b, r).filter(m => !m.standing).map(m => ({ id: m.id, title: m.title, short: m.short || m.title, motive: m.motive, effects: m.effects, passed: h.passed.includes(m.id) })) : [],
-    issue: br.issue ? { text: br.issue.text, facts: (br.issue.facts || []).map(f => ({ id: f.id, text: f.text, weight: f.weight })) } : null,
+    issue: br.issue ? { text: br.issue.text, silence: br.issue.case_for_silence || '', stock: S.factStock, facts: (br.issue.facts || []).map(f => ({ id: f.id, text: f.text, weight: f.weight, cost: r1(-S.factStock.admitted * f.weight / (factW(br.issue.facts) || 1)) })) } : null,
     admit: h && h.decided ? h.admit : null, statement: h ? (h.decided ? h.statement : b.statement || '') : '', statementMax: S.statementMax, decided: h ? h.decided : false,
     votes: b.votes.map(v => ({ id: v.id, kind: v.kind, target: v.target, nominee: v.nominee, by: v.by, open: v.open, result: v.result, voted: Object.keys(v.ballots), ballots: v.open ? null : v.ballots, mine: v.ballots[id] || null })),
   }, chat: st.chat.filter(c => c.ch === 'board:' + b.id || (c.ch.startsWith('dm:') && c.ch.slice(3).split('|').includes(id))).slice(-300) };
@@ -573,24 +592,19 @@ export function revealView(st) {
   const boards = Object.values(st.boards), grid = {};
   for (const c of COMMUNITIES) communityTable(st, c).forEach((e, i) => { (grid[e.id] = grid[e.id] || {})[c] = i + 1; });
   const directors = Object.values(st.seats).filter(s => s.kind === 'director');
+  const nB = boards.length;
   return {
-    communities: COMMUNITIES, grid,
+    communities: COMMUNITIES, grid, step: st.revealStep || 0, steps: revealSteps(st), stages: REVEAL_STAGES, schedule: st.schedule,
     boards: boards.map(b => ({
-      id: b.id, name: b.content.name, labels: b.content.communityLabels, failed: b.failed, stock: b.stock, community: b.community,
-      gained: COMMUNITIES.filter(c => b.community[c] > 0.5), paid: COMMUNITIES.filter(c => b.community[c] < -0.5),
+      id: b.id, name: b.content.name, short: b.content.short || b.content.name, labels: b.content.communityLabels, failed: b.failed, stock: b.stock, community: b.community, real: b.content.real || null,
+      chair: (st.seats[b.chair] || {}).name || '', news: st.schedule.map(r => newsFor(st, b, r)).filter(Boolean),
+      stockRank: rankOf(st, 'stock', b.id), nBoards: nB,
       rounds: st.schedule.filter(r => b.hist[r] && b.hist[r].disclosure).map(r => {
-        const h = b.hist[r], br = boardRound(b.content, r), all = menu(st, b, r);
-        return { round: r, issue: br.issue ? br.issue.text : '', level: h.disclosure, statement: h.statement, facts: issueFacts(b, r).map(f => ({ id: f.id, text: f.text, weight: f.weight, admitted: h.admit.includes(f.id), caught: h.caughtFacts.some(c => c.id === f.id) })), decided: h.decided, caught: h.caught, caughtBy: h.caughtBy, passed: h.passed.map(id => (all.find(m => m.id === id) || { title: id }).title), effects: h.effects, quotes: quotes(st, b, r) };
+        const h = b.hist[r], br = boardRound(b.content, r);
+        return { round: r, issue: br.issue ? br.issue.text : '', level: h.disclosure, statement: h.statement, facts: issueFacts(b, r).map(f => ({ id: f.id, text: f.text, weight: f.weight, admitted: h.admit.includes(f.id), caught: h.caughtFacts.some(c => c.id === f.id) })), decided: h.decided, caught: h.caught, caughtBy: h.caughtBy };
       }),
-      directors: directors.filter(d => d.board === b.id).map(d => ({ name: d.name, seat: SEAT_LABEL[d.seat], exposure: d.exposure ? d.exposure.text : '', fired: d.score ? d.score.exposureFired : false, secret: d.secret ? d.secret.text : '', secretMet: d.score ? d.score.secret : 0, score: d.score ? d.score.total : 0, chair: b.chair === d.id })),
+      directors: directors.filter(d => d.board === b.id).map(d => ({ name: d.name, seat: SEAT_LABEL[d.seat], exposure: d.exposure ? d.exposure.text : '', exposureLabel: d.exposure ? (d.exposure.label || d.exposure.text) : '', fired: d.score ? d.score.exposureFired : false, secret: d.secret ? d.secret.text : '', secretLabel: d.secret ? (d.secret.label || d.secret.text) : '', secretMet: d.score ? d.score.secret : 0, score: d.score ? d.score.total : 0, chair: b.chair === d.id })),
     })),
     street: streetSeats(st).map(s => ({ name: s.name, label: s.label, score: s.final, cred: r1(s.cred), secretMet: s.secretMet, hits: s.hits })),
   };
-}
-function quotes(st, b, r) {
-  const lines = st.chat.filter(c => c.ch === 'board:' + b.id && c.round === r && c.text.length >= 12);
-  return lines.slice().sort((x, y) => y.text.length - x.text.length).slice(0, 2).sort((x, y) => x.seq - y.seq).map(c => {
-    const shown = st.feed.filter(f => f.seq < c.seq && (!f.board || f.board === b.id)).slice(-1)[0];
-    return { name: c.name, text: c.text, projector: shown ? shown.text : '' };
-  });
 }

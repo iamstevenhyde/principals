@@ -35,7 +35,7 @@ try {
   await admin.waitForTimeout(1500);
   await shot(ps[0], 'team', 'Lobby', 'Waiting room (not placed yet)'); await shot(proj, 'projector', 'Lobby', 'Lobby', false); await shot(admin, 'admin', 'Lobby', 'Host: waiting room, nobody placed');
   await admin.click('#tmbox summary');
-  for (const k of ['shock', 'play', 'outside']) await admin.fill('#tm_' + k, k === 'play' ? '40' : '10');
+  for (const k of ['shock', 'play', 'outside']) await admin.fill('#tm_' + k, k === 'play' ? '1' : '10');
   await admin.click('#savetm');
   await admin.selectOption('#nb', '5');
   await admin.click('#auto2'); await admin.waitForTimeout(1500);
@@ -64,13 +64,13 @@ try {
           else { await team.fill('#msg', 'Do we really want to leave that fact out?'); await team.click('#send'); }
           await team.click('[data-go="0"]');
           for (const k of [0, 1]) await team.locator('[data-fact]').nth(k).check({ timeout: 3000 }).catch(() => {});
-          await shot(team, 'team', step, '1 Facts: switches and severity bars');
+          await shot(team, 'team', step, '1 Facts: switches, bars, price cost');
           await team.click('[data-go="1"]');
           if (await team.$('#stmt')) await team.fill('#stmt', 'We are reviewing the matter and will report what we find.');
           await shot(team, 'team', step, '2 Statement');
           if (await team.$('[data-a=calld]')) { await team.click('[data-a=calld]'); await team.waitForSelector('[data-fsubmit]', { timeout: 5000 }); await shot(team, 'team', step, 'Facts vote open', false); await team.click('[data-fsubmit]'); await team.waitForTimeout(800);
             const cl = await team.$('[data-a=close]'); if (cl) await cl.click().catch(() => {}); await team.waitForTimeout(1200); await shot(team, 'team', step, 'Facts and statement locked'); }
-          await team.click('[data-go="2"]'); await team.locator('.mhead').first().click(); await shot(team, 'team', step, '3 Motions: one row each');
+          await team.click('[data-go="2"]'); await team.locator('.mhead').first().click(); await shot(team, 'team', step, '3 Motion: the one headline vote');
           if (await team.$('[data-callm]')) { await team.click('[data-callm]'); await team.waitForTimeout(900); await shot(team, 'team', step, 'Motion vote open', false); const y = await team.$('[data-ballot="yes"]'); if (y) { await y.click(); await team.waitForTimeout(500); } }
         } catch (e) { console.log('team act skipped', e.message.slice(0, 80)); }
         if (outside) try { const tg = await outside.$('[data-tgt]'); if (tg) { await tg.click(); await outside.waitForTimeout(1000); await shot(outside, 'outside', step, 'Outside picks a target'); } } catch {}

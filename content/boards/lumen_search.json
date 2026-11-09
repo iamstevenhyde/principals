@@ -1,9 +1,10 @@
 {
   "id": "lumen_search",
   "name": "Lumen Search",
+  "short": "Lumen",
   "industry": "Search and AI platform",
   "from_week": "6",
-  "blurb": "A search engine and AI assistant with two billion queries a day. An ad business pays for all of it, and about 3,000 contract moderators hired through a staffing vendor keep the worst content out of sight. Co-founder Idris Valdane still holds 25% of the vote.",
+  "blurb": "A search engine and AI assistant with two billion queries a day, paid for by an ad business. Co-founder Idris Valdane still holds 25% of the vote.",
   "communities": [
     {
       "key": "shareholders",
@@ -11,7 +12,7 @@
     },
     {
       "key": "workers",
-      "label": "Contract moderators"
+      "label": "Engineers and staff"
     },
     {
       "key": "customers",
@@ -19,8 +20,7 @@
     },
     {
       "key": "home",
-      "id": "users",
-      "label": "Users (privacy)"
+      "label": "Users"
     },
     {
       "key": "public",
@@ -33,8 +33,10 @@
       "name": "Tessa Brandt",
       "title": "Attorney",
       "home": "The state bar",
+      "motive": "You told Lumen the dashboard footnote was enough disclosure, and that was a defensible view. A judge may not share it.",
       "exposure": {
-        "text": "Disbarred if the board is caught hiding facts while she sits on it.",
+        "text": "You are disbarred if the board is caught hiding a heavy fact.",
+        "label": "Disbarred if caught hiding",
         "trigger": {
           "type": "facts_caught",
           "weight": 3
@@ -44,6 +46,7 @@
         {
           "id": "attorney_A",
           "text": "Clean the books: the board admits every fact in round 1.",
+          "label": "Admit every fact in round 1",
           "check": {
             "type": "disclosure_choice",
             "round": 1,
@@ -52,7 +55,8 @@
         },
         {
           "id": "attorney_B",
-          "text": "Your firm bills Lumen $3M a year. One caught fact ends the contract, so none may be caught.",
+          "text": "Your firm bills Lumen $3M a year. One caught fact ends it, so none may be caught.",
+          "label": "No fact gets caught",
           "check": {
             "type": "not",
             "of": {
@@ -66,26 +70,30 @@
       "seat": "labor",
       "name": "Priya Raman",
       "title": "Labor director",
-      "home": "Content Workers Alliance (contract moderators)",
+      "home": "Lumen Tech Workers Guild",
+      "motive": "Your members built the dashboard, and some flagged the cutoff months ago. If the board fires the CEO they may walk out, and if it does not they may stay angry.",
       "exposure": {
-        "text": "Loses the next vote if more than 10% of moderators are cut or replaced by the model.",
+        "text": "Members vote you out if the board removes Idris.",
+        "label": "Idris removed",
         "trigger": {
-          "type": "staff_cut_pct_gt",
-          "value": 10
+          "type": "motion_passed",
+          "id": "remove_founder"
         }
       },
       "secrets": [
         {
           "id": "labor_A",
-          "text": "The moderator wellness program gets funded before the game ends.",
+          "text": "The advertiser credit passes. Your members do not want to defend a bad number.",
+          "label": "Credit passes",
           "check": {
             "type": "motion_passed",
-            "id": "mod_wellness"
+            "id": "credit_advertisers"
           }
         },
         {
           "id": "labor_B",
           "text": "You were granted stock options last year. The stock must end above where it started.",
+          "label": "Stock ends above start",
           "check": {
             "type": "stock_end_above_start"
           }
@@ -97,8 +105,10 @@
       "name": "Anders Lund",
       "title": "Fund partner",
       "home": "Cobalt Ridge Ventures (owns 7%)",
+      "motive": "Cobalt Ridge pitched its investors on clean numbers at Lumen. A refund would embarrass you, and a lawsuit would be worse.",
       "exposure": {
-        "text": "Investors pull money from his fund if the stock ends below where it started.",
+        "text": "Your investors pull their money if the stock ends below where it started.",
+        "label": "Stock ends below start",
         "trigger": {
           "type": "stock_end_below_start"
         }
@@ -106,15 +116,20 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Pass a buyback of $40M or more in any round.",
+          "text": "A refund this size would sink your quarter. The advertiser credit must not pass.",
+          "label": "Credit fails",
           "check": {
-            "type": "payout_m_gte",
-            "value": 40
+            "type": "not",
+            "of": {
+              "type": "motion_passed",
+              "id": "credit_advertisers"
+            }
           }
         },
         {
           "id": "fund_B",
-          "text": "Your fund quietly owns a rival search company. Lumen's stock must finish in the bottom half.",
+          "text": "Your fund quietly owns a rival search company. The stock must finish in the bottom half.",
+          "label": "Stock ends in bottom half",
           "check": {
             "type": "stock_rank_bottom_half"
           }
@@ -125,17 +140,21 @@
       "seat": "founder_friend",
       "name": "Wes Calloway",
       "title": "Founder's friend",
-      "home": "Idris Valdane, the co-founder (grad-school roommate)",
+      "home": "Idris Valdane, the founder (grad-school roommate)",
+      "motive": "Idris was your roommate, and he told you first that the dashboard was a risk. You are loyal, and you are also the one person he trusts to say no.",
       "exposure": {
-        "text": "Loses the seat if the board votes down replacing the moderators with the model, which Idris wants.",
+        "text": "You lose the seat if the board removes Idris as CEO.",
+        "label": "Idris removed",
         "trigger": {
-          "type": "founder_motion_failed"
+          "type": "motion_passed",
+          "id": "remove_founder"
         }
       },
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Idris knew about the bot traffic. Make sure the board never admits every fact about it.",
+          "text": "Idris knew about the cutoff. The board must never admit every fact about it in round 1.",
+          "label": "Don't admit every fact in round 1",
           "check": {
             "type": "not",
             "of": {
@@ -147,7 +166,8 @@
         },
         {
           "id": "founder_friend_B",
-          "text": "You sit on two other boards. No scandal anywhere you sit, so no disclosure on this board gets caught.",
+          "text": "You sit on two other boards. No scandal anywhere you sit, so no fact on this board may be caught.",
+          "label": "No fact gets caught",
           "check": {
             "type": "not",
             "of": {
@@ -162,30 +182,33 @@
       "name": "Mira Castellanos",
       "title": "Community seat (User-privacy advocate)",
       "home": "Open Signal Alliance",
+      "motive": "You speak for the users whose attention is being sold. You want advertisers to hear the truth even if it costs the product you rely on.",
       "exposure": {
-        "text": "Loses standing at home if the board sells user data.",
+        "text": "You lose standing at home if the board is caught hiding a fact.",
+        "label": "Caught hiding",
         "trigger": {
-          "type": "motion_passed",
-          "id": "sell_data"
+          "type": "facts_caught"
         }
       },
       "secrets": [
         {
           "id": "community_A",
-          "text": "The ad targeting cap passes.",
+          "text": "The advertiser credit passes. Honest numbers come before honest privacy.",
+          "label": "Credit passes",
           "check": {
             "type": "motion_passed",
-            "id": "ad_cap"
+            "id": "credit_advertisers"
           }
         },
         {
           "id": "community_B",
-          "text": "Lumen's foundation pays 40% of your group's budget. The ad targeting cap must not pass.",
+          "text": "Lumen's foundation pays 40% of your group's budget. The credit must not pass.",
+          "label": "Credit fails",
           "check": {
             "type": "not",
             "of": {
               "type": "motion_passed",
-              "id": "ad_cap"
+              "id": "credit_advertisers"
             }
           }
         }
@@ -197,73 +220,49 @@
       "round": 1,
       "motions": [
         {
-          "id": "buyback",
-          "title": "Stock buyback",
-          "short": "Stock buyback",
-          "motive": "Return the cash to the owners, and the market will notice tonight.",
+          "id": "credit_advertisers",
+          "title": "Credit advertisers for the disputed views and fix the dashboard",
+          "short": "Credit advertisers",
+          "motive": "Fix it before they find it.",
           "effects": {
-            "shareholders": 2,
+            "shareholders": -2,
             "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "payout_m": 40,
-            "tags": [
-              "payout"
-            ]
-          }
-        },
-        {
-          "id": "mod_wellness",
-          "title": "Moderator wellness program",
-          "short": "Moderator wellness",
-          "motive": "Counseling and breaks for people who look at the worst of it all day.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 2,
-            "customers": 0,
+            "customers": 2,
             "home": 0,
             "public": 1
-          }
-        },
-        {
-          "id": "ad_cap",
-          "title": "Cap how finely advertisers can target",
-          "short": "Cap ad targeting",
-          "motive": "Advertisers can pick a city and an interest, not a person.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": -2,
-            "home": 2,
-            "public": 0
+          },
+          "headline": {
+            "passed": "Lumen credits advertisers and fixes its dashboard",
+            "failed": "Lumen board refuses advertiser credits"
+          },
+          "flags": {
+            "resolves_issue": true
           }
         }
       ],
       "issue": {
-        "id": "bot_traffic",
-        "text": "Advertisers paid for about a fifth of last quarter's traffic that turned out to be bots. Internal analytics flagged it three weeks ago. Nobody has told the advertisers.",
+        "id": "view_metric",
+        "text": "Lumen's ad dashboard reports average view time, but a new analysis shows it leaves out views under three seconds. The analysis is not final, and the cutoff sits in a footnote of the technical guide.",
+        "case_for_silence": "The analysis is unfinished, the cutoff is documented, and nervous advertisers could pull spending the numbers may not justify.",
         "facts": [
           {
             "id": "f1",
-            "text": "About a fifth of last quarter's traffic was bots.",
+            "text": "The dashboard's average view time leaves out views under three seconds, which raises the average.",
             "weight": 3
           },
           {
             "id": "f2",
-            "text": "Advertisers paid for that traffic.",
+            "text": "The gap could be as large as 60 to 80 percent, or much smaller. The analysis is not final.",
             "weight": 2
           },
           {
             "id": "f3",
-            "text": "Internal analytics flagged it three weeks ago.",
+            "text": "Some advertisers bought larger campaigns after seeing those numbers.",
             "weight": 2
           },
           {
             "id": "f4",
-            "text": "Nobody has told the advertisers.",
+            "text": "The cutoff appears only in a footnote of the technical guide.",
             "weight": 1
           }
         ]
@@ -273,78 +272,67 @@
       "round": 2,
       "motions": [
         {
-          "id": "sell_data",
-          "title": "Sell user profiles to data brokers",
-          "short": "Sell user data",
-          "motive": "The terms of service allow it. Brokers pay well.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": -3,
-            "public": 0
-          },
-          "flags": {
-            "if_found": {
-              "public": -2
-            },
-            "tags": [
-              "sells_user_data"
-            ]
-          }
-        },
-        {
-          "id": "mods_ai",
-          "title": "Replace most moderators with the model",
-          "short": "Model replaces mods",
-          "motive": "The model never takes a sick day.",
-          "effects": {
-            "shareholders": 0,
-            "workers": -3,
-            "customers": 0,
-            "home": 0,
-            "public": -1
-          },
-          "flags": {
-            "staff_cut_pct": 60,
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "safety_rebuild",
-          "title": "Rebuild the trust and safety team",
-          "short": "Rebuild safety team",
-          "motive": "Put people back on the queues the model can't handle.",
+          "id": "remove_founder",
+          "title": "Remove co-founder Idris Valdane as CEO",
+          "short": "Remove the CEO",
+          "motive": "The board must be able to trust what it is told.",
           "effects": {
             "shareholders": -1,
-            "workers": 1,
+            "workers": -2,
             "customers": 0,
-            "home": 1,
+            "home": 0,
             "public": 0
+          },
+          "headline": {
+            "passed": "Lumen board removes co-founder as CEO",
+            "failed": "Lumen board backs its co-founder as CEO"
           }
         }
       ],
       "issue": {
-        "id": "covenant_breach",
-        "text": "Lumen breached a debt covenant last month. The lenders haven't been told, and waiver talks go easier if revenue looks steady.",
+        "id": "ceo_candor",
+        "text": "Several directors say co-founder Idris Valdane has not been fully candid with them. He says the board had what it needed. Most engineers say they would follow him, and no reason has been given to him in writing.",
+        "case_for_silence": "Saying why could start a legal fight and spook lenders, and it would be unfair to Idris if the concerns turn out to be small.",
         "facts": [
           {
             "id": "f1",
-            "text": "Lumen broke a condition of its bank loans last month.",
+            "text": "Several directors say Idris has not been fully candid with the board.",
             "weight": 3
           },
           {
             "id": "f2",
-            "text": "The lenders have not been told.",
+            "text": "Idris met outside investors about a side project without telling the board, and he calls that routine.",
             "weight": 2
           },
           {
             "id": "f3",
-            "text": "Lenders are easier to deal with if revenue looks steady.",
+            "text": "Most engineers have said they would follow Idris if he left.",
+            "weight": 2
+          },
+          {
+            "id": "f4",
+            "text": "No reason has been given to Idris in writing.",
             "weight": 1
           }
         ]
       }
     }
-  ]
+  ],
+  "real": {
+    "cases": [
+      {
+        "round": 1,
+        "event": "Facebook video metrics",
+        "years": "2016 to 2019",
+        "line": "Facebook said in 2016 it overstated average video watch time, and paid $40M in 2019 to settle advertiser claims."
+      },
+      {
+        "round": 2,
+        "event": "OpenAI board",
+        "years": "2023",
+        "line": "OpenAI's board removed Sam Altman, saying he was not consistently candid. 745 of 770 staff threatened to leave and he returned."
+      }
+    ],
+    "fix": "Correct a known error fast, and be able to defend your reasons for a firing."
+  }
 }

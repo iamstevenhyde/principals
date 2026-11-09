@@ -8,7 +8,7 @@
 import { openStore, params, hostToken, saveHostToken, pageMode } from './pages/store.js';
 import { Host } from './pages/host.js';
 import { esc, fmtClock, SEAT_ICON, ICON, COLORS } from './pages/render.js';
-import { SEAT_LABEL } from './engine/engine.js';
+import { SEAT_LABEL, revealSteps } from './engine/engine.js';
 const app = document.getElementById('app');
 const store = await openStore();
 let code = params().get('g'), host = null, lastHtml = '';
@@ -35,6 +35,8 @@ if (!code) {
   }
 }
 
+document.addEventListener('keydown', e => { if (!host || !host.state || host.state.phase !== 'reveal' || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return; if (e.key === 'ArrowRight') host.act({ type: 'reveal_step', delta: 1 }); if (e.key === 'ArrowLeft') host.act({ type: 'reveal_step', delta: -1 }); });
+
 function lobby(st, joinUrl) {
   const D = st.draft, byId = Object.fromEntries(st.players.map(p => [p.id, p]));
   const where = {};
@@ -56,7 +58,7 @@ function lobby(st, joinUrl) {
   <div class="card"><h2>Waiting room ${waiting.length ? `<span class="pill">${waiting.length}</span>` : ''}</h2><div class="chipgrid">${waiting.map(p => `<span class="pchip">${face(p.name)}${esc(p.name)}</span>`).join('') || '<span class="mute">Everyone is placed.</span>'}</div></div>
   <div class="hostgrid">${D.boards.map(board).join('')}
   <div class="card bcard"><h3>${SEAT_ICON.auditor} Outside <span class="pill">${outs.length}</span></h3>
-    ${outs.map(id => `<div class="srow">${SEAT_ICON[D.outside[id]]}<span>${esc((byId[id] || {}).name)}</span><select data-out="${id}" aria-label="Role"><option value="reporter" ${D.outside[id] === 'reporter' ? 'selected' : ''}>Reporter</option><option value="auditor" ${D.outside[id] === 'auditor' ? 'selected' : ''}>Auditor</option><option value="">Remove</option></select></div>`).join('')}
+    ${outs.map(id => `<div class="srow">${SEAT_ICON[D.outside[id]]}<span>${esc((byId[id] || {}).name)}</span><select data-out="${id}" aria-label="Role"><option value="auditor" selected>Auditor</option><option value="">Remove</option></select></div>`).join('')}
     ${waiting.length ? `<div class="srow"><span></span><select id="addout"><option value="">Add someone...</option>${waiting.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select><span></span></div>` : ''}</div></div>`;
 }
 function render(st) {
@@ -83,14 +85,14 @@ function render(st) {
     <label class="row small"><input type="checkbox" id="auto" ${st.settings.autoAdvance ? 'checked' : ''}> auto-advance</label>
     ${pageMode() === 'local' ? '<button id="bots">Add 5 simulated players</button>' : ''}
   </div>`}
-  <details class="card small" id="tmbox"><summary><b>Timers</b> (seconds per step)</summary><div class="row" style="margin-top:6px">
-    ${['shock', 'play', 'outside'].map(k => `<label>${k} <input id="tm_${k}" type="number" min="5" style="width:80px" value="${st.settings.timers[k]}"></label>`).join('')}
+  <details class="card small" id="tmbox"><summary><b>Timers</b> (round length in minutes, other steps in seconds)</summary><div class="row" style="margin-top:6px">
+    ${['shock', 'play', 'outside'].map(k => `<label>${k === 'play' ? 'round length (min)' : k + ' (s)'} <input id="tm_${k}" type="number" min="${k === 'play' ? 1 : 5}" step="${k === 'play' ? 0.5 : 1}" style="width:80px" value="${k === 'play' ? st.settings.timers[k] / 60 : st.settings.timers[k]}"></label>`).join('')}
     <button id="savetm">Save timers</button></div></details>
   ${boards.length ? `<div class="card"><h2>Boards</h2>${boards.map(b => { const h = b.hist[st.round] || {}; return `<div class="row small" style="border-top:1px solid var(--line);padding:6px 0"><b style="min-width:140px">${esc(b.content.name)}</b>
      stock ${b.stock[b.stock.length - 1]} ${b.failed ? '<b class="err">FAILED</b>' : ''} | passed ${(h.passed || []).length} | facts ${esc(b.disclosure || 'undecided')} | chair ${esc((st.seats[b.chair] || {}).name || '-')}
      | ${Object.values(st.seats).filter(s => s.kind === 'director' && s.board === b.id).map(s => esc(s.name)).join(', ')}</div>`; }).join('')}
      <p class="small mute">Street: ${Object.values(st.seats).filter(s => s.kind === 'street').map(s => esc(s.name) + ' (' + esc(s.label) + ')').join(', ')}</p></div>` : ''}
-  ${st.phase === 'reveal' ? '<div class="card"><p>The reveal is on the projector.</p></div>' : ''}
+  ${st.phase === 'reveal' ? `<div class="card row ctl"><b>Debrief screen ${(st.revealStep || 0) + 1} of ${revealSteps(st)}</b><button id="rprev" ${(st.revealStep || 0) === 0 ? 'disabled' : ''}>Back</button><button class="primary" id="rnext" ${(st.revealStep || 0) >= revealSteps(st) - 1 ? 'disabled' : ''}>Next screen</button><span class="mute small">Arrow keys also work. The projector follows.</span></div>` : ''}
   <p class="small mute">Keep this tab open: it runs the game. ${host.lastError ? '<span class="err">' + esc(host.lastError) + '</span>' : ''}</p>`;
   const paint = () => { const c = document.getElementById('hclk'); if (c) c.textContent = fmtClock(left); };
   if (html === lastHtml) { paint(); return; }
@@ -102,7 +104,8 @@ function render(st) {
   on('add30', () => host.act({ type: 'add_time', secs: 30 })); on('add60', () => host.act({ type: 'add_time', secs: 60 }));
   on('bots', () => { host.addBots(5); render(host.state); });
   on('tabs', () => { for (let i = 0; i < 3; i++) window.open(q('index.html?g=' + st.code), '_blank'); });
-  on('savetm', () => host.act({ type: 'set_timers', timers: Object.fromEntries(['shock', 'play', 'outside'].map(k => [k, Number(document.getElementById('tm_' + k).value) || st.settings.timers[k]])) }));
+  on('savetm', () => host.act({ type: 'set_timers', timers: Object.fromEntries(['shock', 'play', 'outside'].map(k => [k, (Number(document.getElementById('tm_' + k).value) || st.settings.timers[k] / (k === 'play' ? 60 : 1)) * (k === 'play' ? 60 : 1)])) }));
+  on('rprev', () => host.act({ type: 'reveal_step', delta: -1 })); on('rnext', () => host.act({ type: 'reveal_step', delta: 1 }));
   const auto = document.getElementById('auto'); if (auto) auto.onchange = () => host.act({ type: 'auto', on: auto.checked });
   const nb = document.getElementById('nb'); if (nb) nb.onchange = () => { document.activeElement.blur(); host.act({ type: 'set_boards', n: Number(nb.value) }); render(host.state); };
   const act = a => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); host.act(a); render(host.state); };
@@ -110,7 +113,7 @@ function render(st) {
   document.querySelectorAll('[data-seat]').forEach(el => el.onchange = () => act({ type: 'draft_seat', board: el.dataset.board, seat: el.dataset.seat, player: el.value || null }));
   document.querySelectorAll('[data-star]').forEach(el => el.onclick = () => act({ type: 'draft_chair', board: el.dataset.board, player: el.dataset.star }));
   document.querySelectorAll('[data-out]').forEach(el => el.onchange = () => act({ type: 'draft_outside', player: el.dataset.out, role: el.value || null }));
-  const addout = document.getElementById('addout'); if (addout) addout.onchange = () => { if (addout.value) act({ type: 'draft_outside', player: addout.value, role: 'reporter' }); };
+  const addout = document.getElementById('addout'); if (addout) addout.onchange = () => { if (addout.value) act({ type: 'draft_outside', player: addout.value, role: 'auditor' }); };
   const qr = document.getElementById('qr'); if (qr) { try { new QRCode(qr, { text: joinUrl, width: 150, height: 150 }); } catch (e) { qr.textContent = ''; qr.style.display = 'none'; } }
   if (focus && focus.startsWith('tm_')) { const el = document.getElementById(focus); if (el) el.focus(); }
 }

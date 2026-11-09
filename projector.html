@@ -6,13 +6,11 @@
 .top{display:flex;align-items:center;gap:16px}.top h1{flex:1}
 .lobby{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start}
 .names{columns:3;font-size:1.1rem}
-.banner{background:var(--card);border:2px solid var(--warn);border-radius:12px;padding:8px 14px;margin:0 0 12px;font-size:1.2rem}
-.clockbar{height:8px;margin:6px 0 14px}
 @media(max-width:700px){.lobby{grid-template-columns:1fr}.names{columns:1}}
 </style></head><body><div class="proj" id="app"><p class="mute">Loading.</p></div>
 <script type="module">
 import { openStore, params } from './pages/store.js';
-import { esc, fmtClock, outsideView, revealHTML } from './pages/render.js';
+import { esc, fmtClock, frontPage, revealScreen } from './pages/render.js';
 const app = document.getElementById('app');
 const code = (params().get('g') || '').toUpperCase();
 const store = await openStore();
@@ -23,10 +21,8 @@ setInterval(() => { if (P && P.clockLeft != null && !P.paused) { const el = docu
 function render() {
   if (!P) { app.innerHTML = '<p class="err">No game ' + esc(code) + '.</p>'; return; }
   const joinUrl = location.href.split('projector.html')[0] + 'index.html?g=' + code + (params().get('local') === '1' ? '&local=1' : '');
-  const pct = P.clockTotal ? Math.max(0, (P.clockLeft - (Date.now() - got)) / P.clockTotal * 100) : 0;
-  const head = `<div class="top"><h1>Principals</h1><span class="pill">${esc(code)}</span>${P.round ? `<span class="pill">Round ${P.round} of ${P.schedule.length}</span>` : ''}<span class="clock" id="clk">${fmtClock(P.clockLeft)}</span></div>
-    ${P.clockTotal ? `<div class="bar clockbar"><i style="width:${pct}%"></i></div>` : ''}`;
   if (P.phase === 'lobby') {
+    const head = `<div class="top"><h1>Principals</h1><span class="pill">${esc(code)}</span></div>`;
     if (qrDone && document.getElementById('qr')) { document.getElementById('names').innerHTML = (P.players || []).map(esc).join('<br>'); document.getElementById('cnt').textContent = (P.players || []).length; return; }
     app.innerHTML = head + `<div class="lobby"><div><div class="qr" id="qr"></div><p class="small">${esc(joinUrl)}</p></div>
       <div><h2>Join on your phone. Code <b>${esc(code)}</b></h2><p><b id="cnt" style="font-size:2.4rem">${(P.players || []).length}</b> in the waiting room</p><div class="names" id="names">${(P.players || []).map(esc).join('<br>')}</div></div></div>`;
@@ -34,9 +30,13 @@ function render() {
     qrDone = true; return;
   }
   qrDone = false;
-  if (P.phase === 'reveal') { app.innerHTML = head + revealHTML(P.reveal); return; }
-  const shock = P.shock ? `<p class="shock"><b>${esc(P.shock.title)}.</b> ${esc(P.shock.text)}</p>` : '';
-  if (P.phase === 'shock') { app.innerHTML = head + shock + outsideView(P); return; }
-  app.innerHTML = head + (P.phase === 'play' ? `<p class="mute">${esc(P.shock ? P.shock.title : '')}</p>` : '') + outsideView(P);
+  if (P.phase === 'reveal') { app.innerHTML = revealScreen(P.reveal); return; }
+  if (P.phase === 'shock') {
+    app.innerHTML = `<section class="paper shockpage"><header class="mast"><span class="edn">Round ${P.round} of ${P.schedule.length}</span><h1>The Principal Times</h1><span class="clock" id="clk">${fmtClock(P.clockLeft)}</span></header>
+      <div class="bigshock"><h2>${esc(P.shock ? P.shock.title : '')}</h2><p>${esc(P.shock ? P.shock.text : '')}</p></div></section>`;
+    return;
+  }
+  app.innerHTML = frontPage(P);
+  const el = document.getElementById('clk'); if (el) el.textContent = fmtClock(P.clockLeft);
 }
 </script></body></html>

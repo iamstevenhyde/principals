@@ -1,6 +1,6 @@
 // node test/simulate.mjs [games=20]
-// Simulates 24-player games through both rounds of the middle cut (plus small/large variants) and asserts:
-// no engine crash, budgets respected, every rule type in content/RULES.md has a handler, reveal renders.
+// Simulates 24-player games through both rounds of Option B (one headline motion per round, front page, five-screen-plus debrief) plus small/large variants and asserts:
+// no engine crash, every rule type in content/RULES.md has a handler, front page and every debrief screen render within the word cap.
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,7 +9,8 @@ import { STUB } from './fixtures/stub.js';
 import { createGame, apply, tick, seatView, publicView, revealView, unknownRules } from '../engine/engine.js';
 import { RULES } from '../engine/rules.js';
 import { botStep } from '../engine/bots.js';
-import { revealHTML, outsideView } from '../pages/render.js';
+import { revealScreen, frontPage } from '../pages/render.js';
+import { SCORING } from '../config/scoring.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const content = loadContent() || STUB;
@@ -36,6 +37,7 @@ function mulberry(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = 
 function playGame(seed, { players = 24, boards = 4, late = 0 } = {}) {
   const st = createGame(content, { code: 'SIM' + seed, seed, boardCount: boards, timers: { shock: 20, play: 120, outside: 10 } });
   const rand = mulberry(seed * 7 + 3);
+  const t0 = 1_000_000 + 5000 * 1000;
   let t = 1_000_000, crashes = 0, errors = 0, actions = 0;
   const run = a => { const r = apply(st, { ...a, t }); actions++; if (r.crash) { crashes++; console.log('CRASH', r.error, JSON.stringify(a)); } else if (!r.ok) errors++; return r; };
   for (let i = 0; i < players; i++) run({ by: 'p' + i, type: 'join', name: 'Student ' + i });
@@ -49,14 +51,15 @@ function playGame(seed, { players = 24, boards = 4, late = 0 } = {}) {
     t += 1000; steps++;
     for (const id of ids()) for (const a of botStep(seatView(st, id, t), rand)) run({ ...a, by: id });
     seenPhases.add(st.phase + st.round);
-    if (st.phase === 'outside') ok(outsideView(publicView(st, t)).includes('ticker'), 'outside view renders');
+    if (st.phase === 'outside') ok(frontPage(publicView(st, t)).includes('class="story'), 'front page renders');
+    if (st.phase === 'play' && steps % 20 === 0) ok(frontPage(publicView(st, t)).includes('The Principal Times'), 'live front page renders during play');
     if (st.phase === 'outside' && !st.clock) run({ by: 'host', type: 'reveal' });
     tick(st, t);
   }
   ok(st.phase === 'reveal', `seed ${seed}: reached reveal (phase ${st.phase})`);
   ok(crashes === 0, `seed ${seed}: no crashes (${crashes})`);
   ok(st.schedule.length === 2, 'two rounds');
-  for (const b of Object.values(st.boards)) for (const r of st.schedule) ok(((b.content.rounds.find(x => x.round === r) || {}).motions || []).length === 3, `${b.id} r${r}: exactly three motions`);
+  for (const b of Object.values(st.boards)) for (const r of st.schedule) ok(((b.content.rounds.find(x => x.round === r) || {}).motions || []).length === 1, `${b.id} r${r}: exactly one headline motion`);
   for (const b of Object.values(st.boards)) for (const r of st.schedule) {
     const h = b.hist[r]; if (!h) continue;
     ok(['all', 'some', 'none'].includes(h.disclosure), `seed ${seed} ${b.id} r${r}: disclosure level set`);
@@ -66,11 +69,24 @@ function playGame(seed, { players = 24, boards = 4, late = 0 } = {}) {
     ok(h.caught === (h.caughtFacts.length > 0), `seed ${seed} ${b.id} r${r}: caught flag matches caught facts`);
     ok((h.statement || '').length <= 400 && (h.decided || !h.statement), `seed ${seed} ${b.id} r${r}: statement within cap and empty unless locked`);
   }
-  ok(Object.values(st.seats).filter(s => s.kind === 'street').every(s => ['reporter', 'auditor'].includes(s.role)), 'street roles are Auditor and Reporter only');
+  ok(Object.values(st.seats).filter(s => s.kind === 'street').every(s => s.role === 'auditor'), 'the only outside role is the Auditor');
   for (const s of Object.values(st.seats)) if (s.kind === 'director') ok(s.score && Number.isFinite(s.score.total), 'director scored ' + s.id);
-  const R = revealView(st), html = revealHTML(R);
-  ok(R.boards.every(b => html.includes(b.name.replace(/&/g, '&amp;'))), `seed ${seed}: reveal renders every board`);
+  const R = revealView(st);
+  ok(R.steps === 4 + Object.keys(st.boards).length, `seed ${seed}: four screens plus one ethics screen per board`);
+  let all = '';
+  for (let i = 0; i < R.steps; i++) {
+    const html = revealScreen({ ...R, step: i }), words = html.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean).length;
+    all += html;
+    ok(words <= 175, `seed ${seed}: debrief screen ${i + 1} has ${words} words (cap 175)`);
+  }
+  ok(R.boards.every(b => all.includes(b.short.replace(/&/g, '&amp;'))), `seed ${seed}: debrief names every board`);
+  ok(R.boards.every(b => b.real && b.real.cases.length === 2 && b.real.fix), `seed ${seed}: every board carries its real-case reveal`);
+  ok(revealScreen({ ...R, step: 3 }).includes('Fixes') && R.boards.every(b => all.includes(b.real.cases[0].event.replace(/&/g, '&amp;'))), `seed ${seed}: real cases shown`);
+  // hidden facts must not reach the public payload before the reveal
+  const pub = JSON.stringify({ ...publicView(st, t0), reveal: null });
+  for (const b of Object.values(st.boards)) for (const r of st.schedule) { const h = b.hist[r]; if (!h) continue; for (const f of (((b.content.rounds.find(x => x.round === r) || {}).issue || {}).facts || [])) if (!h.admit.includes(f.id) && !h.caughtFacts.some(c => c.id === f.id)) ok(!pub.includes(f.text), `seed ${seed}: hidden fact not public (${f.id})`); }
   ok(!('leagues' in R), 'no seat leagues');
+  ok(SCORING.timers.play === 480, 'round length defaults to 8 minutes');
   const nB = Object.keys(st.boards).length, nS = Object.values(st.seats).filter(s => s.kind === 'street').length;
   return { st, actions, errors, nB, nS, R };
 }

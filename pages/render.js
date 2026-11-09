@@ -14,7 +14,6 @@ export const SEAT_ICON = {
   attorney: svg('<path d="M12 3v18M6 21h12M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>'),
   labor: STAKE_ICON.workers, fund: STAKE_ICON.shareholders, community: STAKE_ICON.home,
   founder_friend: svg('<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4M21 12v3"/>'),
-  reporter: svg('<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>'),
   auditor: svg('<circle cx="10" cy="10" r="6"/><path d="M15 15l6 6"/>'),
 };
 export const ICON = {
@@ -30,9 +29,12 @@ export function effectStrip(eff, labels) {
   return `<span class="strip">${STAKE.map(k => { const v = (eff || {})[k] || 0, n = Math.min(2, Math.abs(v)), name = L[k] || COMM_LABEL[k] || k;
     return `<span class="cell ${v > 0 ? 'up' : v < 0 ? 'down' : 'zero'}" title="${esc(name)}" aria-label="${esc(name + (v > 0 ? ' gains' : v < 0 ? ' loses' : ' unchanged'))}">${STAKE_ICON[k]}<b class="chev">${v === 0 ? '' : (v > 0 ? '▲' : '▼').repeat(n)}</b></span>`; }).join('')}</span>`;
 }
-export const legendStrip = labels => `<span class="strip legend">${STAKE.map(k => `<span class="cell zero" title="${esc((labels || {})[k] || COMM_LABEL[k])}">${STAKE_ICON[k]}<small>${esc(((labels || {})[k] || COMM_LABEL[k]).replace(/^The /, '').split(/[\s(]/)[0])}</small></span>`).join('')}</span>`;
+export const STAKE_WORD = { shareholders: 'Owners', workers: 'Workers', customers: 'Customers', home: 'Community', public: 'Public' };
+// the five words never change between boards; the board's own names are listed in whoLine()
+export const legendStrip = () => `<span class="strip legend">${STAKE.map(k => `<span class="cell zero">${STAKE_ICON[k]}<small>${STAKE_WORD[k]}</small></span>`).join('')}</span>`;
+export const whoLine = labels => STAKE.map(k => `${STAKE_WORD[k]} = ${esc((labels || {})[k] || STAKE_WORD[k])}`).join(' · ');
 // severity meter: 1 to 3 bars, colour ramp, no words
-export const sevBars = w => `<span class="sev s${w}" role="img" aria-label="${['', 'light', 'serious', 'severe'][w] || ''}">${[1, 2, 3].map(i => `<i class="${i <= w ? 'on' : ''}"></i>`).join('')}</span>`;
+export const sevBars = w => `<span class="sev s${w}" role="img" title="How bad if it comes out" aria-label="How bad if it comes out: ${['', 'light', 'serious', 'severe'][w] || ''}">${[1, 2, 3].map(i => `<i class="${i <= w ? 'on' : ''}"></i>`).join('')}</span>`;
 const COMM_LABEL = { shareholders: 'Shareholders', workers: 'Workers', customers: 'Customers', home: 'Home community', public: 'The public' };
 export const COLORS = ['#2f6db5', '#c0562f', '#3f8f5a', '#8a5aa8', '#b58a1f'];
 
@@ -62,39 +64,71 @@ export function arrowsLabeled(eff, labels) {
 }
 export const fmtClock = ms => (ms == null ? '' : Math.floor(ms / 60000) + ':' + String(Math.floor((ms % 60000) / 1000)).padStart(2, '0'));
 
-export function tickerCard(b, i) {
-  const last = b.stock[b.stock.length - 1], prev = b.stock[b.stock.length - 2] ?? last, ch = Math.round((last - prev) * 10) / 10;
-  const st = b.statements[b.statements.length - 1];
-  return `<article class="ticker ${b.failed ? 'failed' : ''}">
-    <header><h3>${esc(b.name)}</h3><span class="px">${last.toFixed(1)}</span><span class="ch ${ch >= 0 ? 'up' : 'down'}">${ch >= 0 ? '+' : ''}${ch.toFixed(1)}</span></header>
-    ${spark(b.stock, 220, 56, COLORS[i % COLORS.length])}
-    <div class="dials">${dial('Payout', b.dials.payout)}${dial('Wages', b.dials.wages)}${dial('Price', b.dials.price)}</div>
-    <p class="stmt ${st && st.kind === 'none' ? 'quiet' : ''}">${st ? esc(st.text) : '&nbsp;'}</p>
-    ${st && st.caught && st.caught.length ? st.caught.map(c => `<p class="stmt-caught"><b>Caught:</b> ${esc(c)}</p>`).join('') : ''}
-    ${b.failed ? '<p class="failtag">FAILED</p>' : ''}</article>`;
+// ---------------- projector: the front page ----------------
+const told = (n, total) => `<span class="told" aria-label="${n} of ${total} facts told">${Array.from({ length: total }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
+const LEVEL_DECK = { all: 'Board comes clean', some: 'Board shares part of the story', none: 'Board says nothing about it' };
+const px = v => (v == null ? '' : Number(v).toFixed(1));
+function storyHTML(b, n, lead) {
+  const last = b.stock[b.stock.length - 1];
+  const ch = n && n.resolved ? Math.round((n.stockEnd - n.stockStart) * 10) / 10 : null;
+  const kick = `<p class="kick">${esc(b.name)}<span class="px"> Share price ${px(n && n.resolved ? n.stockEnd : last)}${ch == null ? '' : ` <b class="${ch >= 0 ? 'up' : 'down'}">${ch >= 0 ? '▲' : '▼'}${Math.abs(ch).toFixed(1)}</b>`}</span></p>`;
+  if (!n || (!n.headline && !n.locked)) {
+    const chips = n ? `<p class="chips2"><span class="${n.locked ? 'ok' : ''}">${n.locked ? '✓' : '…'} Facts</span><span class="${n.result === 'passed' || n.result === 'failed' ? 'ok' : ''}">${n.result === 'passed' || n.result === 'failed' ? '✓' : '…'} Motion</span></p>` : '';
+    return `<article class="story pending ${lead ? 'lead' : ''}">${kick}<h2>Board still meeting</h2>${chips}</article>`;
+  }
+  const deck = n.undecided ? 'Board failed to decide what to tell' : n.level ? LEVEL_DECK[n.level] : 'Facts not locked yet';
+  const q = n.statement ? `<blockquote>“${esc(n.statement)}”</blockquote>` : (n.level ? '<blockquote class="none">No statement.</blockquote>' : '');
+  const caught = n.caught && n.caught.length ? `<p class="caught-line"><b>${esc(n.caughtBy || 'Auditor')} finds:</b> ${esc(n.caught[0])}${n.caught.length > 1 ? ' (+' + (n.caught.length - 1) + ' more)' : ''}</p>` : '';
+  return `<article class="story ${lead ? 'lead' : ''} r-${n.result}">${kick}<h2>${esc(n.headline || 'Motion not yet decided')}</h2><p class="deck">${n.level ? told(n.told, n.total) : ''}${esc(deck)}</p>${q}${caught}</article>`;
 }
-export function outsideView(P) {
-  return `<section class="tickers">${P.boards.map(tickerCard).join('')}</section>
-  <section class="feed"><h2>Wire</h2><ol>${P.feed.slice().reverse().slice(0, 14).map(f => `<li class="k-${esc(f.kind)}"><b>R${f.round}</b> ${esc(f.text)}</li>`).join('')}</ol></section>`;
+export function frontPage(P, round) {
+  const r = round || P.round;
+  const items = P.boards.map(b => ({ b, n: b.news.find(x => x.round === r) || null }));
+  const score = ({ n }) => (n && n.resolved ? (n.caught.length ? 20 : 0) + Math.abs(n.stockEnd - n.stockStart) + (n.level === 'none' ? 2 : 0) : n && n.headline ? 1 : 0);
+  const order = items.slice().sort((x, y) => score(y) - score(x));
+  const title = P.shock ? P.shock.title : '';
+  const done = items.filter(x => x.n && x.n.resolved).length;
+  return `<section class="paper"><header class="mast"><span class="edn">Round ${r}${title ? ' · ' + esc(title) : ''}</span><h1>The Principal Times</h1><span class="clock" id="clk"></span></header>
+    <div class="front c${Math.min(items.length, 5)}">${order.map((x, i) => storyHTML(x.b, x.n, i === 0)).join('')}</div>
+    <footer class="paperfoot">${done === items.length ? 'Final edition' : 'Stories appear as boards decide'}</footer></section>`;
 }
 
+// ---------------- projector: the debrief (four screens, then one ethics screen per board) ----------------
 const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
-export function revealHTML(R) {
-  const C = R.communities;
-  const n = R.boards.length;
-  const shade = rk => `hsl(210 45% ${30 + (rk - 1) / Math.max(1, n - 1) * 55}%)`;
-  const grid = `<table class="grid"><thead><tr><th></th>${C.map(c => `<th>${esc(COMM_LABEL[c])}</th>`).join('')}</tr></thead><tbody>
-    ${R.boards.map(b => `<tr><th>${esc(b.name)}${b.failed ? ' <small>failed</small>' : ''}</th>${C.map(c => { const rk = R.grid[b.id][c]; return `<td style="background:${shade(rk)};color:${rk <= n / 2 ? '#fff' : '#111'}" title="${esc((b.labels || {})[c] || c)}">${ordinal(rk)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
-  const boards = R.boards.map((b, i) => `<article class="rboard">
-    <header><h3>${esc(b.name)}</h3>${spark(b.stock, 160, 40, COLORS[i % COLORS.length])}</header>
-    <p class="recog"><span class="gain">Gained: ${b.gained.map(c => esc((b.labels || {})[c] || c)).join(', ') || 'nobody'}</span> <span class="paid">Paid: ${b.paid.map(c => esc((b.labels || {})[c] || c)).join(', ') || 'nobody'}</span></p>
-    ${b.rounds.map(r => `<div class="rround"><div class="rr-h"><b>Round ${r.round}</b> <span class="disc d-${r.level}">${esc({ all: 'Admitted every fact', some: 'Admitted some facts', none: 'Admitted nothing' }[r.level] || '')}</span>${r.caught ? ` <span class="caught">caught by ${esc(r.caughtBy)}</span>` : ''}${r.decided ? '' : ' <span class="quiet">failed to decide</span>'}</div>
-      <p class="issue">${esc(r.issue)}</p>
-      <p class="stmt-public">${r.statement ? 'Public statement: "' + esc(r.statement) + '"' : 'No public statement.'}</p>
-      <ul class="facts">${r.facts.map(f => `<li class="${f.admitted ? 'admitted' : 'omitted'} ${f.caught ? 'caughtf' : ''}">${f.admitted ? '' : '<s>'}${esc(f.text)}${f.admitted ? '' : '</s>'}${f.caught ? ' <b class="caught">caught</b>' : ''}</li>`).join('')}</ul>
-      ${r.quotes.map(q => `<div class="quote"><blockquote>"${esc(q.text)}" <cite>${esc(q.name)}</cite></blockquote><p class="shown">Projector at that moment: ${esc(q.projector)}</p></div>`).join('')}</div>`).join('')}
-    <ul class="dirs">${b.directors.map(d => `<li><b>${esc(d.name)}</b> ${esc(d.seat)}${d.chair ? ' (Chair)' : ''} <span class="${d.fired ? 'fired' : 'safe'}">${d.fired ? 'exposure fired' : 'exposure safe'}</span> <span class="${d.secretMet ? 'met' : 'unmet'}">${d.secretMet ? 'secret met' : 'secret missed'}</span><br><small>${esc(d.secret)}</small></li>`).join('')}</ul>
-  </article>`).join('');
-  const street = `<section class="rstreet"><h3>The Street</h3><ul>${R.street.map(s => `<li><b>${esc(s.name)}</b> ${esc(s.label)}: ${s.hits.filter(h => h.hit === true).length} true, ${s.hits.filter(h => h.hit === false).length} false</li>`).join('')}</ul></section>`;
-  return `<section class="reveal"><h2>How each community ranks the boards</h2>${grid}<div class="rboards">${boards}</div>${street}</section>`;
+const resWord = r => ({ passed: 'Passed', failed: 'Voted down', open: 'No vote', voting: 'No vote' }[r] || 'No vote');
+export function revealStageName(R) { return R.step < R.stages.length ? R.stages[R.step] : 'Ethics'; }
+export function revealScreen(R) {
+  const step = R.step, nS = R.stages.length;
+  const stepTag = `<span class="stepno">${step + 1} of ${R.steps}</span>`;
+  const wrap = (title, body, ask) => `<section class="deck-screen"><header><h2>${esc(title)}</h2>${stepTag}</header>${body}${ask ? `<p class="ask">${esc(ask)}</p>` : ''}</section>`;
+  if (step === 0) {
+    const rows = R.boards.map(b => `<tr><th>${esc(b.short)}</th>${R.schedule.map(r => { const n = b.news.find(x => x.round === r); return `<td>${n ? `<b>${esc(n.headline)}</b>${n.level ? told(n.told, n.total) : ''}` : ''}</td>`; }).join('')}</tr>`).join('');
+    return wrap('Reactions: how the papers saw it', `<table class="cmp react"><thead><tr><th></th>${R.schedule.map(r => `<th>Round ${r}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`, 'Whose headline would you want?');
+  }
+  if (step === 1) {
+    const rows = R.boards.map(b => `<tr><th>${esc(b.short)}</th>${R.schedule.map(r => { const n = b.news.find(x => x.round === r); return `<td>${n ? `${esc(n.motion ? n.motion.short : '')}<br><b class="res-${n.result}">${resWord(n.result)}</b> · Told ${n.told ?? 0}/${n.total}${n.caught.length ? ' · <b class="down">Caught</b>' : ''}` : ''}</td>`; }).join('')}<td class="num">${px(b.stock[0])} to <b>${px(b.stock[b.stock.length - 1])}</b></td></tr>`).join('');
+    return wrap('Side by side', `<table class="cmp"><thead><tr><th></th>${R.schedule.map(r => `<th>Round ${r}</th>`).join('')}<th>Share price</th></tr></thead><tbody>${rows}</tbody></table>`);
+  }
+  if (step === 2) {
+    const rows = R.boards.map(b => { const met = b.directors.filter(d => d.secretMet).length, fired = b.directors.filter(d => d.fired).length, caught = b.rounds.reduce((n, r) => n + r.facts.filter(f => f.caught).length, 0), hid = b.rounds.reduce((n, r) => n + r.facts.filter(f => !f.admitted).length, 0);
+      return `<tr><th>${esc(b.short)}</th><td>Chair ${esc(b.chair)}</td><td>${met} of ${b.directors.length} hit a private goal</td><td>${fired} took a penalty</td><td>${hid} facts hidden, ${caught} caught</td></tr>`; }).join('');
+    return wrap('Governance: who held the power', `<table class="cmp gov"><tbody>${rows}</tbody></table>`, 'Who gained from silence?');
+  }
+  if (step === 3) {
+    const rows = R.boards.map(b => `<tr><th>${esc(b.short)}</th><td>${b.real ? b.real.cases.map(c => `${esc(c.event)} (${esc(c.years)})`).join(' and ') : ''}<br><i>${b.real ? esc(b.real.fix) : ''}</i></td></tr>`).join('');
+    return wrap('Fixes: the real cases behind the boards', `<table class="cmp fix"><tbody>${rows}</tbody></table>`);
+  }
+  const b = R.boards[step - nS]; if (!b) return wrap('The end', '');
+  const dirs = b.directors.map(d => `<tr><th>${esc(d.name)}<small>${esc(d.seat)}${d.chair ? ', Chair' : ''}</small></th><td>Goal: ${esc(d.secretLabel)} <b class="${d.secretMet ? 'up' : 'down'}">${d.secretMet ? 'Hit' : 'Missed'}</b></td><td>Penalty: ${esc(d.exposureLabel)} <b class="${d.fired ? 'down' : 'up'}">${d.fired ? 'Fired' : 'Avoided'}</b></td></tr>`).join('');
+  const real = b.real ? b.real.cases.map(c => `<p class="real"><b>${esc(c.event)}, ${esc(c.years)}.</b> ${esc(c.line)}</p>`).join('') : '';
+  return wrap('Ethics: ' + b.name, `<table class="cmp eth"><tbody>${dirs}</tbody></table>${real}`);
+}
+// phone result: why you got N points, in plain words
+export function scoreLines(d) {
+  const s = d.score, p = s.parts || {};
+  return [
+    [s.secret ? 'ok' : 'no', 'Private goal ' + (s.secret ? 'hit' : 'missed'), s.secret ? '+' + p.secret : '0'],
+    [s.exposureFired ? 'no' : 'ok', 'Penalty ' + (s.exposureFired ? 'fired' : 'avoided'), s.exposureFired ? String(p.exposure) : '0'],
+    ['', 'Your board ranked ' + ordinal(s.homeRank) + ' of ' + (p.of ?? '') + ' for ' + (d.homeLabel || 'your group'), '+' + (p.home ?? 0)],
+  ];
 }

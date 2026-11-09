@@ -1,9 +1,10 @@
 {
   "id": "valley_health",
   "name": "Valley Health",
+  "short": "Valley",
   "industry": "Regional health system",
-  "from_week": "11",
-  "blurb": "Two hospitals and nine clinics, about 6,000 nurses and techs, and a rural clinic in Marrow Creek that serves 11,000 people. Founder Dr. Evelyn Marsh built it from that single clinic and her family trust still holds 22% of the vote.",
+  "from_week": "6",
+  "blurb": "Two hospitals, nine clinics and 6,000 nurses and techs. Founder Dr. Evelyn Marsh built it from the Marrow Creek rural clinic, and her family trust holds 22% of the vote.",
   "communities": [
     {
       "key": "shareholders",
@@ -19,7 +20,6 @@
     },
     {
       "key": "home",
-      "id": "patients",
       "label": "Rural patients"
     },
     {
@@ -33,8 +33,10 @@
       "name": "Oliver Brandt",
       "title": "Attorney",
       "home": "The state bar",
+      "motive": "You signed off on this system's compliance reports for nine years, and your name is on the one that missed the billing pattern. If it comes out later, you would rather be the person who raised it.",
       "exposure": {
-        "text": "Disbarred if the board is caught hiding facts while he sits on it.",
+        "text": "You are disbarred if the board is caught hiding a heavy fact.",
+        "label": "Disbarred if caught hiding",
         "trigger": {
           "type": "facts_caught",
           "weight": 3
@@ -43,18 +45,18 @@
       "secrets": [
         {
           "id": "attorney_A",
-          "text": "Never be on a board that's caught hiding facts.",
+          "text": "Clean the books: the board admits every fact in round 1.",
+          "label": "Admit every fact in round 1",
           "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught",
-              "weight": 3
-            }
+            "type": "disclosure_choice",
+            "round": 1,
+            "choice": "all"
           }
         },
         {
           "id": "attorney_B",
-          "text": "Your firm holds the system's compliance contract. One caught fact brings in outside review, so none may be caught.",
+          "text": "Your firm holds the compliance contract. One caught fact ends it, so none may be caught.",
+          "label": "No fact gets caught",
           "check": {
             "type": "not",
             "of": {
@@ -69,34 +71,29 @@
       "name": "Teresa Alvarado",
       "title": "Labor director",
       "home": "Valley Nurses Association",
+      "motive": "You speak for 6,000 nurses who see the billing sheets every shift. You also know a hospital that repays millions cuts shifts before it cuts executives.",
       "exposure": {
-        "text": "Loses the next vote if more than 10% of nurses and techs are cut.",
+        "text": "Nurses vote you out if the board closes the rural clinic.",
+        "label": "Clinic closes",
         "trigger": {
-          "type": "any",
-          "of": [
-            {
-              "type": "staff_cut_pct_gt",
-              "value": 10
-            },
-            {
-              "type": "motion_passed",
-              "id": "raise_ratios"
-            }
-          ]
+          "type": "motion_passed",
+          "id": "close_clinic"
         }
       },
       "secrets": [
         {
           "id": "labor_A",
-          "text": "The safe-staffing ratio gets funded before the game ends.",
+          "text": "The outside audit passes. Your nurses are tired of being blamed for codes they were told to use.",
+          "label": "Audit passes",
           "check": {
             "type": "motion_passed",
-            "id": "staffing_ratio"
+            "id": "outside_audit"
           }
         },
         {
           "id": "labor_B",
           "text": "You were granted stock options last year. The stock must end above where it started.",
+          "label": "Stock ends above start",
           "check": {
             "type": "stock_end_above_start"
           }
@@ -108,8 +105,10 @@
       "name": "Ruth Kessler",
       "title": "Fund partner",
       "home": "Meridian Health Partners (owns 10%)",
+      "motive": "Your fund owns 10% and answers to investors who check the price every Friday. You dislike surprises, and an audit is one.",
       "exposure": {
-        "text": "Investors pull money from her fund if the stock ends below where it started.",
+        "text": "Your investors pull their money if the stock ends below where it started.",
+        "label": "Stock ends below start",
         "trigger": {
           "type": "stock_end_below_start"
         }
@@ -117,15 +116,20 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Pass a distribution of $40M or more in any round.",
+          "text": "Your fund sells its stake next year. The outside audit must not pass.",
+          "label": "Audit fails",
           "check": {
-            "type": "payout_m_gte",
-            "value": 40
+            "type": "not",
+            "of": {
+              "type": "motion_passed",
+              "id": "outside_audit"
+            }
           }
         },
         {
           "id": "fund_B",
-          "text": "Your fund quietly owns a rival hospital chain. Valley Health's stock must finish in the bottom half.",
+          "text": "Your fund quietly owns a rival hospital chain. The stock must finish in the bottom half.",
+          "label": "Stock ends in bottom half",
           "check": {
             "type": "stock_rank_bottom_half"
           }
@@ -137,8 +141,10 @@
       "name": "Dr. Arthur Penn",
       "title": "Founder's friend",
       "home": "Dr. Evelyn Marsh, the founder (residency classmate)",
+      "motive": "Evelyn Marsh trained you, and she built this system out of one clinic. You owe her more than you will say out loud.",
       "exposure": {
-        "text": "Loses the seat if the board votes down closing the rural clinic, which Dr. Marsh wants.",
+        "text": "You lose the seat if the board votes down closing the rural clinic, which Dr. Marsh wants.",
+        "label": "Clinic closure voted down",
         "trigger": {
           "type": "founder_motion_failed"
         }
@@ -146,7 +152,8 @@
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Dr. Marsh approved the new billing codes. Make sure the board never admits every fact about them.",
+          "text": "Dr. Marsh approved the new billing codes. The board must never admit every fact about them in round 1.",
+          "label": "Don't admit every fact in round 1",
           "check": {
             "type": "not",
             "of": {
@@ -158,7 +165,8 @@
         },
         {
           "id": "founder_friend_B",
-          "text": "You sit on two other boards. No scandal anywhere you sit, so no disclosure on this board gets caught.",
+          "text": "You sit on two other boards. No scandal anywhere you sit, so no fact on this board may be caught.",
+          "label": "No fact gets caught",
           "check": {
             "type": "not",
             "of": {
@@ -173,37 +181,31 @@
       "name": "Imani Brooks",
       "title": "Community seat (Chief Nursing Officer)",
       "home": "Patients at the bedside",
+      "motive": "You worked the night shift and you know which patients will not make an hour's drive. You also know the system loses money and that cutting is easier than raising.",
       "exposure": {
-        "text": "Loses standing at home if the board closes the rural clinic or cuts nurses.",
+        "text": "You lose standing at home if the board is caught hiding a fact.",
+        "label": "Caught hiding",
         "trigger": {
-          "type": "any",
-          "of": [
-            {
-              "type": "motion_passed",
-              "id": "close_clinic"
-            },
-            {
-              "type": "motion_passed",
-              "id": "nurse_layoff"
-            }
-          ]
+          "type": "facts_caught"
         }
       },
       "secrets": [
         {
           "id": "community_A",
-          "text": "Either the safe-staffing ratio or the rural mobile clinic passes.",
+          "text": "The Marrow Creek clinic stays open.",
+          "label": "Clinic stays open",
           "check": {
-            "type": "motion_passed_any",
-            "ids": [
-              "staffing_ratio",
-              "rural_van"
-            ]
+            "type": "not",
+            "of": {
+              "type": "motion_passed",
+              "id": "close_clinic"
+            }
           }
         },
         {
           "id": "community_B",
-          "text": "You would run the consolidated hospital if the rural clinic closes. Get the closure through.",
+          "text": "You would run the consolidated hospital if the clinic closes. Get the closure through.",
+          "label": "Clinic closes",
           "check": {
             "type": "motion_passed",
             "id": "close_clinic"
@@ -217,78 +219,49 @@
       "round": 1,
       "motions": [
         {
-          "id": "distribution",
-          "title": "Distribution to owners and bondholders",
-          "short": "Pay owners",
-          "motive": "Return the surplus to the people who funded us, and the market will notice tonight.",
+          "id": "outside_audit",
+          "title": "Hire an outside firm to audit billing and repay any overcharge",
+          "short": "Outside billing audit",
+          "motive": "Know the number before a regulator does.",
           "effects": {
-            "shareholders": 2,
+            "shareholders": -2,
             "workers": 0,
-            "customers": 0,
+            "customers": 1,
             "home": 0,
-            "public": 0
+            "public": 1
+          },
+          "headline": {
+            "passed": "Valley Health hires outside auditors to check its billing",
+            "failed": "Valley Health board declines outside billing audit"
           },
           "flags": {
-            "payout_m": 40,
-            "tags": [
-              "payout"
-            ]
-          }
-        },
-        {
-          "id": "staffing_ratio",
-          "title": "Safe-staffing ratio of five patients per nurse",
-          "short": "Safe staffing",
-          "motive": "Nobody should carry more than five patients on a night shift.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 2,
-            "customers": 0,
-            "home": 1,
-            "public": 0
-          },
-          "flags": {
-            "lag_payback": {
-              "shareholders": 2
-            }
-          }
-        },
-        {
-          "id": "rural_van",
-          "title": "Mobile clinic for rural roads",
-          "short": "Rural mobile clinic",
-          "motive": "Bring the exam room to people who live an hour out.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 2,
-            "public": 0
+            "resolves_issue": true
           }
         }
       ],
       "issue": {
         "id": "upcoded_billing",
-        "text": "An internal review found billing codes bumped up on about one in eight inpatient stays. It adds roughly $14M a year. Only the review team has seen it.",
+        "text": "An internal review of 3,200 hospital stays found about one in eight billed at a higher severity code than the notes clearly support. The review is a draft. Coders call the rules a judgment call.",
+        "case_for_silence": "The review is a draft and the codes may all prove correct. An early admission could read as a confession to regulators.",
         "facts": [
           {
             "id": "f1",
-            "text": "Billing codes were bumped up on about one in eight hospital stays.",
+            "text": "About one in eight stays was billed at a higher severity code than the notes clearly support.",
             "weight": 3
           },
           {
             "id": "f2",
-            "text": "It adds roughly $14M a year.",
+            "text": "The higher codes bring in roughly $14M a year, and the review could not say how much was a mistake.",
             "weight": 2
           },
           {
             "id": "f3",
-            "text": "Only the internal review team has seen it.",
+            "text": "The billing software suggests the higher code first.",
             "weight": 1
           },
           {
             "id": "f4",
-            "text": "The review covered 3,200 stays at two hospitals.",
+            "text": "Only the internal review team has seen the draft.",
             "weight": 1
           }
         ]
@@ -309,66 +282,59 @@
             "home": -3,
             "public": 0
           },
-          "flags": {
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "nurse_layoff",
-          "title": "Lay off 15% of nurses and techs",
-          "short": "Lay off nurses",
-          "motive": "Fewer procedures, fewer shifts.",
-          "effects": {
-            "shareholders": 0,
-            "workers": -3,
-            "customers": 0,
-            "home": -1,
-            "public": 0
+          "headline": {
+            "passed": "Valley Health to close its Marrow Creek clinic",
+            "failed": "Valley Health board votes to keep Marrow Creek clinic open"
           },
           "flags": {
-            "staff_cut_pct": 15
-          }
-        },
-        {
-          "id": "telehealth_rural",
-          "title": "Telehealth line for rural patients",
-          "short": "Rural telehealth",
-          "motive": "A nurse on a screen is better than an hour's drive.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 2,
-            "public": 0
+            "founder_wants": true
           }
         }
       ],
       "issue": {
         "id": "clinic_closure",
-        "text": "The system plans to close the Marrow Creek rural clinic, which serves 11,000 people, and hasn't announced it. The lease ends in March.",
+        "text": "Management has priced closing the Marrow Creek clinic, which serves 11,000 people and loses money. The lease ends in March. Nothing is decided and nothing is announced.",
+        "case_for_silence": "Nothing is decided. A leak could scare staff and patients away before the board has weighed the options.",
         "facts": [
           {
             "id": "f1",
-            "text": "The system plans to close the Marrow Creek rural clinic.",
+            "text": "Management has priced out closing the Marrow Creek clinic, which serves 11,000 people.",
             "weight": 3
           },
           {
             "id": "f2",
-            "text": "The clinic serves 11,000 people.",
+            "text": "Patients would face about an hour's drive to the nearest hospital.",
             "weight": 2
           },
           {
             "id": "f3",
-            "text": "The lease ends in March.",
+            "text": "The lease ends in March and has not been renewed.",
             "weight": 1
           },
           {
             "id": "f4",
-            "text": "Nothing has been announced.",
+            "text": "Rent on the system's buildings rose again and takes a large share of its margin.",
             "weight": 1
           }
         ]
       }
     }
-  ]
+  ],
+  "real": {
+    "cases": [
+      {
+        "round": 1,
+        "event": "Columbia/HCA",
+        "years": "1997 to 2003",
+        "line": "HCA subsidiaries pleaded guilty to billing fraud in 2000, including upcoding, and recoveries reached about $1.7B by 2003."
+      },
+      {
+        "round": 2,
+        "event": "Steward Health Care",
+        "years": "2024",
+        "line": "Steward went bankrupt owing about $9B, including $6.6B of rent, and closed hospitals such as Nashoba Valley."
+      }
+    ],
+    "fix": "Order your own audit before a regulator does, and treat rent as a risk."
+  }
 }

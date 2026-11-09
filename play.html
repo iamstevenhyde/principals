@@ -11,7 +11,7 @@
 <div id="note"></div></div>
 <script type="module">
 import { openStore, params, savedSeat } from './pages/store.js';
-import { esc, fmtClock, spark, dial, effectStrip, legendStrip, sevBars, SEAT_ICON, STAKE_ICON, ICON, COLORS } from './pages/render.js';
+import { esc, fmtClock, spark, dial, effectStrip, legendStrip, whoLine, sevBars, scoreLines, SEAT_ICON, STAKE_ICON, ICON, COLORS } from './pages/render.js';
 document.getElementById('chatx').innerHTML = ICON.x;
 const code = (params().get('g') || '').toUpperCase();
 const keep = params().get('local') === '1' ? '&local=1' : '';
@@ -21,7 +21,7 @@ const store = await openStore();
 const $ = id => document.getElementById(id);
 let V = null, P = null, got = 0, ch = 'board', lastMain = '', lastBar = '', sheet = false, seenTotal = 0;
 let pick = null, stmtLocal = null, stmtTimer = null, step = 0, openM = null, cardOpen = true, lastKey = '';
-const STEPS = ['Facts', 'Statement', 'Motions'];
+const STEPS = ['Facts', 'Statement', 'Motion'];
 const send = async a => { try { await store.submit(code, seat.token, a); setTimeout(load, 300); } catch (e) { flash(e.message); } };
 const flash = m => { $('note').innerHTML = `<div class="notice">${esc(m)}</div>`; setTimeout(() => $('note').innerHTML = '', 3500); };
 async function load() {
@@ -68,15 +68,18 @@ function waiting() {
 function title(id) { const m = V.board.motions.find(x => x.id === id); return m ? esc(m.short || m.title) : 'Motion'; }
 function director() {
   const d = V.director, b = V.board, open = b.votes.find(v => v.open), chair = d.chair, play = P.phase === 'play';
-  const head = hdr(esc(b.name), `<span class="px">${P.boards.find(x => x.id === b.id) ? P.boards.find(x => x.id === b.id).stock.slice(-1)[0].toFixed(1) : ''}</span>`);
+  const head = hdr(esc(b.name), `<span class="px" title="Share price, starts at 100"><small>Share price</small>${P.boards.find(x => x.id === b.id) ? P.boards.find(x => x.id === b.id).stock.slice(-1)[0].toFixed(1) : ''}</span>`);
+  const powers = chair ? `<div class="powers me">${ICON.crown}<b>You are Chair</b><span class="pw">call each vote</span><span class="pw">close it early</span><span class="pw">break fact ties</span></div>` : `<div class="powers">${ICON.crown} Chair: <b>${esc(d.chairName)}</b> calls the votes</div>`;
   if (P.phase === 'reveal') return head + revealMine();
   const rc = P.shock;
   const hero = P.phase === 'shock' && rc ? `<div class="card hero"><h2>${esc(rc.title)}</h2><p>${esc(rc.board_text || rc.text)}</p></div>` : '';
-  const card = `<details class="card secret" id="card" ${cardOpen ? 'open' : ''}><summary>${SEAT_ICON[d.seat]}<b>${esc(d.card.name || d.seatLabel)}</b><span class="mute">${esc(d.seatLabel)}</span>${chair ? `<span class="chairtag">${ICON.crown}Chair</span>` : ''}</summary>
-    <p class="cardline">${ICON.fire}<span><b>You lose</b> ${esc(d.exposure)}</span></p><p class="cardline">${ICON.lock}<span><b>Your secret</b> ${esc(d.secret)}</span></p>
-    ${d.card.home ? `<p class="small mute">Home: ${esc(d.card.home)}</p>` : ''}</details>`;
+  const card = `<details class="card secret" id="card" ${cardOpen ? 'open' : ''}><summary>${SEAT_ICON[d.seat]}<b>${esc(d.card.name || d.seatLabel)}</b><span class="mute">${esc(d.seatLabel)}</span></summary>
+    <p class="motive">${esc(d.motive)}</p>
+    <p class="cardline">${ICON.lock}<span><b>Goal +${d.pts.secret}</b> ${esc(d.secret)}</span></p><p class="cardline">${ICON.fire}<span><b>Penalty -${d.pts.exposure}</b> ${esc(d.exposure)}</span></p>
+    <p class="howscore">Plus up to ${d.pts.home} if the board does well for ${esc(d.homeLabel)}.</p></details>`;
+  const isb = b.issue, brief = isb ? `<p class="brief">${esc(isb.text)}</p>` : '';
   const failed = b.failed ? '<div class="card"><h2 class="err">This firm has failed.</h2></div>' : '';
-  if (!play) return head + failed + hero + card + `<div class="card center mute">${ICON.eye}<p>${P.phase === 'shock' ? 'Read your card. Voting opens next.' : 'Round over. Watch the outside view.'}</p></div>`;
+  if (!play) return head + powers + failed + hero + (P.phase === 'shock' ? `<div class="card">${brief}</div>` : '') + card + `<div class="card center mute">${ICON.eye}<p>${P.phase === 'shock' ? 'Voting opens next.' : 'Round over. Watch the front page.'}</p></div>`;
   const voters = x => `<span class="voters">${b.directors.map(dd => `<i class="${x.voted.includes(dd.id) ? 'on' : ''}" title="${esc(dd.name)}">${esc(dd.name.slice(0, 1))}</i>`).join('')}</span>`;
   const banner = open ? (open.kind === 'facts'
     ? `<div class="vote"><h2>${ICON.check} Vote: facts and statement</h2><div class="ballots"><button data-fsubmit="${open.id}" class="primary">${open.mine ? 'Update my picks' : 'Send my picks'}</button>${chair ? '<button data-a="close">' + ICON.lock + 'Lock</button>' : ''}</div>${voters(open)}</div>`
@@ -86,51 +89,47 @@ function director() {
   const mine = open && open.kind === 'facts' ? open.mine : null;
   if (!pick.ids) pick.ids = new Set(mine || []);
   const tot = fs.reduce((n, f) => n + f.weight, 0) || 1;
-  const counter = () => { const hid = fs.filter(f => !pick.ids.has(f.id)).reduce((n, f) => n + f.weight, 0); return `<b>${pick.ids.size}</b> of ${fs.length} admitted${dial('Risk', Math.round(4 * hid / tot))}`; };
+  const counter = () => { const hid = fs.filter(f => !pick.ids.has(f.id)).reduce((n, f) => n + f.weight, 0), fr = hid / tot, st = is.stock, quiet = st.admitted * (1 - fr) + st.hidden * fr, loud = st.admitted * (1 - fr) + st.caught * fr, sg = x => (x >= 0 ? '+' : '') + x.toFixed(1);
+    return `<b>${pick.ids.size}/${fs.length}</b> told<div class="prices">Share price from these facts: <b class="${quiet >= 0 ? 'up' : 'down'}">${sg(quiet)}</b> if nothing hidden comes out, <b class="down">${sg(loud)}</b> if all of it does.</div>`; };
   counterFn = counter;
   const facts = !is ? '' : b.decided
     ? `<ul class="facts locked">${fs.map(f => `<li class="${b.admit.includes(f.id) ? 'admitted' : 'omitted'}"><span class="ft">${b.admit.includes(f.id) ? ICON.check : ICON.x}${esc(f.text)}</span>${sevBars(f.weight)}</li>`).join('')}</ul>`
-    : `<div class="opts">${fs.map(f => `<label class="frow"><input type="checkbox" data-fact="${f.id}" ${pick.ids.has(f.id) ? 'checked' : ''}><span class="sw"></span><span class="ft">${esc(f.text)}</span>${sevBars(f.weight)}</label>`).join('')}</div>
+    : `<p class="legendnote"><span>Bars: how bad if it comes out</span><span>Tag: price cost of telling</span></p><div class="opts">${fs.map(f => `<label class="frow"><input type="checkbox" data-fact="${f.id}" ${pick.ids.has(f.id) ? 'checked' : ''}><span class="sw"></span><span class="ft">${esc(f.text)} <span class="cost">tell -${f.cost.toFixed(1)}</span></span>${sevBars(f.weight)}</label>`).join('')}</div>
        <div class="counter" id="counter">${counter()}</div>`;
   const CH = ['We are looking into it.', 'We take this seriously.', 'We will share more soon.', 'We have nothing more to add.'];
   const stmt = b.decided
     ? `<p class="stmtlocked">${ICON.lock}${b.statement ? esc(b.statement) : '<span class="mute">No statement.</span>'}</p>`
-    : `<textarea id="stmt" maxlength="${b.statementMax}" rows="2" placeholder="What the firm tells the public">${esc(stmtLocal != null ? stmtLocal : b.statement)}</textarea>
+    : `<p class="mute small">The newspaper prints this as the board's quote.</p><textarea id="stmt" maxlength="${b.statementMax}" rows="2" placeholder="What the firm tells the public">${esc(stmtLocal != null ? stmtLocal : b.statement)}</textarea>
        <div class="chips">${CH.map(c => `<button data-chip="${esc(c)}">${esc(c)}</button>`).join('')}</div>
        ${chair && !open ? `<button class="primary wide" data-a="calld">${ICON.check} Call the vote</button>` : !open ? `<p class="mute small center">${ICON.crown} The Chair calls the vote.</p>` : ''}`;
-  const motions = `<div class="legendrow">${legendStrip(b.labels)}</div>` + b.motions.map(m => {
-    const isOpen = openM === m.id, voting = open && open.target === m.id;
-    return `<div class="mrow ${m.passed ? 'passed' : ''} ${voting ? 'voting' : ''}"><button class="mhead" data-m="${m.id}" aria-expanded="${isOpen}"><span class="mst">${m.passed ? ICON.check : voting ? ICON.eye : ICON.swap}</span><span class="mt">${esc(m.short || m.title)}</span>${effectStrip(m.effects, b.labels)}</button>
-      ${isOpen ? `<div class="mbody"><p>${esc(m.title)}</p><p class="mute small">${esc(m.motive || '')}</p>${chair && !m.passed && !open ? `<button class="primary" data-callm="${m.id}">Call vote</button>` : ''}</div>` : ''}</div>`;
+  const motions = `<div class="legendrow">${legendStrip()}</div>` + b.motions.map(m => {
+    const voting = open && open.target === m.id;
+    return `<div class="mrow ${m.passed ? 'passed' : ''} ${voting ? 'voting' : ''}"><div class="mhead"><span class="mst">${m.passed ? ICON.check : voting ? ICON.eye : ICON.swap}</span><span class="mt">${esc(m.short || m.title)}</span>${effectStrip(m.effects, b.labels)}</div>
+      <div class="mbody"><p>${esc(m.title)}</p><p class="mute small">${esc(m.motive || '')}</p><p class="whoref">${whoLine(b.labels)}</p>${chair && !m.passed && !open ? `<button class="primary" data-callm="${m.id}">Call vote</button>` : ''}</div></div>`;
   }).join('');
   const panes = [
-    `<h2>Which facts do we admit?</h2>${facts}`,
+    `<h2>Which facts do we admit?</h2>${brief}${isb && isb.silence ? `<p class="silence"><b>Case for silence:</b> ${esc(isb.silence)}</p>` : ''}${facts}`,
     `<h2>Public statement</h2>${stmt}`,
-    `<h2>Motions</h2>${motions}`];
-  return head + failed + banner + `<div class="step">${panes[step]}</div>` + card;
+    `<h2>Motion</h2>${motions}`];
+  return head + powers + failed + banner + `<div class="step">${panes[step]}</div>` + (step !== 1 ? card : '');
 }
 let counterFn = null;
 function revealMine() {
   if (!V.director.score) return '<div class="card center"><span class="spin"></span></div>';
-  const s = V.director.score, n = P.boards.length;
+  const d = V.director, s = d.score;
   return `<div class="card result"><div class="big">${s.total ?? ''}<small> pts</small></div>
-    <div class="tiles"><div class="tile ${s.secret ? 'ok' : 'no'}">${s.secret ? ICON.check : ICON.x}${ICON.lock}</div>
-    <div class="tile ${s.exposureFired ? 'no' : 'ok'}">${s.exposureFired ? ICON.fire : ICON.shield}</div>
-    <div class="tile">${dial('Rank', n > 1 ? Math.round((n - s.homeRank) / (n - 1) * 4) : 4)}<small>${s.homeRank} of ${n}</small></div></div>
-    <p class="mute small">Secret, exposure, home rank. The full reveal is on the projector.</p></div>`;
+    <ul class="scorelines">${scoreLines(d).map(([c, t, v]) => `<li class="${c}"><span>${esc(t)}</span><b>${esc(v)}</b></li>`).join('')}</ul>
+    <p class="mute small">${s.parts && s.parts.capped ? 'Your firm failed, which caps the score. ' : ''}The full debrief is on the projector.</p></div>`;
 }
 
 // ---------- outside (Reporter / Auditor) ----------
 function street() {
-  const s = V.street, play = ['shock', 'play'].includes(P.phase), r = s.role;
-  if (P.phase === 'reveal') return hdr('Result') + `<div class="card result"><div class="big">${s.score ?? ''}<small> pts</small></div><p>${s.history.filter(h => h.hit === true).length} ${ICON.check} ${s.history.filter(h => h.hit === false).length} ${ICON.x}</p></div>`;
-  const q = r === 'reporter' ? 'Which board left a fact out?' : 'Which board do you inspect?';
-  const cards = P.boards.map((b, i) => { const st = b.statements[b.statements.length - 1], on = s.action && s.action.target === b.id; return `<button class="tgtc ${on ? 'sel' : ''}" data-tgt="${b.id}" ${play ? '' : 'disabled'}><span class="chk">${on ? ICON.check : ''}</span><b>${esc(b.name)}</b><span class="px">${b.stock[b.stock.length - 1].toFixed(1)}</span><span class="sp">${spark(b.stock, 120, 28, COLORS[i % COLORS.length])}</span>${st ? `<span class="small mute one">${esc(st.text)}</span>` : ''}</button>`; }).join('');
-  const rc = P.shock;
-  return hdr(esc(s.label)) + (P.phase === 'shock' && rc ? `<div class="card hero"><h2>${esc(rc.title)}</h2><p>${esc(rc.text)}</p></div>` : '') +
-    `<div class="card"><h2>${q}</h2><div class="tgtl">${cards}</div></div>
-    <details class="card secret" ${cardOpen ? 'open' : ''}><summary>${SEAT_ICON[r]}<b>${esc(s.label)}</b>${dial('Credibility', Math.round(s.cred * 4))}</summary><p class="small">${esc(s.actionText)}</p><p class="cardline">${ICON.lock}<span><b>Your secret</b> ${esc(s.secret)}</span></p>${s.consulted ? `<p class="small">Your firm consults for <b>${esc(s.consulted)}</b>.</p>` : ''}${s.weak ? `<p class="err small">${ICON.fire} Low credibility: half strength this round.</p>` : ''}</details>
-    <div class="card wire"><h2>Wire</h2>${P.feed.slice().reverse().slice(0, 3).map(f => `<p class="small"><b>R${f.round}</b> ${esc(f.text)}</p>`).join('')}</div>`;
+  const s = V.street, play = ['shock', 'play'].includes(P.phase);
+  if (P.phase === 'reveal') return hdr('Result') + `<div class="card result"><div class="big">${s.score ?? ''}<small> pts</small></div><p>${s.history.filter(h => h.hit === true).length} caught ${ICON.check} ${s.history.filter(h => h.hit === false).length} wrong ${ICON.x}</p></div>`;
+  const cards = P.boards.map((b, i) => { const on = s.action && s.action.target === b.id; return `<button class="tgtc ${on ? 'sel' : ''}" data-tgt="${b.id}" ${play ? '' : 'disabled'}><span class="chk">${on ? ICON.check : ''}</span><b>${esc(b.name)}</b><span class="px"><small>Share price</small>${b.stock[b.stock.length - 1].toFixed(1)}</span></button>`; }).join('');
+  return hdr(esc(s.label)) +
+    `<div class="card"><h2>Which board do you inspect?</h2><div class="tgtl">${cards}</div></div>
+    <details class="card secret" ${cardOpen ? 'open' : ''}><summary>${SEAT_ICON.auditor}<b>${esc(s.label)}</b>${dial('Credibility', Math.round(s.cred * 4))}</summary><p class="small">${esc(s.actionText)}</p><p class="cardline">${ICON.lock}<span><b>Goal</b> ${esc(s.secret)}</span></p>${s.consulted ? `<p class="small">Your firm consults for <b>${esc(s.consulted)}</b>.</p>` : ''}${s.weak ? `<p class="err small">${ICON.fire} Low credibility: half strength this round.</p>` : ''}</details>`;
 }
 
 // ---------- fixed bottom bar ----------

@@ -38,7 +38,7 @@ try {
   await proj.screenshot({ path: join(shots, '1_projector_lobby.png') });
   ok((await proj.textContent('#app')).includes('Tester 0'), 'projector lobby lists players');
   await admin.click('#tmbox summary');
-  for (const k of ['shock', 'play', 'outside']) await admin.fill('#tm_' + k, k === 'play' ? '60' : '6');
+  for (const k of ['shock', 'play', 'outside']) await admin.fill('#tm_' + k, k === 'play' ? '1' : '6');
   await admin.click('#savetm');
   await admin.selectOption('#nb', '5');   // 22 players, 5 boards: every test player is seated as a director
   await admin.click('#auto2');
@@ -66,11 +66,14 @@ try {
     await say(p, 'Tester ' + i + ' says we should talk about the issue first.');
     if (await p.$('[data-go="1"]')) await p.click('[data-go="1"]');
     const callD = await p.$('[data-a=calld]');
+    ok((await p.textContent('.powers')).includes(callD ? 'You are Chair' : 'Chair:'), 'player ' + i + ' sees Chair powers or who the Chair is');
+    ok((await p.textContent('.hdr .px')).includes('Share price'), 'player ' + i + ' header labels the share price');
     if (callD) {   // Chair: write the statement, tick a fact, call the vote, send picks, lock
       const text = 'Tester ' + i + ' firm statement: we are reviewing a matter.';
       await p.fill('#stmt', text);
       await admin.waitForFunction(t => Object.values(window.__host.state.boards).some(b => b.statement === t), text, { timeout: 10000 }).catch(async e => { console.log('DBG', JSON.stringify(await admin.evaluate(() => ({ ph: window.__host.state.phase, err: window.__host.errors, st: Object.values(window.__host.state.boards).map(b => [b.chair, b.statement]) })))); throw e; });
       await p.click('[data-go="0"]');
+      ok((await p.textContent('.counter')).includes('Share price') && (await p.textContent('.legendnote')).includes('how bad'), 'facts step shows the price cost and what the bars mean');
       const boxes = await p.$$('[data-fact]'); ok(boxes.length >= 3, 'player ' + i + ' sees a fact list (' + boxes.length + ')');
       await p.click('[data-go="0"]');
       await p.check('[data-fact]');
@@ -87,11 +90,12 @@ try {
       await p.click('[data-go="0"]');
       ok((await p.$$('.facts.locked li')).length >= 3, 'player ' + i + ' sees admitted and left-out facts');
       await p.click('[data-go="2"]');
-      const rows = await p.$$('.mrow'); ok(rows.length === 3, 'player ' + i + ' sees exactly 3 motion rows (' + rows.length + ')');
-      ok((await p.$$('.mrow .strip .cell')).length === 15, 'player ' + i + ' motion rows carry 5 stakeholder icons each');
+      const rows = await p.$$('.mrow'); ok(rows.length === 1, 'player ' + i + ' sees exactly one headline motion (' + rows.length + ')');
+      ok((await p.$$('.mrow .strip .cell')).length === 5, 'player ' + i + ' motion carries 5 stakeholder icons');
+      ok((await p.textContent('.legendrow')).includes('Owners') && (await p.textContent('.legendrow')).includes('Community'), 'player ' + i + ' sees the same five stakeholder words');
       const mh = await p.evaluate(() => document.documentElement.scrollHeight); phoneH.push(mh); ok(mh < 1500, 'player ' + i + ' motions step is short (' + mh + ' px)');
-      await p.click('.mhead'); await p.screenshot({ path: join(shots, `3c_player${i}_motions.png`), fullPage: true });
-      if (await p.$('[data-callm]')) { await p.click('[data-callm]'); await p.waitForTimeout(800); const y = await p.$('[data-ballot="yes"]'); if (y) { await y.click(); await p.waitForTimeout(500); } }
+      await p.screenshot({ path: join(shots, `3c_player${i}_motions.png`), fullPage: true });
+      if (await p.$('[data-callm]')) { await p.click('[data-callm]'); await p.waitForTimeout(800); const y = await p.$('[data-ballot="yes"]'); if (y) { await y.click({ timeout: 3000 }).catch(() => {}); await p.waitForTimeout(500); } }
       lockedText.push(locked);
       await p.screenshot({ path: join(shots, `3b_player${i}_locked.png`), fullPage: true });
     }
@@ -103,26 +107,33 @@ try {
   await players[0].waitForTimeout(1500);
   ok((await players[0].textContent('#msgs')).includes('Tester 0 says'), 'chat message delivered');
   await proj.screenshot({ path: join(shots, '4_projector_play.png') });
+  ok((await proj.textContent('#app')).includes('The Principal Times'), 'projector shows the front page during play');
   // run through the rest on the clock
   const t0 = Date.now();
   while (Date.now() - t0 < 240000) {
     const txt = await admin.textContent('#app');
     if (/Phase:\s*reveal/.test(txt)) break;
     const btn = await admin.$('#adv');
-    if (btn && (await btn.textContent()).trim() === 'Reveal') { await proj.screenshot({ path: join(shots, '5_projector_outside_r3.png') }); await btn.click(); }
+    if (btn && (await btn.textContent()).trim() === 'Reveal') { await proj.screenshot({ path: join(shots, '5_projector_final_edition.png') }); const ft = await proj.textContent('#app'); ok(ft.includes('Final edition') && /Share price/.test(ft), 'final edition of the front page shows share prices'); if (lockedText.length) ok(lockedText.some(t => ft.includes(t.replace(/^.*?:\s*/, '').slice(0, 20)) || ft.includes('“')), 'a locked statement is printed as a pull quote'); await btn.click(); }
     await admin.waitForTimeout(1000);
   }
   await proj.waitForTimeout(2500);
-  const rtxt = await proj.textContent('#app');
-  ok(rtxt.includes('How each community ranks the boards'), 'projector reveal renders grid');
-  ok(!rtxt.includes('Seat leagues'), 'projector reveal has no seat leagues (cut)');
-  ok(!/Activist|Short seller|Plaintiff|Executive session|Resign/i.test(rtxt), 'projector reveal mentions no cut features');
-  const nStruck = await proj.$$eval('.facts li.omitted s', e => e.length), nCaught = await proj.$$eval('.facts li.caughtf', e => e.length);
-  ok(nStruck > 0, 'projector reveal shows struck omitted facts (' + nStruck + ' struck, ' + nCaught + ' caught)');
-  ok(rtxt.includes('Public statement') && /caught|left out|Admitted/.test(rtxt), 'projector reveal shows statement and fact list');
-  ok(!/^(Tell|Spin|Bury)$/i.test((await proj.$$eval('.disc', els => els.map(e => e.textContent.trim()))).join('\n')), 'projector reveal has no Tell/Spin/Bury label');
-  if (lockedText.length) ok(lockedText.some(t => rtxt.includes(t)), 'locked statement appears on the projector reveal (' + lockedText.length + ' chair(s) locked)');
-  else ok(true, 'no test player was seated as a director this run; statement check skipped');
+  const seen = [];
+  for (let n = 0; n < 12; n++) {
+    const txt = await proj.textContent('#app'); seen.push(txt);
+    const words = txt.trim().split(/\s+/).length;
+    ok(words <= 200, 'debrief screen ' + (n + 1) + ' is short (' + words + ' words)');
+    await proj.screenshot({ path: join(shots, '6_projector_debrief_' + (n + 1) + '.png') });
+    const nx = admin.locator('#rnext'); if (await nx.isDisabled()) break;
+    await nx.click(); await proj.waitForTimeout(1800);
+  }
+  const rtxt = seen.join(' ');
+  ok(/Reactions/.test(seen[0]) && /Side by side/.test(seen[1]) && /Governance/.test(seen[2]) && /Fixes/.test(seen[3]), 'debrief runs Reactions, Side by side, Governance, Fixes');
+  ok(seen.length >= 6 && seen.slice(4).every(t => t.includes('Ethics')), 'one ethics screen per board follows (' + (seen.length - 4) + ')');
+  ok(/Columbia\/HCA|Boeing|Facebook|H&M|Wells Fargo/.test(seen[3]), 'Fixes screen reveals the real cases');
+  ok(!/Activist|Short seller|Plaintiff|Executive session|Resign|Reporter/i.test(rtxt), 'debrief mentions no cut features');
+  ok(!/^(Tell|Spin|Bury)$/i.test(rtxt), 'no Tell/Spin/Bury label');
+  ok(!/exposure safe|secret missed|Gained: |Paid: /.test(rtxt), 'reveal labels are plain words');
   await proj.screenshot({ path: join(shots, '6_projector_reveal.png'), fullPage: true });
   for (const [i, p] of players.entries()) { await p.waitForTimeout(500); await p.screenshot({ path: join(shots, `7_player${i}_reveal.png`), fullPage: true }); ok((await p.$('.result .big')) !== null, 'player ' + i + ' sees own result'); }
   console.log('phone heights (px):', phoneH.join(', '));

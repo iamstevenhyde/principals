@@ -3,3 +3,4 @@
 2026-11-04 20:37:40 sim 20x24 + variants PASS; committed engine
 2026-11-04 20:46:15 pages built; headless run passes except favicon 404 (fixed)
 2026-11-04 20:47:06 final: simulate PASS, headless PASS; committed (not pushed, no SQL run)
+2026-11-08 Option B built: one motion per round, front page projector, five-plus debrief, real cases, Auditor kept, Reporter cut; simulate + headless PASS; not pushed, no SQL run

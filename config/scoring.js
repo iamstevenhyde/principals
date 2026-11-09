@@ -5,7 +5,7 @@
 
 export const SCORING = {
   // ---------- timers (seconds); the host can change these in admin ----------
-  timers: { shock: 30, play: 240, outside: 60 },
+  timers: { shock: 30, play: 480, outside: 60 },   // play = round length: 8 minutes by default, host sets minutes in admin
 
   // ---------- sizing ----------
   boardSize: 5,                 // boards fill to five, everyone after that is the Street
@@ -14,7 +14,7 @@ export const SCORING = {
   seatDropOrder: ['community', 'founder_friend', 'fund', 'labor', 'attorney'],
   // Board priority when the host picks fewer than five boards (spec: with 4 drop Lumen, with 3 also drop Thread).
   boardPriority: ['heartland', 'summit', 'valley', 'thread', 'lumen'],
-  streetPriority: ['reporter', 'auditor'], // content/street.json priority wins if present
+  streetPriority: ['auditor'], // content/street.json priority wins if present
 
   // ---------- disclosure ----------
   defaultDisclosure: 'none',    // round 1, if the Chair never locks the facts: admit nothing (provisional: silence reads as hiding)
@@ -24,6 +24,8 @@ export const SCORING = {
   factStock: { admitted: -2, hidden: +2, caught: -12 },
   // Chance the Auditor's inspect finds one omitted fact, by the fact's weight (1 light, 3 heavy). Old Spin 50% / Bury 70% sat inside this range.
   factDetect: { 1: 0.3, 2: 0.5, 3: 0.7 },
+  // Background chance per round that the press finds one hidden fact with no Auditor on the board, by weight. The game plays the press.
+  pressDetect: { 1: 0.05, 2: 0.12, 3: 0.2 },
   harmCaughtWeight: 3,                    // a harm suit wins when the caught facts weigh at least this much (old: a caught Bury)
   detectVisitBonus: 0.15,                 // a Street member sat at the table this round (no executive session)
   detectInvestigatorBonus: 0.2,           // the board hired an investigator and still spun or buried

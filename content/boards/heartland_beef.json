@@ -1,9 +1,10 @@
 {
   "id": "heartland_beef",
   "name": "Heartland Beef",
+  "short": "Heartland",
   "industry": "Beef-on-dairy packer",
   "from_week": "2",
-  "blurb": "One big packing plant in Prairie Bend, 1,400 line workers, and about 600 ranches that sell it cattle. Founder Walt Dreyer started as a rancher and still holds 28% of the vote. The ranchers' co-op sells Heartland most of its herds.",
+  "blurb": "One big packing plant in Prairie Bend, 1,400 line workers, and about 600 ranches that sell it cattle. Founder Walt Dreyer started as a rancher and holds 28% of the vote.",
   "communities": [
     {
       "key": "shareholders",
@@ -19,7 +20,6 @@
     },
     {
       "key": "home",
-      "id": "ranchers",
       "label": "Ranchers' co-op"
     },
     {
@@ -33,8 +33,10 @@
       "name": "Carla Whitfield",
       "title": "Attorney",
       "home": "The state bar",
+      "motive": "You reviewed the Premium Program terms and told Heartland the opt-in language was enough. You have since read the complaints.",
       "exposure": {
-        "text": "Disbarred if the board is caught hiding facts while she sits on it.",
+        "text": "You are disbarred if the board is caught hiding a heavy fact.",
+        "label": "Disbarred if caught hiding",
         "trigger": {
           "type": "facts_caught",
           "weight": 3
@@ -43,20 +45,23 @@
       "secrets": [
         {
           "id": "attorney_A",
-          "text": "Never be on a board that's caught hiding facts.",
+          "text": "Clean the books: the board admits every fact in round 1.",
+          "label": "Admit every fact in round 1",
           "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught",
-              "weight": 3
-            }
+            "type": "disclosure_choice",
+            "round": 1,
+            "choice": "all"
           }
         },
         {
           "id": "attorney_B",
-          "text": "Your firm earns fees when regulators look into Heartland. A hidden fact that comes out keeps the fees coming.",
+          "text": "Your firm earns fees when regulators look into Heartland. One caught fact ends it, so none may be caught.",
+          "label": "No fact gets caught",
           "check": {
-            "type": "facts_caught"
+            "type": "not",
+            "of": {
+              "type": "facts_caught"
+            }
           }
         }
       ]
@@ -66,25 +71,29 @@
       "name": "Denise Kowalski",
       "title": "Labor director",
       "home": "Meatcutters Local 88",
+      "motive": "Your members cut the beef, and the buyers who push quotas are their neighbors. You have seen what a missed quota does to a family.",
       "exposure": {
-        "text": "Loses the next union vote if line wages are frozen.",
+        "text": "Members vote you out if the board spends $60M on TraceMark.",
+        "label": "TraceMark funded",
         "trigger": {
           "type": "motion_passed",
-          "id": "wage_freeze"
+          "id": "fund_tracemark"
         }
       },
       "secrets": [
         {
           "id": "labor_A",
-          "text": "The old ammonia system gets replaced before the game ends.",
+          "text": "The buyer quotas end.",
+          "label": "Quotas end",
           "check": {
             "type": "motion_passed",
-            "id": "ammonia_retrofit"
+            "id": "end_quotas"
           }
         },
         {
           "id": "labor_B",
           "text": "You were granted stock options last year. The stock must end above where it started.",
+          "label": "Stock ends above start",
           "check": {
             "type": "stock_end_above_start"
           }
@@ -96,8 +105,10 @@
       "name": "Marcus Feld",
       "title": "Fund partner",
       "home": "Cornbelt Partners (owns 9%)",
+      "motive": "Cornbelt's investors want growth, and sign-up numbers have been the growth chart. TraceMark is the kind of story that lifts a price.",
       "exposure": {
-        "text": "Investors pull money from his fund if the stock ends below where it started.",
+        "text": "Your investors pull their money if the stock ends below where it started.",
+        "label": "Stock ends below start",
         "trigger": {
           "type": "stock_end_below_start"
         }
@@ -105,15 +116,17 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Pass a buyback of $30M or more in any round.",
+          "text": "Your fund holds a stake in the nephew's startup. TraceMark must pass.",
+          "label": "TraceMark passes",
           "check": {
-            "type": "payout_m_gte",
-            "value": 30
+            "type": "motion_passed",
+            "id": "fund_tracemark"
           }
         },
         {
           "id": "fund_B",
-          "text": "Your fund quietly owns a rival packer. Heartland's stock must finish in the bottom half.",
+          "text": "Your fund quietly owns a rival packer. The stock must finish in the bottom half.",
+          "label": "Stock ends in bottom half",
           "check": {
             "type": "stock_rank_bottom_half"
           }
@@ -125,8 +138,10 @@
       "name": "Gus Halvorsen",
       "title": "Founder's friend",
       "home": "Walt Dreyer, the founder (hunting partner of 30 years)",
+      "motive": "Walt has never been wrong about cattle in the thirty years you have hunted together. He has never been right about software, but he has never lost an argument about it.",
       "exposure": {
-        "text": "Loses the seat if the board votes down the wage freeze Walt wants.",
+        "text": "You lose the seat if the board votes down TraceMark, which Walt wants.",
+        "label": "TraceMark voted down",
         "trigger": {
           "type": "founder_motion_failed"
         }
@@ -134,7 +149,8 @@
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Walt signed off on keeping the ammonia near-miss quiet. Make sure the board never admits every fact about it.",
+          "text": "Walt signed off on the buyer quotas. The board must never admit every fact about them in round 1.",
+          "label": "Don't admit every fact in round 1",
           "check": {
             "type": "not",
             "of": {
@@ -146,7 +162,8 @@
         },
         {
           "id": "founder_friend_B",
-          "text": "Walt's name is on the cancellation clause. No fact about it may ever be caught.",
+          "text": "Walt's name is on the TraceMark deal. No fact about it may be caught.",
+          "label": "No fact gets caught",
           "check": {
             "type": "not",
             "of": {
@@ -161,31 +178,41 @@
       "name": "Luanne Pruitt",
       "title": "Community seat (Ranchers' co-op president)",
       "home": "Prairie Ranchers' Co-op",
+      "motive": "You lead the ranchers' co-op, and some Premium fees came out of your members' checks. You have also sold Heartland your own cattle for years.",
       "exposure": {
-        "text": "Faces a no-confidence vote at home if contracts are cancelled on small ranchers.",
+        "text": "You face a no-confidence vote at home if the quotas stay.",
+        "label": "Quotas stay",
         "trigger": {
-          "type": "motion_passed",
-          "id": "cancel_small"
+          "type": "not",
+          "of": {
+            "type": "motion_passed",
+            "id": "end_quotas"
+          }
         }
       },
       "secrets": [
         {
           "id": "community_A",
-          "text": "Either the rancher bonus or the hardship loans pass.",
+          "text": "TraceMark fails and the money goes to rancher refunds instead.",
+          "label": "TraceMark fails",
           "check": {
-            "type": "motion_passed_any",
-            "ids": [
-              "rancher_bonus",
-              "ranch_fund"
-            ]
+            "type": "not",
+            "of": {
+              "type": "motion_passed",
+              "id": "fund_tracemark"
+            }
           }
         },
         {
           "id": "community_B",
-          "text": "You run a 4,000-head feedlot that would pick up cancelled contracts. Get the cancellations through.",
+          "text": "You run a 4,000-head feedlot that gains when small ranchers lose their contracts. The quotas stay.",
+          "label": "Quotas stay",
           "check": {
-            "type": "motion_passed",
-            "id": "cancel_small"
+            "type": "not",
+            "of": {
+              "type": "motion_passed",
+              "id": "end_quotas"
+            }
           }
         }
       ]
@@ -196,77 +223,50 @@
       "round": 1,
       "motions": [
         {
-          "id": "buyback",
-          "title": "Stock buyback",
-          "short": "Stock buyback",
-          "motive": "Hand the cash back to the owners, and the market will notice tonight.",
+          "id": "end_quotas",
+          "title": "End buyer sign-up quotas and refund Premium Program fees",
+          "short": "End buyer quotas",
+          "motive": "Stop paying people to sign up ranchers who did not ask.",
           "effects": {
-            "shareholders": 2,
+            "shareholders": -2,
             "workers": 0,
             "customers": 0,
-            "home": 0,
-            "public": 0
+            "home": 2,
+            "public": 1
           },
-          "flags": {
-            "payout_m": 30,
-            "tags": [
-              "payout"
-            ]
-          }
-        },
-        {
-          "id": "ammonia_retrofit",
-          "title": "Replace the ammonia cooling system",
-          "short": "Fix ammonia system",
-          "motive": "The old system is forty years old and due for replacement.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 2,
-            "customers": 1,
-            "home": 0,
-            "public": 0
+          "headline": {
+            "passed": "Heartland ends buyer quotas and refunds ranchers",
+            "failed": "Heartland keeps quotas despite rancher complaints"
           },
           "flags": {
             "resolves_issue": true
           }
-        },
-        {
-          "id": "rancher_bonus",
-          "title": "Pay ranchers a bonus on this year's cattle",
-          "short": "Rancher bonus",
-          "motive": "They carry the weather and the feed bills. Share the good year.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 2,
-            "public": 0
-          }
         }
       ],
       "issue": {
-        "id": "ammonia_leak",
-        "text": "Last month an ammonia line at the plant sprang a leak. Nobody was hurt, the floor cleared for twenty minutes, and nobody reported it to the regulator.",
+        "id": "quota_signups",
+        "text": "To hit quotas, some Heartland cattle buyers enrolled ranchers in a paid Premium Program. The hotline logged 212 complaints last year. HR reviewed some and calls most of them misunderstandings.",
+        "case_for_silence": "Most complaints may be misunderstandings, ranchers did sign something, and ending the program would blow a hole in this year's numbers.",
         "facts": [
           {
             "id": "f1",
-            "text": "An ammonia line at the plant sprang a leak last month.",
-            "weight": 1
+            "text": "The hotline logged 212 complaints from ranchers about Premium Program fees they did not expect.",
+            "weight": 3
           },
           {
             "id": "f2",
-            "text": "The floor was cleared for twenty minutes.",
+            "text": "Buyers get bonuses for sign-ups and lose their jobs for missing quota.",
             "weight": 2
           },
           {
             "id": "f3",
-            "text": "Nobody reported it to the regulator.",
-            "weight": 3
+            "text": "HR reviewed some complaints and called most of them misunderstandings.",
+            "weight": 2
           },
           {
             "id": "f4",
-            "text": "The cooling system has not been replaced.",
-            "weight": 2
+            "text": "Board reports mentioned sign-up growth but not the complaints.",
+            "weight": 1
           }
         ]
       }
@@ -275,69 +275,77 @@
       "round": 2,
       "motions": [
         {
-          "id": "cancel_small",
-          "title": "Cancel contracts with small ranchers",
-          "short": "Drop small ranchers",
-          "motive": "The contract allows it. Small herds cost the most to collect.",
+          "id": "fund_tracemark",
+          "title": "Put $60M into the founder's TraceMark system and announce it to buyers",
+          "short": "Fund TraceMark",
+          "motive": "Tracing is the future, and Walt has never missed on cattle.",
           "effects": {
-            "shareholders": 1,
-            "workers": 0,
-            "customers": 0,
-            "home": -3,
-            "public": 0
-          }
-        },
-        {
-          "id": "wage_freeze",
-          "title": "Freeze line wages",
-          "short": "Freeze line wages",
-          "motive": "No raises until the market comes back.",
-          "effects": {
-            "shareholders": 1,
+            "shareholders": 2,
             "workers": -1,
-            "customers": 0,
+            "customers": 1,
             "home": 0,
             "public": 0
           },
+          "headline": {
+            "passed": "Heartland backs founder's $60M TraceMark bet",
+            "failed": "Heartland board turns down founder's TraceMark bet"
+          },
           "flags": {
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "ranch_fund",
-          "title": "Hardship loans for small ranchers",
-          "short": "Rancher hardship loans",
-          "motive": "Help the small herds make it through the year.",
-          "effects": {
-            "shareholders": -1,
-            "workers": 0,
-            "customers": 0,
-            "home": 2,
-            "public": 0
+            "founder_wants": true,
+            "reveal_effects": {
+              "shareholders": -3,
+              "workers": 0,
+              "customers": 0,
+              "home": 0,
+              "public": -2
+            }
           }
         }
       ],
       "issue": {
-        "id": "cancel_clause",
-        "text": "A clause in the small-rancher contracts lets Heartland cancel on 30 days' notice, and most ranchers have not read it.",
+        "id": "tracemark",
+        "text": "Founder Walt Dreyer wants $60M for TraceMark, a cattle-tracing system built by his nephew's startup. It has run only in demos. Nobody on the board has run a tracing system.",
+        "case_for_silence": "Demos are how every new system starts, the engineers may have left for ordinary reasons, and public doubt could kill a bet that may pay.",
         "facts": [
           {
             "id": "f1",
-            "text": "Small-rancher contracts let Heartland cancel on 30 days' notice.",
+            "text": "No one on the board has run a tracing system or read its test data.",
             "weight": 3
           },
           {
             "id": "f2",
-            "text": "Most ranchers have not read the clause.",
+            "text": "TraceMark has only been shown in demos run by Walt's nephew's team.",
             "weight": 2
           },
           {
             "id": "f3",
-            "text": "The clause has been in contracts since 2019.",
+            "text": "Two TraceMark engineers left last spring, and the startup calls it ordinary turnover.",
+            "weight": 2
+          },
+          {
+            "id": "f4",
+            "text": "No outside lab has tested it.",
             "weight": 1
           }
         ]
       }
     }
-  ]
+  ],
+  "real": {
+    "cases": [
+      {
+        "round": 1,
+        "event": "Wells Fargo",
+        "years": "2013 to 2020",
+        "line": "Wells Fargo paid $185M in 2016 over unauthorized accounts. Its board heard of the risk in 2014 but got incomplete numbers."
+      },
+      {
+        "round": 2,
+        "event": "Theranos",
+        "years": "2015 to 2022",
+        "line": "Theranos raised over $700M. Its founder was sentenced in 2022 to 11 years 3 months. Critics noted a board of famous names with little medical expertise."
+      }
+    ],
+    "fix": "Ask for the raw numbers, and seat directors who can read them."
+  }
 }

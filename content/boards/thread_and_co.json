@@ -1,9 +1,10 @@
 {
   "id": "thread_and_co",
   "name": "Thread & Co.",
+  "short": "Thread",
   "industry": "Apparel brand",
-  "from_week": "10",
-  "blurb": "A mid-priced apparel brand with 900 stores and a web shop. Everything is made at 40 supplier factories in Karvan and two other countries, and the biggest Karvan factory employs 2,000 people. Founder Elodie Marchetti started with one denim line and holds 26% of the vote.",
+  "from_week": "6",
+  "blurb": "A mid-priced apparel brand with 900 stores. Everything is made at 40 supplier factories in Karvan and two other countries, and the largest Karvan factory employs 2,000 people. Founder Elodie Marchetti holds 26% of the vote.",
   "communities": [
     {
       "key": "shareholders",
@@ -19,8 +20,7 @@
     },
     {
       "key": "home",
-      "id": "karvan",
-      "label": "Supplier country (Karvan)"
+      "label": "Karvan (supplier country)"
     },
     {
       "key": "public",
@@ -33,8 +33,10 @@
       "name": "Dominic Aldrich",
       "title": "Attorney",
       "home": "The state bar",
+      "motive": "You approved the wording 'made with recycled materials' as defensible. You still think so, but you have not seen the lab results.",
       "exposure": {
-        "text": "Disbarred if the board is caught hiding facts while he sits on it.",
+        "text": "You are disbarred if the board is caught hiding a heavy fact.",
+        "label": "Disbarred if caught hiding",
         "trigger": {
           "type": "facts_caught",
           "weight": 3
@@ -43,18 +45,18 @@
       "secrets": [
         {
           "id": "attorney_A",
-          "text": "Never be on a board that's caught hiding facts.",
+          "text": "Clean the books: the board admits every fact in round 1.",
+          "label": "Admit every fact in round 1",
           "check": {
-            "type": "not",
-            "of": {
-              "type": "facts_caught",
-              "weight": 3
-            }
+            "type": "disclosure_choice",
+            "round": 1,
+            "choice": "all"
           }
         },
         {
           "id": "attorney_B",
-          "text": "Your firm does Thread & Co.'s trademark work by the hour. One caught fact brings in outside counsel, so none may be caught.",
+          "text": "Your firm does Thread's trademark work. One caught fact ends it, so none may be caught.",
+          "label": "No fact gets caught",
           "check": {
             "type": "not",
             "of": {
@@ -69,25 +71,34 @@
       "name": "Nasrin Haque",
       "title": "Labor director",
       "home": "Garment Workers Federation (supplier side)",
+      "motive": "Your members sew the clothes in Karvan and have never been in the room when a brand decides anything. A brand that pays late or leaves worries you more than a bad label.",
       "exposure": {
-        "text": "Loses the next vote if the board delays factory payment or moves orders away from union factories.",
+        "text": "Members vote you out if the board does not pay for the factory's repairs.",
+        "label": "Repairs not paid",
         "trigger": {
-          "type": "tag_passed",
-          "tag": "factory_squeeze"
+          "type": "not",
+          "of": {
+            "type": "motion_passed",
+            "id": "pay_repairs"
+          }
         }
       },
       "secrets": [
         {
           "id": "labor_A",
-          "text": "A supplier wage floor passes before the game ends.",
+          "text": "No hidden fact is caught. A scandal sends orders to cheaper countries.",
+          "label": "No fact gets caught",
           "check": {
-            "type": "motion_passed",
-            "id": "wage_floor"
+            "type": "not",
+            "of": {
+              "type": "facts_caught"
+            }
           }
         },
         {
           "id": "labor_B",
           "text": "You were granted stock options last year. The stock must end above where it started.",
+          "label": "Stock ends above start",
           "check": {
             "type": "stock_end_above_start"
           }
@@ -99,8 +110,10 @@
       "name": "Teodor Brandt",
       "title": "Fund partner",
       "home": "Brightwater Capital (owns 8%)",
+      "motive": "Brightwater paid up for Thread's green story. A relabel hurts the multiple and an accident hurts more.",
       "exposure": {
-        "text": "Investors pull money from his fund if the stock ends below where it started.",
+        "text": "Your investors pull their money if the stock ends below where it started.",
+        "label": "Stock ends below start",
         "trigger": {
           "type": "stock_end_below_start"
         }
@@ -108,15 +121,20 @@
       "secrets": [
         {
           "id": "fund_A",
-          "text": "Pass a buyback of $30M or more in any round.",
+          "text": "The green story is why your fund bought in. The relabel must not pass.",
+          "label": "Relabel fails",
           "check": {
-            "type": "payout_m_gte",
-            "value": 30
+            "type": "not",
+            "of": {
+              "type": "motion_passed",
+              "id": "relabel"
+            }
           }
         },
         {
           "id": "fund_B",
-          "text": "Your fund quietly owns a rival fast-fashion brand. Thread & Co.'s stock must finish in the bottom half.",
+          "text": "Your fund quietly owns a rival fast-fashion brand. The stock must finish in the bottom half.",
+          "label": "Stock ends in bottom half",
           "check": {
             "type": "stock_rank_bottom_half"
           }
@@ -128,16 +146,20 @@
       "name": "Camille Roux",
       "title": "Founder's friend",
       "home": "Elodie Marchetti, the founder (first design partner)",
+      "motive": "You and Elodie drew the first denim line at her kitchen table, and 'recycled' was your word. You have never known which of you means it more.",
       "exposure": {
-        "text": "Loses the seat if the board votes down moving orders to a cheaper country, which Elodie wants.",
+        "text": "You lose the seat if the board drops the 'recycled' claim.",
+        "label": "'Recycled' claim dropped",
         "trigger": {
-          "type": "founder_motion_failed"
+          "type": "motion_passed",
+          "id": "relabel"
         }
       },
       "secrets": [
         {
           "id": "founder_friend_A",
-          "text": "Elodie approved the 'recycled' label. Make sure the board never admits every fact about it.",
+          "text": "Elodie approved the label. The board must never admit every fact about it in round 1.",
+          "label": "Don't admit every fact in round 1",
           "check": {
             "type": "not",
             "of": {
@@ -150,6 +172,7 @@
         {
           "id": "founder_friend_B",
           "text": "You sit on two other boards. No scandal anywhere you sit, so no fact on this board may be caught.",
+          "label": "No fact gets caught",
           "check": {
             "type": "not",
             "of": {
@@ -164,37 +187,31 @@
       "name": "Rahel Tesfaye",
       "title": "Community seat (Trade representative)",
       "home": "Karvan Export Council",
+      "motive": "Karvan's largest factory employs 2,000 people, and so does your cousin's. Brands come and go, but a closed building does not reopen.",
       "exposure": {
-        "text": "Loses standing at home if a Karvan factory closes or the board moves orders out of the country.",
+        "text": "You lose standing at home if the board is caught hiding a fact about the factory.",
+        "label": "Caught hiding",
         "trigger": {
-          "type": "any",
-          "of": [
-            {
-              "type": "motion_passed",
-              "id": "delay_pay"
-            },
-            {
-              "type": "motion_passed",
-              "id": "shift_orders"
-            }
-          ]
+          "type": "facts_caught"
         }
       },
       "secrets": [
         {
           "id": "community_A",
-          "text": "The supplier wage floor passes.",
+          "text": "The relabel passes. Karvan's name depends on honest labels.",
+          "label": "Relabel passes",
           "check": {
             "type": "motion_passed",
-            "id": "wage_floor"
+            "id": "relabel"
           }
         },
         {
           "id": "community_B",
-          "text": "Your cousin owns the largest Karvan factory. The five-year supplier deal must pass, even though it leaves the smaller factories out.",
+          "text": "Your cousin owns the largest factory and owes a loan. The repair payment must pass, though it leaves smaller factories out.",
+          "label": "Repair payment passes",
           "check": {
             "type": "motion_passed",
-            "id": "supplier_contract"
+            "id": "pay_repairs"
           }
         }
       ]
@@ -205,78 +222,49 @@
       "round": 1,
       "motions": [
         {
-          "id": "buyback",
-          "title": "Stock buyback",
-          "short": "Stock buyback",
-          "motive": "Hand the cash back to the owners, and the market will notice tonight.",
-          "effects": {
-            "shareholders": 2,
-            "workers": 0,
-            "customers": 0,
-            "home": 0,
-            "public": 0
-          },
-          "flags": {
-            "payout_m": 30,
-            "tags": [
-              "payout"
-            ]
-          }
-        },
-        {
-          "id": "wage_floor",
-          "title": "Set a wage floor in supplier contracts",
-          "short": "Factory wage floor",
-          "motive": "A minimum wage written into every factory contract.",
+          "id": "relabel",
+          "title": "Drop the 'recycled' claim from the Green Line label",
+          "short": "Drop 'recycled' label",
+          "motive": "Say only what the tests show.",
           "effects": {
             "shareholders": -1,
-            "workers": 2,
+            "workers": 0,
             "customers": -1,
-            "home": 1,
-            "public": 0
+            "home": 0,
+            "public": 2
+          },
+          "headline": {
+            "passed": "Thread & Co. drops 'recycled' claim from its Green Line",
+            "failed": "Thread & Co. keeps 'recycled' label on its Green Line"
           },
           "flags": {
-            "lag_payback": {
-              "shareholders": 2
-            }
-          }
-        },
-        {
-          "id": "supplier_contract",
-          "title": "Five-year deal with the biggest factory",
-          "short": "Five-year deal",
-          "motive": "Steady orders for them and steady supply for us.",
-          "effects": {
-            "shareholders": 1,
-            "workers": 1,
-            "customers": 0,
-            "home": 1,
-            "public": 0
+            "resolves_issue": true
           }
         }
       ],
       "issue": {
-        "id": "fake_recycled",
-        "text": "The 'recycled' line is mostly virgin polyester. A supplier swapped the material two seasons ago to hit cost targets and the labels never changed.",
+        "id": "green_label",
+        "text": "Thread's Green Line is labeled 'made with recycled materials.' Tests on three garments found between 5% and 60% recycled fiber. A supplier changed the fiber mix two seasons ago to meet a cost target, and the label was not updated.",
+        "case_for_silence": "'Made with recycled materials' is true of some garments, three samples prove little, and a retraction could hurt a line shoppers like.",
         "facts": [
           {
             "id": "f1",
-            "text": "The recycled line is mostly new, non-recycled polyester.",
+            "text": "Tests on three garments found between 5% and 60% recycled fiber, and the label does not say how much.",
             "weight": 3
           },
           {
             "id": "f2",
-            "text": "A supplier swapped the material two seasons ago to hit cost targets.",
+            "text": "A supplier changed the fiber mix two seasons ago to meet a cost target.",
             "weight": 2
           },
           {
             "id": "f3",
-            "text": "The labels never changed.",
+            "text": "The label was not updated after the change.",
             "weight": 2
           },
           {
             "id": "f4",
-            "text": "Nobody has tested the fabric.",
+            "text": "No lab has tested the whole line.",
             "weight": 1
           }
         ]
@@ -286,85 +274,70 @@
       "round": 2,
       "motions": [
         {
-          "id": "delay_pay",
-          "title": "Delay payment to the Karvan factory another quarter",
-          "short": "Delay factory pay",
-          "motive": "It's in the contract terms. The factory will wait.",
-          "effects": {
-            "shareholders": 1,
-            "workers": -2,
-            "customers": 0,
-            "home": -3,
-            "public": 0
-          },
-          "flags": {
-            "tags": [
-              "factory_squeeze"
-            ],
-            "reveal_effects": {
-              "home": -1
-            }
-          }
-        },
-        {
-          "id": "shift_orders",
-          "title": "Move orders to a cheaper country",
-          "short": "Move orders abroad",
-          "motive": "Same clothes, lower cost.",
-          "effects": {
-            "shareholders": 1,
-            "workers": -3,
-            "customers": 0,
-            "home": -3,
-            "public": 0
-          },
-          "flags": {
-            "tags": [
-              "factory_squeeze"
-            ],
-            "founder_wants": true
-          }
-        },
-        {
-          "id": "pay_factory",
-          "title": "Pay the factory in full now",
-          "short": "Pay factory in full",
-          "motive": "The invoice is due and the factory has payroll to meet.",
+          "id": "pay_repairs",
+          "title": "Pay the Karvan factory $18M now, tied to a structural check and repairs",
+          "short": "Pay factory for repairs",
+          "motive": "The invoice is due and the building needs a look.",
           "effects": {
             "shareholders": -2,
             "workers": 2,
             "customers": 0,
-            "home": 3,
-            "public": 0
+            "home": 2,
+            "public": 1
+          },
+          "headline": {
+            "passed": "Thread & Co. pays Karvan factory $18M for repairs",
+            "failed": "Thread & Co. holds payment as factory warns of cracks"
+          },
+          "flags": {
+            "resolves_issue": true
           }
         }
       ],
       "issue": {
-        "id": "unpaid_factory",
-        "text": "Thread & Co. owes the largest Karvan factory $18M in unpaid invoices. Another quarter without payment will probably close it and put 2,000 people out of work.",
+        "id": "factory_cracks",
+        "text": "An inspector's note reports cracks in a wall of the largest Karvan factory and asks for a structural check. The factory says it cannot pay for one while Thread's $18M in invoices is unpaid. Spring orders are due in six weeks.",
+        "case_for_silence": "The cracks may be cosmetic, a check takes weeks, and a public warning could stall an order that 2,000 people depend on.",
         "facts": [
           {
             "id": "f1",
-            "text": "Thread & Co. owes the largest Karvan factory $18M in unpaid invoices.",
+            "text": "An inspector's note reports cracks in a wall of the largest Karvan factory and asks for a structural check.",
             "weight": 3
           },
           {
             "id": "f2",
-            "text": "Another quarter without payment will probably close the factory.",
+            "text": "The factory says it cannot pay for repairs while Thread owes it $18M.",
             "weight": 2
           },
           {
             "id": "f3",
-            "text": "About 2,000 people would be out of work.",
+            "text": "Thread's audits check wages and hours but not the building.",
             "weight": 2
           },
           {
             "id": "f4",
-            "text": "The unpaid invoices are for the spring order.",
+            "text": "Spring orders are due in six weeks.",
             "weight": 1
           }
         ]
       }
     }
-  ]
+  ],
+  "real": {
+    "cases": [
+      {
+        "round": 1,
+        "event": "H&M Conscious",
+        "years": "2019 to 2022",
+        "line": "Norway's consumer authority said in 2019 that H&M's Conscious marketing lacked the information to back its claims."
+      },
+      {
+        "round": 2,
+        "event": "Rana Plaza",
+        "years": "2013",
+        "line": "Rana Plaza collapsed in Bangladesh on 24 April 2013, killing 1,134 garment workers a day after cracks appeared."
+      }
+    ],
+    "fix": "Audit the building, not only the wages, and back every green claim."
+  }
 }
