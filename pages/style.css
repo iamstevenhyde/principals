@@ -237,3 +237,15 @@ nav.bar{height:auto;overflow:visible;background:var(--card)}
 .phone .fact{font-size:.88rem;line-height:1.32;margin:0 0 .4em}.phone .cardtext{font-size:.98rem;line-height:1.42}
 .phone .opt{min-height:0;margin-bottom:5px;padding:7px 9px;gap:8px}.phone .opt .n{font-size:1.1rem}.phone .opt b{font-size:.95rem}.phone .opt span.t{font-size:.82rem;line-height:1.25}
 .phone h2{font-size:1.05rem;margin:4px 0}.phone .small{font-size:.8rem;margin:2px 0}
+
+/* one-screen debrief */
+.deck-screen.one{padding:1vw 1.6vw;min-height:0;height:100vh;overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column}
+.deck-screen.one header{gap:1.2vw;flex-wrap:wrap}.deck-screen.one h2{font-size:clamp(24px,3vw,54px)}
+.chosebar{flex:1;font-weight:700;font-size:clamp(16px,1.7vw,30px)}
+.rtabs{display:flex;gap:.4vw}.rtab{font-size:clamp(11px,.9vw,16px);padding:.2em .6em;border:1px solid var(--line);border-radius:99px;color:var(--mute)}.rtab.on{background:var(--ink);color:var(--bg,#fff);border-color:var(--ink)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:2vw;flex:1;min-height:0}
+.split .colhd{font-size:clamp(14px,1.3vw,22px);text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:.3em 0}
+.split .paper{max-width:none;min-height:0}.split .hl{font-size:clamp(22px,2.8vw,48px)}
+.split .real,.deck-screen.one .real{font-size:clamp(15px,1.75vw,31px);line-height:1.35;max-width:none;margin:.3em 0}
+.split .qs{font-size:clamp(15px,1.75vw,31px);line-height:1.3;margin:.2em 0;padding-left:1.2em}.split .qs li{margin-bottom:.4em}
+.split .ticker{font-size:clamp(22px,3vw,52px);margin-top:.6em}

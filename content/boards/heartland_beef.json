@@ -39,6 +39,13 @@
    "title": "Community seat",
    "home": "Prairie Ranchers' Co-op (President)",
    "motive": "You lead the co-op whose members found fees on their checks, and you were elected to protect them. Heartland is also the only buyer within a day's haul for many ranchers, your own herd included. You want an apology and a refund, and you need the plant to stay open."
+  },
+  {
+   "seat": "audit_chair",
+   "name": "Howard Lindqvist",
+   "title": "Audit chair",
+   "home": "Heartland audit committee (retired accountant)",
+   "motive": "You signed the last three audits, and the program count was a figure you reviewed. Calling this a few bad employees protects your record, while calling it a design flaw means you missed it. You want a review that finds a process failure, not a person, and not you."
   }
  ],
  "briefing": {

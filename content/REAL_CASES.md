@@ -84,3 +84,15 @@ Fictional names stay in play. The real case appears only at the debrief (Fixes s
 
 - WeWork (spare) was not checked and is not used.
 - Any claim marked UNVERIFIED above is excluded from slides. Re-check the Wikipedia-sourced lines (Rana Plaza, OpenAI letter) against a primary source before quoting them outside class.
+
+## Aurum Silicon (sixth board, added 10 Nov 2026)
+
+**Real case: Nvidia, November 2026. Ongoing; every fact below is as reported, not confirmed. Verified only against the outlets' coverage as relayed to the author, not re-fetched.**
+- Used on screen: CEO Jensen Huang told staff of a relationship with Alice Huang, an executive at Megaspeed, a Singapore data-center company that bought more than $4.8B of Nvidia chips; US intelligence officials are reported to believe she worked for China's Ministry of State Security. The board announced an independent investigation, said it saw no reason to believe security was compromised, and Huang stays as CEO. The reveal text says the investigation is ongoing.
+- Also in the briefing (fictionalized): DOJ National Security Division reported investigating Megaspeed; they met in June 2024 at a Taipei trade show; no succession plan, no president or COO, flat structure with many direct reports, two adult children work at the company, long-tenured board with several venture investors (Semafor); bipartisan congressional scrutiny; stock fell. Analyst Dan Ives: no succession plan and hard to find an internal replacement (not quoted on screen).
+- Fictional names: Aurum Silicon (Nvidia), Kai Nakamura (Huang), Lena Voss (Alice Huang), Tidewater Compute in Port Arden (Megaspeed). The stock path and press stories are invented. Update the reveal text if the investigation concludes before class.
+- Sources: https://www.cnbc.com/2026/11/08/nvidia-jensen-huang-investigation-china-spy.html
+- https://www.axios.com/2026/11/08/nvidia-ceo-jensen-huang-admits-affair-board-to-launch-investigation
+- https://www.semafor.com/article/11/09/2026/with-a-weak-board-and-no-successor-nvidia-confronts-a-governance-crisis
+- https://www.cbsnews.com/news/nvidia-jensen-huang-investigation-china-intelligence/
+

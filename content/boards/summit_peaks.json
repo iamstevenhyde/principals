@@ -39,6 +39,13 @@
    "title": "Community seat",
    "home": "Alder Creek (Mayor)",
    "motive": "You are Mayor of Alder Creek, where the second fall happened, and you went to two of the funerals. The town depends on Summit for jobs and taxes, you face re-election in the fall, and the town is divided about what speaking for it requires."
+  },
+  {
+   "seat": "audit_chair",
+   "name": "Ines Calder",
+   "title": "Audit chair",
+   "home": "Summit audit committee (former state inspector)",
+   "motive": "You led the risk review that rated lift maintenance low, and the engineer's warning would show that review missed something. You want the full record out on your terms, but a Monday disclosure could end your career, and a later one could end it worse."
   }
  ],
  "briefing": {

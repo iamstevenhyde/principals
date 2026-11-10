@@ -39,6 +39,13 @@
    "title": "Community seat",
    "home": "Patients at the bedside",
    "motive": "You are the Chief Nursing Officer, and the nurses' letter came to your desk. You filed it, thinking a few coders were the problem, and a reporter called you Monday. You wonder whether your silence made you part of it, and you would rather say so first."
+  },
+  {
+   "seat": "audit_chair",
+   "name": "Gloria Feng",
+   "title": "Audit chair",
+   "home": "Valley audit committee (retired hospital CFO)",
+   "motive": "Your committee reviewed the coding reports the attorney signed, and the CFO told you the numbers tied out. You never tested them yourself. You want outside reviewers in before anyone says a figure aloud, because your own approval may be one of the things they find."
   }
  ],
  "briefing": {

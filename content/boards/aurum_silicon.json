@@ -1,0 +1,146 @@
+{
+ "id": "aurum_silicon",
+ "name": "Aurum Silicon",
+ "short": "Aurum",
+ "industry": "AI chip maker",
+ "blurb": "A chip designer whose processors power most of the world's AI systems, worth about $3 trillion. Co-founder Kai Nakamura has been CEO for thirty-one years.",
+ "directors": [
+  {
+   "seat": "attorney",
+   "name": "Lorna Whitcombe",
+   "title": "Attorney",
+   "home": "The state bar",
+   "motive": "You advise the board, and the CEO told his staff before he told you. The board has already said it sees no reason to believe secrets were lost, and you cannot find what that rests on. You want no statement the board cannot back, and you want to keep this client."
+  },
+  {
+   "seat": "labor",
+   "name": "Marcus Oyelaran",
+   "title": "Labor director",
+   "home": "Aurum Employees Council",
+   "motive": "You speak for 26,000 employees whose stock has dropped, and most of them love the CEO. Some are rumored to be quietly looking elsewhere. You want him to stay and you want answers, and his two children work down the hall from the people you represent."
+  },
+  {
+   "seat": "fund",
+   "name": "Dmitri Albrecht",
+   "title": "Fund partner",
+   "home": "Larkspur Ventures (owns 3%)",
+   "motive": "Your fund backed the company in its first year and you have sat on this board for nineteen years. You never pressed the CEO on succession because he said no one else could do the job. You also never wanted to be the director who forced out the founder."
+  },
+  {
+   "seat": "founder_friend",
+   "name": "Rosalind Tran",
+   "title": "Founder's friend",
+   "home": "Kai Nakamura, the CEO (co-founder, friend of thirty years)",
+   "motive": "Kai Nakamura asked you to speak for him in the room. He told you stepping aside would end the company he built, but he has not told you everything about that trip to Taipei. You want to protect him, and you want to know what you are protecting."
+  },
+  {
+   "seat": "community",
+   "name": "Joon-ho Baek",
+   "title": "Community seat",
+   "home": "Pacific Security Forum (former counterintelligence official)",
+   "motive": "You were put on this board to speak for the public interest, and you know how these approaches work. The board's word that nothing leaked is not evidence. But a chipmaker with no CEO also weakens the country, and you do not want to be blamed for that."
+  },
+  {
+   "seat": "audit_chair",
+   "name": "Vivian Ostrow",
+   "title": "Audit chair",
+   "home": "Aurum audit committee (retired accounting partner)",
+   "motive": "Your committee approved the sales controls that let more than $4 billion of chips go to one buyer. Investigators will ask who reviewed those controls. You want an investigation that does not start with your committee, and you do not want the CEO's absence to hide it."
+  }
+ ],
+ "briefing": {
+  "intro": "Aurum Silicon designs the chips that run most of the world's AI systems, and the company is worth about $3 trillion. Co-founder Kai Nakamura has been CEO for thirty-one years. On Saturday he told staff he had a relationship with Lena Voss, an executive at Tidewater Compute, a data-center company in Port Arden. The board meets Monday, before markets open.",
+  "facts": [
+   "US intelligence officials are reported to believe Voss worked for a foreign intelligence service, which she and her company have not confirmed. They met at a trade show in 2024. Nakamura says he takes full responsibility and shared no secrets. No one has checked.",
+   "Tidewater bought more than $4 billion of Aurum chips in two years and is accused of passing restricted chips to firms barred from buying them. The Justice Department is reported to be investigating Tidewater. Aurum's own sales team approved the orders.",
+   "Nakamura has said he does not believe in succession planning. There is no president or COO, and about 60 executives report to him directly. His two adult children work at Aurum. Analysts say no insider could replace him quickly.",
+   "Two congressional committees of both parties want documents, and the stock is already down 5%. The board's directors average seventeen years of service, and four of nine are venture investors."
+  ]
+ },
+ "decision": {
+  "lead": "Pick one.",
+  "options": [
+   {
+    "n": 1,
+    "title": "Keep him during the review",
+    "text": "Nakamura stays as CEO while an outside firm investigates, and the board reports its findings in sixty days."
+   },
+   {
+    "n": 2,
+    "title": "Step aside",
+    "text": "Nakamura steps aside with pay and a senior director runs the company as interim CEO until findings are in."
+   },
+   {
+    "n": 3,
+    "title": "Name a successor now",
+    "text": "Name a chief operating officer today as successor-in-waiting, and keep Nakamura as CEO while the review runs."
+   },
+   {
+    "n": 4,
+    "title": "Independent chair and probe",
+    "text": "Appoint an independent chair and a special committee to run the investigation, with Nakamura reporting to it."
+   }
+  ]
+ },
+ "reveal": {
+  "case": "Nvidia, November 2026",
+  "text": "The real firm was Nvidia. In November 2026 CEO Jensen Huang told staff of a relationship with Alice Huang, an executive at Megaspeed, a Singapore data-center company that bought more than $4.8 billion of Nvidia chips. US intelligence officials are reported to believe she worked for China's Ministry of State Security. The board announced an independent investigation and said it saw no reason to believe security was compromised, and Huang stayed as CEO. The investigation is ongoing, and all of this is as reported by CNBC, Axios, Semafor and CBS."
+ },
+ "questions": [
+  "Who should hear from the board first: investors, Congress, or staff?",
+  "The CEO says he shared no secrets. Who should check, and how?",
+  "No successor and no COO. Whose job was that?",
+  "Can a board investigate the CEO it relies on? What would make it believable?"
+ ],
+ "press": [
+  {
+   "n": 1,
+   "headline": "Aurum Keeps CEO During Review",
+   "story": "The board said Nakamura stays while lawyers investigate for sixty days. Staff were relieved, but two senators asked who is investigating whom, and a major customer asked for a written security review.",
+   "stock": {
+    "symbol": "AURM",
+    "from": 180,
+    "to": 169.2,
+    "pct": -6
+   }
+  },
+  {
+   "n": 2,
+   "headline": "Aurum CEO Steps Aside, Interim Named",
+   "story": "A senior director took over as interim CEO. Customers asked who is in charge of product decisions, and several executives said they would leave if the founder did not return.",
+   "stock": {
+    "symbol": "AURM",
+    "from": 180,
+    "to": 158.4,
+    "pct": -12
+   }
+  },
+  {
+   "n": 3,
+   "headline": "Aurum Names Chief Operating Officer",
+   "story": "The new COO, hired from outside, will run daily operations while Nakamura stays on as CEO. Analysts liked the succession signal but asked why it took a scandal to get one.",
+   "stock": {
+    "symbol": "AURM",
+    "from": 180,
+    "to": 171,
+    "pct": -5
+   }
+  },
+  {
+   "n": 4,
+   "headline": "Aurum Adds Independent Chair, Special Committee Takes Over Probe",
+   "story": "A committee of outside directors will run the investigation and Nakamura will report to it. Some investors called it overdue, and the founder's allies called it a demotion.",
+   "stock": {
+    "symbol": "AURM",
+    "from": 180,
+    "to": 174.6,
+    "pct": -3
+   }
+  }
+ ],
+ "ticker": {
+  "symbol": "AURM",
+  "start": 180,
+  "unit": "$"
+ }
+}

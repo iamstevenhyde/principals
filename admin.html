@@ -45,14 +45,14 @@ function lobby(st, joinUrl) {
   const waiting = st.players.filter(p => !where[p.id]);
   const nPlaced = st.players.length - waiting.length;
   const face = n => `<span class="face" style="background:${COLORS[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length]}">${esc(n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase())}</span>`;
-  const board = bid => { const bc = st.content.boards.find(b => b.id === bid), seats = Object.keys(D.seats[bid]).filter(k => !k.endsWith('2') || st.players.length > 5 * D.boards.length || D.seats[bid][k]); return `<div class="card bcard"><h3>${esc(bc.name)} <span class="pill">${seats.filter(k => D.seats[bid][k]).length}/5</span></h3>
+  const board = bid => { const bc = st.content.boards.find(b => b.id === bid), seats = Object.keys(D.seats[bid]).filter(k => !k.endsWith('2') || st.players.length > 6 * D.boards.length || D.seats[bid][k]); return `<div class="card bcard"><h3>${esc(bc.name)} <span class="pill">${seats.filter(k => D.seats[bid][k]).length}/6</span></h3>
     ${seats.map(k => { const pid = D.seats[bid][k]; return `<div class="srow" title="${esc(SEAT_LABEL[k.replace('2', '')])}">${SEAT_ICON[k.replace('2', '')]}<select data-board="${bid}" data-seat="${k}" aria-label="${esc(SEAT_LABEL[k.replace('2', '')])}">${opts(pid)}</select>${pid ? `<button class="star ${D.chairs[bid] === pid ? 'on' : ''}" data-board="${bid}" data-star="${pid}" title="Chair">${ICON.crown}</button>` : '<span></span>'}</div>`; }).join('')}</div>`; };
   return `<div class="card herohost"><div class="qr" id="qr"></div><div><div class="bigcount">${st.players.length}</div><div class="mute">in the waiting room</div><div class="small">Code <b>${esc(st.code)}</b> <code>${esc(joinUrl)}</code></div></div>
-    <div style="flex:1"></div><div class="row"><label>Boards <select id="nb">${[1, 2, 3, 4, 5].map(n => `<option ${n === st.settings.boardCount ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <div style="flex:1"></div><div class="row"><label>Boards <select id="nb">${[1, 2, 3, 4, 5, 6].map(n => `<option ${n === st.settings.boardCount ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
     <button id="auto2">${ICON.swap} Assign automatically</button><button id="clr">Clear</button>
     <button class="primary" id="start">Start game (${nPlaced}/${st.players.length} placed)</button>
     ${pageMode() === 'local' ? '<button id="bots">Add 5 simulated players</button><button id="tabs">Open 3 player tabs</button>' : ''}</div>
-    <span class="mute small" style="flex-basis:100%">Five seats per board. With more than 25 students, partners share a seat. Anyone left unplaced is dealt a seat when you start.</span></div>
+    <span class="mute small" style="flex-basis:100%">Six seats per board. With more than 36 students, partners share a seat. Anyone left unplaced is dealt a seat when you start.</span></div>
   <div class="card"><h2>Waiting room ${waiting.length ? `<span class="pill">${waiting.length}</span>` : ''}</h2><div class="chipgrid">${waiting.map(p => `<span class="pchip">${face(p.name)}${esc(p.name)}</span>`).join('') || '<span class="mute">Everyone is placed.</span>'}</div></div>
   <div class="hostgrid">${D.boards.map(board).join('')}
   </div>`;
@@ -85,7 +85,7 @@ function render(st) {
   ${boards.length ? `<div class="card"><h2>Boards</h2>${boards.map(b => { const ds = Object.values(st.seats).filter(x => x.board === b.id); return `<div class="row small" style="border-top:1px solid var(--line);padding:6px 0"><b style="min-width:140px">${esc(b.content.name)}</b>
      voted ${ds.filter(x => b.ballots[x.id]).length}/${ds.length} | ${b.locked ? 'chose ' + (b.choice || 'nothing') : 'open'} | chair ${esc((st.seats[b.chair] || {}).name || '-')}
      | ${ds.map(x => esc(x.name)).join(', ')}</div>`; }).join('')}</div>` : ''}
-  ${st.phase === 'reveal' ? `<div class="card row ctl"><b>Debrief screen ${(st.revealStep || 0) + 1} of ${revealSteps(st)}</b><button id="rprev" ${(st.revealStep || 0) === 0 ? 'disabled' : ''}>Back</button><button class="primary" id="rnext" ${(st.revealStep || 0) >= revealSteps(st) - 1 ? 'disabled' : ''}>Next screen</button><span class="mute small">Arrow keys also work. The projector follows.</span></div>` : ''}
+  ${st.phase === 'reveal' ? `<div class="card row ctl"><b>Debrief: one screen per board. Projector shows</b>${Object.values(st.boards).map((b, i) => `<button class="${(st.revealStep || 0) === i ? 'primary' : ''}" data-rb="${i}">${esc(b.content.short || b.content.name)}</button>`).join('')}<span class="mute small">Arrow keys also switch boards.</span></div>` : ''}
   <p class="small mute">Keep this tab open: it runs the game. ${host.lastError ? '<span class="err">' + esc(host.lastError) + '</span>' : ''}</p>`;
   const paint = () => { const c = document.getElementById('hclk'); if (c) c.textContent = fmtClock(left); };
   if (html === lastHtml) { paint(); return; }
@@ -98,7 +98,7 @@ function render(st) {
   on('bots', () => { host.addBots(5); render(host.state); });
   on('tabs', () => { for (let i = 0; i < 3; i++) window.open(q('index.html?g=' + st.code), '_blank'); });
   on('savetm', () => host.act({ type: 'set_timers', timers: { play: (Number(document.getElementById('tm_play').value) || st.settings.timers.play / 60) * 60 } }));
-  on('rprev', () => host.act({ type: 'reveal_step', delta: -1 })); on('rnext', () => host.act({ type: 'reveal_step', delta: 1 }));
+  document.querySelectorAll('[data-rb]').forEach(el => el.onclick = () => host.act({ type: 'reveal_step', to: +el.dataset.rb }));
   const auto = document.getElementById('auto'); if (auto) auto.onchange = () => host.act({ type: 'auto', on: auto.checked });
   const nb = document.getElementById('nb'); if (nb) nb.onchange = () => { document.activeElement.blur(); host.act({ type: 'set_boards', n: Number(nb.value) }); render(host.state); };
   const act = a => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); host.act(a); render(host.state); };

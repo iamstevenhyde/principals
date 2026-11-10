@@ -6,6 +6,7 @@ export const SEAT_ICON = {
   attorney: svg('<path d="M12 3v18M6 21h12M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>'),
   labor: svg('<path d="M3 17h18"/><path d="M5 17a7 7 0 0 1 14 0"/><path d="M12 6v5"/>'), fund: OWN,
   community: svg('<path d="M3 11 12 3l9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>'),
+  audit_chair: svg('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>'),
   founder_friend: svg('<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4M21 12v3"/>'),
 };
 export const ICON = {
@@ -27,22 +28,18 @@ export function boardTiles(P) {
 }
 
 // ---------------- projector: the debrief ----------------
-// Screen 0: what each board chose. Then, per board, a "what happened" screen and a "discuss" screen.
+// One screen per board, everything at once: press + stock on the left, real case + questions on the right.
 export function revealScreen(R) {
-  const step = R.step, tag = `<span class="stepno">${step + 1} of ${R.steps}</span>`;
-  const wrap = (title, body) => `<section class="deck-screen"><header><h2>${esc(title)}</h2>${tag}</header>${body}</section>`;
-  if (step === 0) {
-    const rows = R.boards.map(b => `<tr><th>${esc(b.short)}</th><td>${b.choice ? `<b>Option ${b.choice.n}</b> ${esc(b.choice.title)}` : '<i>No decision</i>'}</td><td>${b.tally.filter(t => t.votes).map(t => `${t.n}: ${t.votes}`).join(' &nbsp; ')}</td></tr>`).join('');
-    return wrap('What each board chose', `<table class="cmp"><thead><tr><th></th><th>Choice</th><th>Votes by option</th></tr></thead><tbody>${rows}</tbody></table>`);
-  }
-  const b = R.boards[Math.floor((step - 1) / 3)]; if (!b) return wrap('The end', '');
-  const chose = b.choice ? `Your board chose option ${b.choice.n}: ${esc(b.choice.title)}.` : 'Your board did not decide.';
-  if ((step - 1) % 3 === 0) {
-    const p = b.press, t = b.ticker;
-    if (!p) return wrap(b.name + ': the press', `<p class="chose">${chose}</p><p class="real">No decision, so no story today.</p>`);
+  const b = R.boards[R.step] || R.boards[0]; if (!b) return '<section class="deck-screen"></section>';
+  const chose = b.choice ? `Chose option ${b.choice.n}: ${esc(b.choice.title)}` : 'Did not decide';
+  const p = b.press, t = b.ticker;
+  const tabs = R.boards.map((x, i) => `<span class="rtab${i === R.step ? ' on' : ''}">${esc(x.short)}</span>`).join('');
+  let left;
+  if (!p) left = `<p class="real">No decision, so no story today.</p>`;
+  else {
     const dn = p.stock.pct < 0, unit = t && t.unit === '$' ? '$' : '', tail = t && t.unit !== '$' ? 'B' : '';
-    return wrap(b.name + ': the morning after', `<p class="chose">${chose}</p><article class="paper"><h3 class="hl">${esc(p.headline)}</h3><p class="real">${esc(p.story)}</p></article><p class="ticker ${dn ? 'dn' : 'up'}">${esc(p.stock.symbol)} ${unit}${p.stock.from}${tail} to ${unit}${p.stock.to}${tail} (${p.stock.pct > 0 ? '+' : ''}${p.stock.pct}%)</p>`);
+    left = `<h3 class="colhd">The morning after</h3><article class="paper"><h3 class="hl">${esc(p.headline)}</h3><p class="real">${esc(p.story)}</p></article><p class="ticker ${dn ? 'dn' : 'up'}">${esc(p.stock.symbol)} ${unit}${p.stock.from}${tail} to ${unit}${p.stock.to}${tail} (${p.stock.pct > 0 ? '+' : ''}${p.stock.pct}%)</p>`;
   }
-  if ((step - 1) % 3 === 1) return wrap(b.name + ': what happened', `<p class="chose">${chose}</p><h3>${esc(b.reveal ? b.reveal.case : '')}</h3><p class="real">${esc(b.reveal ? b.reveal.text : '')}</p>`);
-  return wrap(b.name + ': discuss', `<p class="chose">${chose}</p><ol class="qs">${b.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ol>`);
+  const right = `<h3 class="colhd">What happened: ${esc(b.reveal ? b.reveal.case : '')}</h3><p class="real">${esc(b.reveal ? b.reveal.text : '')}</p><h3 class="colhd">Discuss</h3><ol class="qs">${b.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ol>`;
+  return `<section class="deck-screen one"><header><h2>${esc(b.name)}</h2><span class="chosebar">${chose}</span><span class="rtabs">${tabs}</span></header><div class="split"><div>${left}</div><div>${right}</div></div></section>`;
 }

@@ -8,8 +8,8 @@
 
 import { SCORING as S } from '../config/scoring.js';
 
-export const SEAT_LABEL = { attorney: 'Attorney', labor: 'Labor director', fund: 'Fund partner', founder_friend: "Founder's friend", community: 'Community seat' };
-const SEAT_ORDER = ['attorney', 'labor', 'fund', 'founder_friend', 'community'];
+export const SEAT_LABEL = { attorney: 'Attorney', labor: 'Labor director', fund: 'Fund partner', founder_friend: "Founder's friend", community: 'Community seat', audit_chair: 'Audit chair' };
+const SEAT_ORDER = ['attorney', 'labor', 'fund', 'founder_friend', 'community', 'audit_chair'];
 const SEAT_KEYS = [...SEAT_ORDER, ...SEAT_ORDER.map(k => k + '2')];   // a "2" key is a partner sharing the same role card
 const seatType = k => k.replace(/2$/, '');
 
@@ -181,7 +181,7 @@ function applyInner(st, a, t) {
 }
 function hostAction(st, a, t) {
   switch (a.type) {
-    case 'set_boards': if (st.phase !== 'lobby') return 'Set boards in the lobby.'; st.settings.boardCount = Math.max(1, Math.min(5, a.n | 0)); st.draft = null; return null;
+    case 'set_boards': if (st.phase !== 'lobby') return 'Set boards in the lobby.'; st.settings.boardCount = Math.max(1, Math.min(6, a.n | 0)); st.draft = null; return null;
     case 'draft_auto': if (st.phase !== 'lobby') return 'Assign in the lobby.'; draftAuto(st); return null;
     case 'draft_clear': if (st.phase !== 'lobby') return 'Assign in the lobby.'; st.draft = emptyDraft(st); return null;
     case 'draft_seat': {   // place a player in a board seat (a.player null empties it); a player is only ever in one place
@@ -209,7 +209,7 @@ function hostAction(st, a, t) {
 
 // ---------- views ----------
 // Debrief screens: one overview, then for each board a newspaper reaction, a "what happened" screen and a "discuss" screen.
-export const revealSteps = st => 1 + 3 * Object.keys(st.boards).length;
+export const revealSteps = st => Object.keys(st.boards).length;   // one full screen per board
 const tallyList = b => ((b.content.decision || {}).options || []).map(o => ({ n: o.n, title: o.title, votes: b.tally[o.n] || 0 }));
 export function publicView(st, t) {
   const out = {

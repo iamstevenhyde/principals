@@ -84,15 +84,13 @@ try {
   await admin.click('#adv'); await admin.waitForTimeout(2200);
   await proj.screenshot({ path: join(shots, '9_projector_debrief_overview.png') });
   await phones[0].screenshot({ path: join(shots, '9_phone0_debrief.png') });
-  const nSteps = await admin.evaluate(() => window.__host.state.boards && Object.keys(window.__host.state.boards).length);
   let sawValleyCase = false, sawQs = false, sawPress = false;
-  for (let k = 1; k <= 3 * nSteps; k++) {
-    await admin.click('#rnext'); await admin.waitForTimeout(1500);
-    const t = await proj.textContent('#app');
-    if (t.includes('Valley Health: the morning after')) { sawPress = t.includes('VLYH') && t.includes('%'); await proj.screenshot({ path: join(shots, '10a_projector_newspaper.png') }); }
-    if (t.includes('Valley Health: what happened')) { sawValleyCase = t.includes('Columbia/HCA'); await proj.screenshot({ path: join(shots, '10_projector_real_case.png') }); }
-    if (t.includes('Valley Health: discuss')) { sawQs = t.includes('Disclose or defend'); await proj.screenshot({ path: join(shots, '11_projector_questions.png') }); }
-  }
+  ok((await admin.$$('#rnext, #rprev')).length === 0, 'no Back/Next debrief controls');
+  const bi = await admin.evaluate(() => Object.keys(window.__host.state.boards).indexOf('valley_health'));
+  await admin.click(`[data-rb="${bi}"]`); await admin.waitForTimeout(1500);
+  const t = await proj.textContent('#app');
+  sawPress = t.includes('VLYH') && t.includes('%'); sawValleyCase = t.includes('Columbia/HCA'); sawQs = t.includes('Disclose or defend');
+  await proj.screenshot({ path: join(shots, '10_projector_one_screen_debrief.png') });
   ok(sawValleyCase, 'debrief reveals the real case (Columbia/HCA)');
   ok(sawPress, 'projector shows newspaper headline and stock move before the real case');
   ok(sawQs, 'debrief shows the discussion questions');

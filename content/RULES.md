@@ -1,11 +1,11 @@
 # Content rules vocabulary
 
-Principals, one-round design (Nov 2026): one decision round, five boards, no scoring. Each board has a one-screen briefing of about 230 words (a setting paragraph plus short fact bullets), four one-line options, five role cards of about 45 words with personal motives, a pre-written "morning after" newspaper story and stock move per option, a real-case reveal and four short debrief questions. The flow follows the Jensen Pharma exercise: read the briefing and your private card, talk out loud with your board (there is no in-app chat), vote for one option, then see the morning-after newspaper and stock screen, then the real case. No Auditor, no outside role, no live press roll, no secret goals, no second round, no points. The earlier source for board text was ONE_ROUND_PACKETS_20261109.html; the board JSON files are now the source of truth.
+Principals, one-round design (Nov 2026): one decision round, six boards, no scoring. Each board has a one-screen briefing of about 230 words (a setting paragraph plus short fact bullets), four one-line options, six role cards of about 45 words with personal motives, a pre-written "morning after" newspaper story and stock move per option, a real-case reveal and four short debrief questions. The flow follows the Jensen Pharma exercise: read the briefing and your private card, talk out loud with your board (there is no in-app chat), vote for one option, then see the morning-after newspaper and stock screen, then the real case. No Auditor, no outside role, no live press roll, no secret goals, no second round, no points. The earlier source for board text was ONE_ROUND_PACKETS_20261109.html; the board JSON files are now the source of truth.
 
 ## Board file (content/boards/*.json)
 
 - `id`, `name`, `short` (one word, used on the debrief), `industry`, `blurb`.
-- `directors`: five entries, one per seat in this order: `attorney`, `labor`, `fund`, `founder_friend`, `community`. Each has `seat`, `name`, `title`, `home` (who they speak for) and `motive` (the private role card, 55 to 80 words, "you" voice, a personal stake that pulls against the board's interest).
+- `directors`: six entries, one per seat in this order: `attorney`, `labor`, `fund`, `founder_friend`, `community`, `audit_chair` (label "Audit chair"). Each has `seat`, `name`, `title`, `home` (who they speak for) and `motive` (the private role card, 55 to 80 words, "you" voice, a personal stake that pulls against the board's interest).
 - `briefing`: `{intro, facts[]}`. `intro` is the setting. `facts` are the bullets. Facts may pull in opposite directions and many are unconfirmed on purpose. All figures inside are fictional for the disguised firm.
 - `decision`: `{lead, options[]}`. `options` are `{n, title, text}`, numbered 1 to 4, with `text` a single plain line of 12 to 19 words. None is clearly right.
 - `press`: one entry per option, `{n, headline, story, stock{symbol, from, to, pct}}`, written ahead of time and shown after the vote as the morning-after newspaper and stock screen. `ticker` gives the symbol and starting price.
@@ -20,9 +20,9 @@ The sentence "The board is small, so every director sits on several committees" 
 
 ## Phases
 
-1. Lobby. Students join on phones. The host assigns each to a board seat (or Assign automatically) and marks the Chair. Anyone unplaced when the host starts is dealt a seat. Five seats per board; with more than five students on a board, extras share a seat (a second player on the same role card). Fewer than five drops seats in the order in config/scoring.js.
+1. Lobby. Students join on phones. The host assigns each to a board seat (or Assign automatically) and marks the Chair. Anyone unplaced when the host starts is dealt a seat. Six seats per board (room for 36); with more than six students on a board, extras share a seat (a second player on the same role card). Fewer than six drops seats in the order in config/scoring.js.
 2. Play (default 15 minutes, host-settable). Each phone has three tabs: Briefing (one screen), My card (private), Vote. There is no chat; the board talks face to face. Everyone votes for one numbered option and can change it until the Chair locks. The projector shows each board's "n of m have voted" and the choice once locked.
-3. Reveal (debrief). The host presses Next screen (or arrow keys). Screen 1 lists each board's choice and vote count. Then each board gets screens for the morning-after newspaper and stock move, "what happened" (the real case) and "discuss" (the four questions).
+3. Reveal (debrief). The host presses Next screen (or arrow keys). Then each board gets ONE screen with everything at once: the morning-after newspaper and stock move on the left, "what happened" (the real case) and "discuss" (the four questions) on the right. The host picks which board is on the projector; there is no Back/Next.
 
 ## The vote
 

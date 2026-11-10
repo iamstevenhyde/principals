@@ -39,6 +39,13 @@
    "title": "Community seat",
    "home": "Karvan Export Council (Trade representative)",
    "motive": "You represent Karvan's exporters, who depend on Thread's orders. You want safe factories and steady orders, and the largest factory owner is your cousin by marriage. A minister who is your friend told you to be careful what you say."
+  },
+  {
+   "seat": "audit_chair",
+   "name": "Paolo Ricci",
+   "title": "Audit chair",
+   "home": "Thread audit committee (former Big Four partner)",
+   "motive": "Your committee approved the supplier audits that never checked buildings, and the fund partner wants the $12 million modeled small. You can make the repair bill look light or heavy, and every director leaning on you wants a different number. Someone will ask who approved those audits."
   }
  ],
  "briefing": {
