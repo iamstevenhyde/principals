@@ -211,8 +211,22 @@ function hostAction(st, a, t) {
 // Debrief screens: one overview, then for each board a newspaper reaction, a "what happened" screen and a "discuss" screen.
 export const revealSteps = st => Object.keys(st.boards).length;   // one full screen per board
 const tallyList = b => ((b.content.decision || {}).options || []).map(o => ({ n: o.n, title: o.title, votes: b.tally[o.n] || 0 }));
+// Who sits where, for the projector: from the host's draft in the lobby, from the real seats once the meeting starts.
+export function seatingView(st) {
+  const nameOf = id => (st.players.find(p => p.id === id) || {}).name || '';
+  const bname = id => ((st.content.boards.find(b => b.id === id) || {}).name) || id;
+  if (st.phase === 'lobby') {
+    const d = st.draft; if (!d) return { boards: [], waiting: st.players.length };
+    const placed = placedIds(d);
+    return { waiting: st.players.filter(p => !placed.has(p.id)).length, boards: d.boards.map(id => ({ id, name: bname(id),
+      members: SEAT_KEYS.filter(k => d.seats[id][k]).map(k => ({ name: nameOf(d.seats[id][k]), label: SEAT_LABEL[seatType(k)], chair: d.chairs[id] === d.seats[id][k] })) })) };
+  }
+  return { waiting: 0, boards: Object.values(st.boards).map(b => ({ id: b.id, name: b.content.name,
+    members: directorsOf(st, b.id).slice().sort((x, y) => SEAT_ORDER.indexOf(x.seat) - SEAT_ORDER.indexOf(y.seat)).map(s => ({ name: s.name, label: SEAT_LABEL[s.seat], chair: b.chair === s.id })) })) };
+}
 export function publicView(st, t) {
   const out = {
+    seating: seatingView(st),
     code: st.code, phase: st.phase, clockLeft: clockLeft(st, t), clockTotal: st.clock ? st.clock.total : null, paused: !!(st.clock && st.clock.paused),
     game: st.content.game,
     players: st.phase === 'lobby' ? st.players.map(p => p.name) : st.players.length,

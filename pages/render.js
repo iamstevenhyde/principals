@@ -27,6 +27,20 @@ export function boardTiles(P) {
     <p class="bigline">${esc(P.game.text)}</p><div class="btiles">${P.boards.map(tile).join('')}</div></section>`;
 }
 
+// ---------------- projector: who sits where ----------------
+// One card per board, every name large, seat label small, Chair marked. `P.seating` comes from the engine's publicView.
+export function seatingGrid(P) {
+  const bs = (P.seating && P.seating.boards) || [], n = bs.length;
+  const stat = id => { const b = (P.boards || []).find(x => x.id === id); return !b ? '' : b.locked ? `<span class="sst done">${ICON.lock} decided</span>` : `<span class="sst">${b.voted}/${b.seats} voted</span>`; };
+  const card = b => `<div class="scard"><h3>${esc(b.name)}${stat(b.id)}</h3><ul>${b.members.map(m => `<li><span class="sn">${esc(m.name)}</span><span class="sl">${m.chair ? '<b class="chr">Chair</b> ' : ''}${esc(m.label)}</span></li>`).join('')}</ul></div>`;
+  const cols = n <= 3 ? Math.max(1, n) : Math.ceil(n / 2);
+  return `<div class="sgrid" style="grid-template-columns:repeat(${cols},1fr)">${bs.map(card).join('')}</div>`;
+}
+export function seatingPlay(P) {
+  return `<section class="meeting seating"><header class="mhd"><h1>${esc(P.game.title)}</h1><span class="clock" id="clk"></span></header>
+    <p class="seatline">Find your name and sit with your board.</p>${seatingGrid(P)}</section>`;
+}
+
 // ---------------- projector: the debrief ----------------
 // One screen per board, everything at once: press + stock on the left, real case + questions on the right.
 export function revealScreen(R) {

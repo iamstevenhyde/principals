@@ -10,7 +10,7 @@
 </style></head><body><div class="proj" id="app"><p class="mute">Loading.</p></div>
 <script type="module">
 import { openStore, params } from './pages/store.js';
-import { esc, fmtClock, boardTiles, revealScreen } from './pages/render.js';
+import { esc, fmtClock, seatingGrid, seatingPlay, revealScreen } from './pages/render.js';
 const app = document.getElementById('app');
 const code = (params().get('g') || '').toUpperCase();
 const store = await openStore();
@@ -21,6 +21,13 @@ setInterval(() => { if (P && P.clockLeft != null && !P.paused) { const el = docu
 function render() {
   if (!P) { app.innerHTML = '<p class="err">No game ' + esc(code) + '.</p>'; return; }
   const joinUrl = location.href.split('projector.html')[0] + 'index.html?g=' + code + (params().get('local') === '1' ? '&local=1' : '');
+  const placed = P.seating && P.seating.boards.some(b => b.members.length);
+  if (P.phase === 'lobby' && placed) {   // host has started placing people: show who sits where, keep the join QR small
+    qrDone = false;
+    app.innerHTML = `<section class="meeting seating lobseat"><header class="mhd"><h1>Principals: your seat</h1><div class="join"><div class="qr" id="qr"></div><div>Code <b>${esc(code)}</b><br>${P.seating.waiting} not yet placed</div></div></header>${seatingGrid(P)}</section>`;
+    try { new QRCode(document.getElementById('qr'), { text: joinUrl, width: 120, height: 120 }); } catch (e) { document.getElementById('qr').textContent = ''; }
+    return;
+  }
   if (P.phase === 'lobby') {
     const head = `<div class="top"><h1>Principals</h1><span class="pill">${esc(code)}</span></div>`;
     if (qrDone && document.getElementById('qr')) { document.getElementById('names').innerHTML = (P.players || []).map(esc).join('<br>'); document.getElementById('cnt').textContent = (P.players || []).length; return; }
@@ -31,7 +38,7 @@ function render() {
   }
   qrDone = false;
   if (P.phase === 'reveal') { app.innerHTML = revealScreen(P.reveal); return; }
-  app.innerHTML = boardTiles(P);
+  app.innerHTML = seatingPlay(P);
   const el = document.getElementById('clk'); if (el) el.textContent = fmtClock(P.clockLeft);
 }
 </script></body></html>
