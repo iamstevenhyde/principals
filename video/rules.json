@@ -53,7 +53,6 @@
    "kicker": "Step 3",
    "head": "Talk it out loud",
    "points": [
-    "No chat in the app",
     "Face to face with your board",
     "Share what you choose to share"
    ],
@@ -63,7 +62,7 @@
      "w": "wide"
     }
    ],
-   "say": "Then you talk with your board out loud. The app has no chat, so you decide how much of your card to share."
+   "say": "Then you talk it through with your board, face to face, and you decide how much of your card to share."
   },
   {
    "kicker": "Step 4",
