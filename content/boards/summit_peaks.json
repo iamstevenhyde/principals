@@ -10,7 +10,7 @@
    "name": "Marisa Kell",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "A staff lawyer sent you an engineer's warning message last week, and you have not told the board. Disclosing it risks the CEO's trust, and hiding it risks your seat when the congressional committee asks who knew what."
+   "motive": "You have had the engineer's full warning message for a week, and the board has only heard that it exists. Showing it risks the CEO's trust, and holding it risks your seat when the congressional committee asks who knew what."
   },
   {
    "seat": "labor",
@@ -31,25 +31,25 @@
    "name": "Hal Brennan",
    "title": "Founder's friend",
    "home": "Dana Strand, the founder (college roommate)",
-   "motive": "Dana Strand is your college roommate, and you skied the first Alder Creek lift with her. She believes the CEO and does not want a leadership fight. You do not know whether to protect her view or tell her she is wrong."
+   "motive": "Dana Strand is your college roommate, and you skied the first Alder Creek lift with her. She believes the CEO and does not want a leadership fight. She put you on this board, and you must decide whether to carry her view into the room or tell her she is wrong."
   },
   {
    "seat": "community",
    "name": "June Okafor",
    "title": "Community seat",
    "home": "Alder Creek (Mayor)",
-   "motive": "You are Mayor of Alder Creek, where the second fall happened, and you went to two of the funerals. The town depends on Summit for jobs and taxes, you face re-election in the fall, and the town is divided about what speaking for it requires."
+   "motive": "You are Mayor of Alder Creek, where the second fall happened, and you went to two of the funerals. The town lives on Summit's jobs and taxes, and you face re-election in the fall. Half the town wants the lifts shut, and the other half wants its paychecks."
   },
   {
    "seat": "audit_chair",
    "name": "Ines Calder",
    "title": "Audit chair",
    "home": "Summit audit committee (former state inspector)",
-   "motive": "You led the risk review that rated lift maintenance low, and the engineer's warning would show that review missed something. You want the full record out on your terms, but a Monday disclosure could end your career, and a later one could end it worse."
+   "motive": "You led the risk review that rated lift risk low, and the engineer's warning about the design shows that review missed something. Any outside review or new safety committee would read your work first. Coming forward now could end your career, and being found out later would end it worse."
   }
  ],
  "briefing": {
-  "intro": "Summit Peaks runs six ski mountains on one season pass and earns most of its money from the Series 7 gondola, a lift it also sells to other resorts. The board has no safety committee, and founder Dana Strand holds 30% of the vote.",
+  "intro": "Summit Peaks runs six ski mountains on one season pass and its most profitable product is the Series 7 gondola, a lift it also builds and sells to other resorts. The board has no safety committee, and founder Dana Strand holds 30% of the vote.",
   "facts": [
    "Two Series 7 cabins have fallen from their cables in five months. The first killed 18 riders at a partner resort, and the second, last Sunday at Summit's Alder Creek mountain, killed 12 riders and a lift operator. Regulators have closed the model elsewhere but not yet Summit's 41 lifts.",
    "A software fix has slipped three times and could be ready in about eleven weeks, with approval not before August. The cable grip reads a single sensor, and an engineer warned two years ago the design was undertested. The board never saw the message.",
@@ -72,8 +72,8 @@
    },
    {
     "n": 3,
-    "title": "Keep building and shield the company",
-    "text": "Keep every lift open and building, follow the inspectors' timetable, and defend the company in public."
+    "title": "Keep running and defend",
+    "text": "Keep every lift open, keep building, wait for regulators to set the timetable, and defend the company in public."
    },
    {
     "n": 4,
@@ -87,7 +87,7 @@
   "text": "The real firm was Boeing, after two 737 MAX crashes killed 346 people in 2018 and 2019. Boeing cut production, created a board safety committee only in September 2019, and removed Dennis Muilenburg as Chair in October and as CEO in December. A shareholder suit over ignored safety warnings settled for $237.5 million."
  },
  "questions": [
-  "Why did Summit save money on one sensor?",
+  "Why would a lift maker rely on a single sensor?",
   "The engineer's warning never reached the board. Who blocked it?",
   "Ground every lift or keep running? Pick one.",
   "Should the CEO also be Chair? Yes or no?"
@@ -118,23 +118,23 @@
   {
    "n": 3,
    "headline": "Summit Peaks Defends Its Record as Lifts Keep Running",
-   "story": "Summit left every Series 7 lift open and is leaving the timetable to inspectors. Within days the home regulator ordered closures, and insurers said coverage may be void.",
+   "story": "Summit left every Series 7 lift open and kept building, so no jobs were cut this week. Within days the state regulator ordered closures anyway, and insurers said coverage may be void.",
    "stock": {
     "symbol": "SMPK",
     "from": 380,
-    "to": 296,
-    "pct": -22
+    "to": 308,
+    "pct": -19
    }
   },
   {
    "n": 4,
    "headline": "Summit Peaks Splits Chair and CEO, Forms Safety Committee",
-   "story": "A new board committee can see all engineering messages and will decide on the lifts after three weeks. Investors welcomed the governance change but asked what happens to the lifts in those weeks.",
+   "story": "A new board committee can see all engineering messages and will decide on the lifts after three weeks. Investors welcomed the governance change, but every Series 7 lift stays open in the meantime, and one regulator said it will not wait that long.",
    "stock": {
     "symbol": "SMPK",
     "from": 380,
-    "to": 365,
-    "pct": -4
+    "to": 346,
+    "pct": -9
    }
   }
  ],

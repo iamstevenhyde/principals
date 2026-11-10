@@ -3,14 +3,14 @@
  "name": "Thread & Co.",
  "short": "Thread",
  "industry": "Apparel brand",
- "blurb": "A mid-priced apparel brand with 900 stores. Everything is made at 40 supplier factories in Karvan and two other countries, and the largest Karvan factory employs 2,000 people. Founder Elodie Marchetti holds 26% of the vote.",
+ "blurb": "A mid-priced apparel brand with 900 stores. Everything is made at 40 supplier factories in Karvan and two other countries, and the largest Karvan factory employs 3,000 people. Founder Elodie Marchetti holds 26% of the vote.",
  "directors": [
   {
    "seat": "attorney",
    "name": "Dominic Aldrich",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You know that if a supplier collapses and Thread knew of the risk, a court will ask what the board was told. You want minutes showing the board weighed the question, whichever option wins, because your name goes on them."
+   "motive": "You told the board two years ago that the less Thread knows about its suppliers' buildings, the less it can be sued for. Any option that sends engineers inside creates reports a court can use, and the binding agreement lets outsiders enforce them. Your name is on that advice and on tonight's minutes."
   },
   {
    "seat": "labor",
@@ -24,14 +24,14 @@
    "name": "Teodor Brandt",
    "title": "Fund partner",
    "home": "Brightwater Capital (owns 8%)",
-   "motive": "Your fund owns 8% and holds for a quarterly return. You think $12 million is affordable, but rivals who skip it may undercut Thread on price. You sit on another board that signed something similar and lost a retailer, and you proposed it."
+   "motive": "Your fund owns 8% and reports its returns every quarter. The $12 million looks affordable, but rivals who skip it can undercut Thread on price. On another board you pushed a similar pledge, it cost that company a major customer, and your partners have not forgotten."
   },
   {
    "seat": "founder_friend",
    "name": "Camille Roux",
    "title": "Founder's friend",
    "home": "Elodie Marchetti, the founder (first design partner)",
-   "motive": "Elodie Marchetti told you she wants to sign, then that she fears the lawsuits, and asked you to learn what the others think without saying what she thinks. You designed the first collection with her in a rented garage and do not want to see her hurt in public."
+   "motive": "Elodie Marchetti told you she wants to sign, then that she fears the lawsuits, and asked you to learn what the others think without saying what she thinks. You designed the first collection with her in a rented garage. She is the public face of the brand, and you do not want her blamed for a fire or sued over a signature."
   },
   {
    "seat": "community",
@@ -45,7 +45,7 @@
    "name": "Paolo Ricci",
    "title": "Audit chair",
    "home": "Thread audit committee (former Big Four partner)",
-   "motive": "Your committee approved the supplier audits that never checked buildings, and the fund partner wants the $12 million modeled small. You can make the repair bill look light or heavy, and every director leaning on you wants a different number. Someone will ask who approved those audits."
+   "motive": "Your committee approved the supplier audits that never checked a building's structure. Independent inspectors would publish what those audits missed, and someone will ask who approved them. If Thread fixes its own audits, your committee keeps the findings in house. The fund partner also wants the $12 million modeled small, and you are not sure it is."
   }
  ],
  "briefing": {
@@ -54,8 +54,8 @@
    "A fire at a Karvan factory killed 112 workers behind locked exits. Thread did not buy from it, but two competitors did, and a national reporter wants Thread's supplier list by Friday.",
    "A proposed five-year binding agreement would require independent inspections, public reports, shared repair costs and no orders from factories that refuse fixes. Only two European brands have signed, and several North American buyers offer a voluntary program instead.",
    "Thread's staff estimate that 10% to 30% of its Karvan factories need major repairs, but no engineer has been inside most. Its audits check wages and exits, not structure. The largest factory owner, a minister's cousin, says he will move to a rival if forced to repair.",
-   "The binding agreement would cost about $12 million over five years against $210 million in annual earnings. Some owners may close rather than pay, putting about 3,000 workers per factory out of work, and Karvan's government will not pay for repairs.",
-   "Counsel says an unread inspection report counts as knowledge in court. The stock is $22, and a pension fund has asked how Thread monitors building safety."
+   "Staff put the binding agreement at about $12 million over five years against $210 million in annual earnings, but Thread's share of repairs has no cap, and labor groups could enforce it in court. Some owners may close rather than pay, putting up to 3,000 workers per factory out of work, and Karvan's government will not pay for repairs.",
+   "Counsel says that once an inspection report exists, a court will treat Thread as knowing what is in it, read or not. The stock is $22, and a pension fund has asked how Thread monitors building safety."
   ]
  },
  "decision": {
@@ -97,12 +97,12 @@
   {
    "n": 1,
    "headline": "Thread & Co. Signs Binding Factory Safety Agreement",
-   "story": "Thread will fund independent inspections and repairs and stop ordering from factories that refuse fixes. Labor groups praised the move, while the owner of its largest Karvan factory threatened to move to a rival buyer.",
+   "story": "Thread will fund independent inspections and repairs and stop ordering from factories that refuse fixes. Labor groups praised the move, but the owner of its largest Karvan factory moved his lines to a rival buyer, and analysts said the repair bill has no ceiling.",
    "stock": {
     "symbol": "THRD",
     "from": 22,
-    "to": 21.8,
-    "pct": -1
+    "to": 21.1,
+    "pct": -4
    }
   },
   {
@@ -123,8 +123,8 @@
    "stock": {
     "symbol": "THRD",
     "from": 22,
-    "to": 21.6,
-    "pct": -2
+    "to": 21.8,
+    "pct": -1
    }
   },
   {

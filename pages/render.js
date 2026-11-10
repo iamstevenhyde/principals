@@ -51,7 +51,7 @@ export function revealScreen(R) {
   let left;
   if (!p) left = `<p class="real">No decision, so no story today.</p>`;
   else {
-    const dn = p.stock.pct < 0, unit = t && t.unit === '$' ? '$' : '', tail = t && t.unit !== '$' ? 'B' : '';
+    const dn = p.stock.pct < 0, unit = '$', tail = t && t.unit !== '$' ? 'B' : '';
     left = `<h3 class="colhd">The morning after</h3><article class="paper"><h3 class="hl">${esc(p.headline)}</h3><p class="real">${esc(p.story)}</p></article><p class="ticker ${dn ? 'dn' : 'up'}">${esc(p.stock.symbol)} ${unit}${p.stock.from}${tail} to ${unit}${p.stock.to}${tail} (${p.stock.pct > 0 ? '+' : ''}${p.stock.pct}%)</p>`;
   }
   const right = `<h3 class="colhd">What happened: ${esc(b.reveal ? b.reveal.case : '')}</h3><p class="real">${esc(b.reveal ? b.reveal.text : '')}</p><h3 class="colhd">Discuss</h3><ol class="qs">${b.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ol>`;

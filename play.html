@@ -55,11 +55,11 @@ function director() {
   if (P.phase === 'reveal') {
     return head + `<div class="card center"><h2>${b.choice ? 'Your board chose option ' + b.choice.n : 'Your board did not decide'}</h2><p>${b.choice ? esc(b.choice.title) : ''}</p>${b.mine ? `<p class="mute">You voted for option ${b.mine}.</p>` : ''}<p class="mute small">The debrief is on the projector.</p></div>`;
   }
-  const chair = d.chair ? `<p class="small">${ICON.crown} <b>You are Chair.</b> You lock the board's choice.</p>` : `<p class="small mute">${ICON.crown} Chair: <b>${esc(d.chairName)}</b></p>`;
+  const chair = d.chair ? `<p class="small">${ICON.crown} <b>You chair this meeting.</b> You lock the board's choice, and your vote breaks a tie.</p>` : `<p class="small mute">${ICON.crown} Chairing this meeting: <b>${esc(d.chairName)}</b></p>`;
   if (tab === 'brief') {
-    return head + `<div class="card briefcard"><p class="fact">${esc(b.briefing.intro)}</p>${b.briefing.facts.map(f => `<p class="fact">${esc(f)}</p>`).join('')}</div>`;
+    return head + `<p class="mute small">Read this, then My card. Talk it over out loud, then vote.</p><div class="card briefcard"><p class="fact">${esc(b.briefing.intro)}</p>${b.briefing.facts.map(f => `<p class="fact">${esc(f)}</p>`).join('')}</div>`;
   }
-  if (tab === 'card') return head + `<div class="card secret">${SEAT_ICON[d.seat]}<h2>${esc(d.card.name)}</h2><p class="mute">${esc(d.card.title)}, ${esc(d.card.home)}</p><p class="cardtext">${esc(d.card.motive)}</p><p class="mute small">${ICON.lock} Private. Tell the board what you choose to.</p></div>`;
+  if (tab === 'card') return head + `<div class="card secret">${SEAT_ICON[d.seat]}<h2>${esc(d.card.name)}</h2><p class="mute">${esc(d.card.title)}, ${esc(d.card.home)}</p><p class="cardtext">${esc(d.card.motive)}</p><p class="mute small">${ICON.lock} Only you see this card, and you can share as much or as little of it as you like.</p></div>`;
   const voters = `<div class="voters">${b.directors.map(x => `<i class="${x.voted ? 'on' : ''}" title="${esc(x.name)}">${esc(x.name.slice(0, 1))}</i>`).join('')}</div>`;
   const opts = b.options.map(o => `<button class="opt ${b.mine === o.n ? 'sel' : ''}" data-opt="${o.n}" ${b.locked ? 'disabled' : ''}><span class="n">${o.n}</span><span><b>${esc(o.title)}</b><span class="t">${esc(o.text)}</span></span></button>`).join('');
   const locked = b.locked ? `<div class="card center"><h2>${ICON.lock} ${b.choice ? 'The board chose option ' + b.choice.n : 'No decision'}</h2><p>${b.choice ? esc(b.choice.title) : ''}</p><p class="mute small">${b.tally.filter(t => t.votes).map(t => 'Option ' + t.n + ': ' + t.votes).join(' · ')}</p></div>` : '';

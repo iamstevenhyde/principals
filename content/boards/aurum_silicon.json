@@ -10,51 +10,51 @@
    "name": "Lorna Whitcombe",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You advise the board, and the CEO told his staff before he told you. The board has already said it sees no reason to believe secrets were lost, and you cannot find what that rests on. You want no statement the board cannot back, and you want to keep this client."
+   "motive": "You advise the board, and the CEO told his staff before he told you. The company's statement says there is no reason to believe secrets were lost, and you cannot find what that rests on. You want no statement the board cannot back, and you want to keep this client."
   },
   {
    "seat": "labor",
    "name": "Marcus Oyelaran",
    "title": "Labor director",
    "home": "Aurum Employees Council",
-   "motive": "You speak for 26,000 employees whose stock has dropped, and most of them love the CEO. Some are rumored to be quietly looking elsewhere. You want him to stay and you want answers, and his two children work down the hall from the people you represent."
+   "motive": "You speak for 26,000 employees. Most of their savings sit in Aurum stock, which has dropped, and most of them love the CEO. If he steps aside, the best engineers will start taking calls from rivals. They also ask you why his two children were hired, and you have never had an answer."
   },
   {
    "seat": "fund",
    "name": "Dmitri Albrecht",
    "title": "Fund partner",
    "home": "Larkspur Ventures (owns 3%)",
-   "motive": "Your fund backed the company in its first year and you have sat on this board for nineteen years. You never pressed the CEO on succession because he said no one else could do the job. You also never wanted to be the director who forced out the founder."
+   "motive": "Your fund backed Aurum in its first year, and the 3% it still holds is most of the fund. In nineteen years on this board you never pressed the CEO on succession, because he said no one else could do the job. You also never wanted to be the director who forced out the founder."
   },
   {
    "seat": "founder_friend",
    "name": "Rosalind Tran",
    "title": "Founder's friend",
    "home": "Kai Nakamura, the CEO (co-founder, friend of thirty years)",
-   "motive": "Kai Nakamura asked you to speak for him in the room. He told you stepping aside would end the company he built, but he has not told you everything about that trip to Taipei. You want to protect him, and you want to know what you are protecting."
+   "motive": "Kai Nakamura asked you to speak for him in the room. He told you that stepping aside would end the company he built, but he has not told you everything about that trade show in 2024. You want to protect him, and you want to know what you are protecting."
   },
   {
    "seat": "community",
    "name": "Joon-ho Baek",
    "title": "Community seat",
    "home": "Pacific Security Forum (former counterintelligence official)",
-   "motive": "You were put on this board to speak for the public interest, and you know how these approaches work. The board's word that nothing leaked is not evidence. But a chipmaker with no CEO also weakens the country, and you do not want to be blamed for that."
+   "motive": "You were put on this board to speak for the public interest, and you know how foreign services recruit executives. The company's word that nothing leaked is not evidence. But a chipmaker with no CEO also weakens the country, and you do not want to be blamed for that."
   },
   {
    "seat": "audit_chair",
    "name": "Vivian Ostrow",
    "title": "Audit chair",
    "home": "Aurum audit committee (retired accounting partner)",
-   "motive": "Your committee approved the sales controls that let more than $4 billion of chips go to one buyer. Investigators will ask who reviewed those controls. You want an investigation that does not start with your committee, and you do not want the CEO's absence to hide it."
+   "motive": "Your committee approved the sales controls that let more than $4 billion of chips go to one buyer, and investigators will ask who reviewed them. A special committee of outside directors would start with yours. You would rather the review stay with a law firm the board hires and the questions stay on the CEO."
   }
  ],
  "briefing": {
   "intro": "Aurum Silicon designs the chips that run most of the world's AI systems, and the company is worth about $3 trillion. Co-founder Kai Nakamura has been CEO for thirty-one years. On Saturday he told staff he had a relationship with Lena Voss, an executive at Tidewater Compute, a data-center company in Port Arden. The board meets Monday, before markets open.",
   "facts": [
-   "US intelligence officials are reported to believe Voss worked for a foreign intelligence service, which she and her company have not confirmed. They met at a trade show in 2024. Nakamura says he takes full responsibility and shared no secrets. No one has checked.",
+   "US intelligence officials are reported to believe Voss worked for a foreign intelligence service, which neither she nor her company has confirmed. Nakamura and Voss met at a trade show in 2024. He says he takes full responsibility and shared no secrets, and the company's statement says it sees no reason to believe security was compromised. No one has checked.",
    "Tidewater bought more than $4 billion of Aurum chips in two years and is accused of passing restricted chips to firms barred from buying them. The Justice Department is reported to be investigating Tidewater. Aurum's own sales team approved the orders.",
    "Nakamura has said he does not believe in succession planning. There is no president or COO, and about 60 executives report to him directly. His two adult children work at Aurum. Analysts say no insider could replace him quickly.",
-   "Two congressional committees of both parties want documents, and the stock is already down 5%. The board's directors average seventeen years of service, and four of nine are venture investors."
+   "Two congressional committees, with members of both parties, want documents, and the stock is already down 5%. The board's directors average seventeen years of service, and four of nine are venture investors."
   ]
  },
  "decision": {
@@ -118,7 +118,7 @@
   {
    "n": 3,
    "headline": "Aurum Names Chief Operating Officer",
-   "story": "The new COO, hired from outside, will run daily operations while Nakamura stays on as CEO. Analysts liked the succession signal but asked why it took a scandal to get one.",
+   "story": "The new COO will run daily operations and is first in line to succeed Nakamura, who stays on as CEO. Analysts liked the succession signal but asked why it took a scandal to get one.",
    "stock": {
     "symbol": "AURM",
     "from": 180,
@@ -129,12 +129,12 @@
   {
    "n": 4,
    "headline": "Aurum Adds Independent Chair, Special Committee Takes Over Probe",
-   "story": "A committee of outside directors will run the investigation and Nakamura will report to it. Some investors called it overdue, and the founder's allies called it a demotion.",
+   "story": "A committee of outside directors will run the investigation and Nakamura will report to it. Some investors called it overdue, while the founder's allies called it a demotion and Nakamura was said to be weighing whether to stay.",
    "stock": {
     "symbol": "AURM",
     "from": 180,
-    "to": 174.6,
-    "pct": -3
+    "to": 169.2,
+    "pct": -6
    }
   }
  ],

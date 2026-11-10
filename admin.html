@@ -27,7 +27,7 @@ if (!code) {
   if (!tok) app.innerHTML = '<p class="err">This browser does not hold the host token for ' + esc(code) + '. Open it from the browser that created the game.</p>';
   else {
     host = new Host(store, code, tok);
-    await host.load({ boardCount: 4 });
+    await host.load({ boardCount: 6 });
     host.start();
     window.__host = host;   // read by test/headless.mjs to seat a test player as Chair
     host.onChange(render);

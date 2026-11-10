@@ -31,7 +31,7 @@
    "name": "Dr. Arthur Penn",
    "title": "Founder's friend",
    "home": "Dr. Evelyn Marsh, the founder (residency classmate)",
-   "motive": "Evelyn Marsh trained you and gave you this board seat, and she reminded you of that last week. Her office hired the consultants, you do not know how much she knew, and you would like to find out before you vote."
+   "motive": "Evelyn Marsh was your residency classmate and gave you this board seat, and she reminded you of that last week. Her office hired the consultant, and you do not know how much she knew. Voting to put her on leave would cost you her trust, and a full disclosure would send agents to her office first."
   },
   {
    "seat": "community",
@@ -53,7 +53,7 @@
   "facts": [
    "An internal audit found that pneumonia cases coded into the higher-paying group rose from 11% to 34% in three years while patients did not get sicker. Two earlier Medicare contractor reviews of about thirty charts each found nothing.",
    "The coding guidance came from a consultant hired by Dr. Marsh's office and paid a share of the added revenue, who called it aggressive but defensible. The overpayment may be $40 million to $110 million, and no one has checked individual charts.",
-   "Valley keeps a second cost report that includes costs the filed one leaves out. Counsel says there may be legitimate reasons, and that it is the first thing agents will ask about.",
+   "Valley keeps a second, internal cost report that does not match the one it filed with Medicare. Counsel says there may be legitimate reasons, and that agents will ask about the mismatch first.",
    "Nurses sent the Chief Nursing Officer a letter saying they were pressured to code patients as sicker. It was filed, never reached the board, and a reporter called about it Monday.",
    "Profit is about $180 million a year, so repaying $110 million would cut a year of earnings by more than half and could trip a bond covenant. Regulators have gone easier on firms that came forward first. The stock is $31, down from $36."
   ]
@@ -90,7 +90,7 @@
  "questions": [
   "Why did pneumonia coding jump from 11% to 34%?",
   "The nurses' letter never reached the board. Who failed?",
-  "A rival repaid early and barely moved. Would you copy it?",
+  "Regulators go easier on firms that come forward. Would you repay before anyone checks the charts?",
   "Disclose or defend? What tipped your vote?"
  ],
  "press": [
@@ -108,7 +108,7 @@
   {
    "n": 2,
    "headline": "Valley Health Rewrites Coding Rules and Says Little",
-   "story": "Valley changed its coder ratings but told agents only what they asked for. The regional paper says the nurses' letter and a second cost report are the next questions.",
+   "story": "Valley changed its coding guidance but told agents only what they asked for. The regional paper says the nurses' letter and a second cost report are the next questions.",
    "stock": {
     "symbol": "VLYH",
     "from": 31,
@@ -119,12 +119,12 @@
   {
    "n": 3,
    "headline": "Valley Health Calls Billing Pattern an Honest Reading of Unclear Rules",
-   "story": "The board kept its consultant, hired litigators and will cooperate only as the law requires. One physician partner's lawyer is said to be talking to the agents.",
+   "story": "The board kept its consultant, hired litigators and will cooperate only as the law requires. Lenders were relieved that no repayment is planned, but a lawyer for one of Valley's doctors is said to be talking to the agents.",
    "stock": {
     "symbol": "VLYH",
     "from": 31,
-    "to": 26.3,
-    "pct": -15
+    "to": 27.3,
+    "pct": -12
    }
   },
   {

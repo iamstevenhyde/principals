@@ -10,50 +10,50 @@
    "name": "Tessa Brandt",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You advise the board, and if you recommend removal, the lack of written findings will be used against it. You want a record you can defend, and you want the outside directors to keep your firm after this weekend."
+   "motive": "You advise the board. If it removes him today with no written findings, the first lawsuit will ask what the cause was, and your advice will be the first exhibit. You want a record you can defend, and you want the outside directors to keep your firm after this weekend."
   },
   {
    "seat": "labor",
    "name": "Priya Raman",
    "title": "Labor director",
    "home": "Lumen Tech Workers Guild",
-   "motive": "You speak for the engineers, most of whom will quit if the CEO goes, and you were one of the 12 who signed the letter asking for slower releases. You want to protect jobs and equity and believe safety matters, but you cannot say both in one breath."
+   "motive": "You speak for the engineers, and most of them will quit if the CEO goes. You were also one of 12 who signed a letter asking for slower releases. You want to protect jobs and equity, you think the safety worries are real, and your members will hear how you voted."
   },
   {
    "seat": "fund",
    "name": "Anders Lund",
    "title": "Fund partner",
    "home": "Cobalt Ridge Ventures (owns 7%)",
-   "motive": "Your fund owns 7% and its investors expect the share sale to close at full price. You think the CEO is the asset and took a late-night call from the technology partner. You also sit on a board burned by a founder's removal, and you promised yourself never again."
+   "motive": "Your fund owns 7%, and its investors expect the December share sale to close at full price. You think the CEO is the asset, and you expect the technology partner to back him as soon as it hears. You once sat on a board that fired its founder, and you promised yourself never again."
   },
   {
    "seat": "founder_friend",
    "name": "Wes Calloway",
    "title": "Founder's friend",
    "home": "Idris Valdane, the founder (grad-school roommate)",
-   "motive": "Idris Valdane was your grad-school roommate. He has not decided who is right and asked you to speak for him without quoting him. You know he trusts the CEO and also fears the system the chief scientist is worried about."
+   "motive": "Idris Valdane, your grad-school roommate, holds 25% of the vote and got you this seat. He trusts the CEO but fears the unreleased system that the safety staff are worried about. He asked you to keep his options open, and he would see a firing today or a full clearance as closing them."
   },
   {
    "seat": "community",
    "name": "Mira Castellanos",
    "title": "Community seat",
    "home": "Open Signal Alliance (User-privacy advocate)",
-   "motive": "You were put on this board to speak for the public and have never been told what the unreleased system can do. You want a safer process, but a messy firing could make safety people look reckless for a decade."
+   "motive": "You are one of the three directors who say he was not honest, and the notes on the unfinished safety review are yours. You were put on this board to speak for the public, and you think every week he stays makes him harder to remove. A messy firing could also make safety people look reckless for a decade."
   },
   {
    "seat": "audit_chair",
    "name": "Raymond Osei",
    "title": "Audit chair",
    "home": "Lumen audit committee (retired accounting partner)",
-   "motive": "You must certify the December share sale, and you cannot sign with no written findings and a side venture nobody has disclosed. You want facts before any vote, but the fund wants this finished by Friday and the employees want the CEO kept. Nobody will thank you for delay."
+   "motive": "You must certify the December share sale, and you cannot sign with no written findings and a side venture nobody has disclosed. You want facts before any vote, but the fund wants this finished today and the employees want the CEO kept. Nobody will thank you for delay."
   }
  ],
  "briefing": {
   "intro": "Lumen Search runs a search engine and AI assistant with two billion queries a day. Its charter puts safe, widely shared AI ahead of profit and gives the board the final word. It is a Friday in November, the board is meeting without notice to the CEO, and a developer conference opens Monday.",
   "facts": [
-   "CEO Sam Hartigan raised the money, recruited most senior staff and drove the fastest user growth in the industry. Three directors say he was not fully honest with the board: a launch learned from the press, a safety review called finished when it was not, and a side venture. Two events are in emails, and one rests on a director's notes.",
+   "CEO Sam Hartigan raised the money, recruited most senior staff and drove the fastest user growth in the industry. Three directors say he was not fully honest with the board: a launch the board learned of from the press, a safety review called finished when it was not, and a side venture he did not disclose. Two of these are in emails, and one rests on a director's notes.",
    "The board has no written findings, no law firm and no investigator. Counsel warns that the first lawsuit would ask what the cause was.",
-   "Nearly all 770 employees hold equity tied to a share sale at an $86 billion valuation in December, and many say they follow the CEO, not the board. The president will quit if he goes, and a rival lab is offering to match researchers' equity.",
+   "Nearly all 770 employees hold equity tied to a share sale at an $86 billion valuation in December, and many say they follow the CEO, not the board. The president will quit if the CEO goes, and a rival lab is offering to match researchers' equity.",
    "The technology partner that supplies the computing was told nothing and could hire the CEO's team if the lab falls apart. A leak is expected within hours."
   ]
  },
@@ -68,7 +68,7 @@
    {
     "n": 2,
     "title": "Put him on notice",
-    "text": "Give him a written list of expectations, review him in ninety days, and keep his seat."
+    "text": "Give him a written list of expectations, review him in ninety days, and leave him as CEO and director."
    },
    {
     "n": 3,
@@ -96,7 +96,7 @@
   {
    "n": 1,
    "headline": "Lumen Board Removes CEO",
-   "story": "The board said he was not consistently honest and named the technology chief interim CEO. Engineers began threatening to leave, and the technology partner offered to hire his team.",
+   "story": "The board said he was not consistently honest and named the technology chief interim CEO. Safety researchers praised a board that used its charter, while engineers began threatening to leave and the technology partner offered to hire his team.",
    "stock": {
     "symbol": "Valuation",
     "from": 86,
@@ -107,12 +107,12 @@
   {
    "n": 2,
    "headline": "Lumen Board Puts CEO on Notice and Keeps Him",
-   "story": "The CEO gets a written list of expectations and a ninety-day review. Staff were relieved, while safety critics asked what had really changed.",
+   "story": "The CEO gets a written list of expectations and a ninety-day review. Staff were relieved, but one of the directors who raised the concerns resigned, and safety critics asked what had changed.",
    "stock": {
     "symbol": "Valuation",
     "from": 86,
-    "to": 85.1,
-    "pct": -1
+    "to": 82.6,
+    "pct": -4
    }
   },
   {
