@@ -10,42 +10,42 @@
    "name": "Dominic Aldrich",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You told the board two years ago that the less Thread knows about its suppliers' buildings, the less it can be sued for. Any option that sends engineers inside creates reports a court can use, and the binding agreement lets outsiders enforce them. Your name is on that advice and on tonight's minutes."
+   "motive": "You told the board two years ago that the less Thread knows about its suppliers' buildings, the less it can be sued for. Any engineer inside creates reports a court can use, and a binding agreement lets outsiders enforce them. You favor moving orders and signing nothing."
   },
   {
    "seat": "labor",
    "name": "Nasrin Haque",
    "title": "Labor director",
    "home": "Garment Workers Federation (supplier side)",
-   "motive": "You speak for factory workers and have seen exits chained shut. You back the binding agreement, but if factories close, your members lose the jobs it is meant to make safe, and many are your neighbors. You will tell them how you voted."
+   "motive": "You speak for factory workers and have seen exits chained shut. You back the binding agreement because it lets workers enforce repairs, and you will tell your members how you voted. You know closures hurt them, but a voluntary promise has never held."
   },
   {
    "seat": "fund",
    "name": "Teodor Brandt",
    "title": "Fund partner",
    "home": "Brightwater Capital (owns 8%)",
-   "motive": "Your fund owns 8% and reports its returns every quarter. The $12 million looks affordable, but rivals who skip it can undercut Thread on price. On another board you pushed a similar pledge, it cost that company a major customer, and your partners have not forgotten."
+   "motive": "Your fund owns 8% and reports quarterly. The $12 million looks affordable, but on another board a similar pledge cost a major customer and your partners remember. Rivals who skip it can undercut Thread on price, so you prefer the voluntary program."
   },
   {
    "seat": "founder_friend",
    "name": "Camille Roux",
    "title": "Founder's friend",
    "home": "Elodie Marchetti, the founder (first design partner)",
-   "motive": "Elodie Marchetti told you she wants to sign, then that she fears the lawsuits, and asked you to learn what the others think without saying what she thinks. You designed the first collection with her in a rented garage. She is the public face of the brand, and you do not want her blamed for a fire or sued over a signature."
+   "motive": "Elodie Marchetti told you she wants to sign, then that she fears the lawsuits, and asked you to sound out the others without saying what she thinks. You designed the first collection with her. You do not want her sued over a signature."
   },
   {
    "seat": "community",
    "name": "Rahel Tesfaye",
    "title": "Community seat",
    "home": "Karvan Export Council (Trade representative)",
-   "motive": "You represent Karvan's exporters, who depend on Thread's orders. You want safe factories and steady orders, and the largest factory owner is your cousin by marriage. A minister who is your friend told you to be careful what you say."
+   "motive": "You represent Karvan's exporters. The largest factory owner, your cousin by marriage, told you privately that he will close three of his five plants if Thread signs, about 9,000 jobs, but would stay for the voluntary program. Nobody else knows this."
   },
   {
    "seat": "audit_chair",
    "name": "Paolo Ricci",
    "title": "Audit chair",
    "home": "Thread audit committee (former Big Four partner)",
-   "motive": "Your committee approved the supplier audits that never checked a building's structure. Independent inspectors would publish what those audits missed, and someone will ask who approved them. If Thread fixes its own audits, your committee keeps the findings in house. The fund partner also wants the $12 million modeled small, and you are not sure it is."
+   "motive": "Your committee approved the supplier audits that never checked a building's structure. Independent inspectors would publish what those audits missed. If Thread strengthens its own audits, your committee keeps the findings in house and fixes the gap itself."
   }
  ],
  "briefing": {
@@ -64,22 +64,22 @@
    {
     "n": 1,
     "title": "Sign the binding agreement",
-    "text": "Sign the binding agreement with inspections, public reports, and shared repair costs."
+    "text": "Sign with inspections, public reports and shared repair costs; the repair bill has no cap, labor groups can sue to enforce it, and the biggest owner may leave."
    },
    {
     "n": 2,
-    "title": "Join the buyers' voluntary program",
-    "text": "Join the buyers' voluntary program, with inspections but no legal duty to fund repairs."
+    "title": "Join the voluntary program",
+    "text": "Join the buyers' program with inspections and no legal duty to fund repairs; labor groups will call it cover, and a building failure would still be Thread's story."
    },
    {
     "n": 3,
     "title": "Strengthen our own audits",
-    "text": "Add structural inspections to our own audits and decide on repairs factory by factory."
+    "text": "Add structural inspections to our own audits and decide on repairs factory by factory; results stay private, so critics say take our word."
    },
    {
     "n": 4,
-    "title": "Reduce exposure",
-    "text": "Move orders away from the riskiest factories over twelve months and sign nothing until then."
+    "title": "Move orders away",
+    "text": "Shift orders from the riskiest factories over twelve months and sign nothing; thousands of jobs are lost and labor groups say Thread left rather than fixed."
    }
   ]
  },
@@ -97,23 +97,23 @@
   {
    "n": 1,
    "headline": "Thread & Co. Signs Binding Factory Safety Agreement",
-   "story": "Thread will fund independent inspections and repairs and stop ordering from factories that refuse fixes. Labor groups praised the move, but the owner of its largest Karvan factory moved his lines to a rival buyer, and analysts said the repair bill has no ceiling.",
+   "story": "Thread will fund independent inspections and repairs and stop ordering from factories that refuse fixes. Labor groups praised the move, but the owner of its largest Karvan factory moved his lines to a rival buyer and closed three plants, and analysts said the repair bill has no ceiling.",
    "stock": {
     "symbol": "THRD",
     "from": 22,
-    "to": 21.1,
-    "pct": -4
+    "to": 20.9,
+    "pct": -5
    }
   },
   {
    "n": 2,
    "headline": "Thread & Co. Joins Buyers' Voluntary Safety Program",
-   "story": "Thread commits to inspections but takes on no legal duty to pay for repairs. Labor groups called it cover, and a pension fund asked what happens if a Thread supplier's building fails.",
+   "story": "Thread commits to inspections but takes on no legal duty to pay for repairs. Labor groups called it cover, a pension fund asked what happens if a Thread supplier's building fails, and the factory owner stayed.",
    "stock": {
     "symbol": "THRD",
     "from": 22,
-    "to": 21.6,
-    "pct": -2
+    "to": 21.3,
+    "pct": -3
    }
   },
   {
@@ -123,8 +123,8 @@
    "stock": {
     "symbol": "THRD",
     "from": 22,
-    "to": 21.8,
-    "pct": -1
+    "to": 21.6,
+    "pct": -2
    }
   },
   {
@@ -134,8 +134,8 @@
    "stock": {
     "symbol": "THRD",
     "from": 22,
-    "to": 21.3,
-    "pct": -3
+    "to": 20.7,
+    "pct": -6
    }
   }
  ],

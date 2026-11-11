@@ -10,42 +10,42 @@
    "name": "Oliver Brandt",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You signed off on this system's compliance reports for nine years, and your name is on the one that missed the billing pattern. You want your name off the first page of a complaint, and you want to keep the Valley account that pays most of your firm's bills."
+   "motive": "Your firm signed the compliance reports that missed this pattern, and Valley pays a third of your fees. Self-reporting puts your name on the first page of the filing. You would rather defend the coding as a reasonable reading and run the response yourself."
   },
   {
    "seat": "labor",
    "name": "Teresa Alvarado",
    "title": "Labor director",
    "home": "Valley Nurses Association",
-   "motive": "You speak for 6,000 nurses, and a few of them wrote the letter nobody read. You promised them the pressure would stop, but a hospital that repays a large sum cuts shifts before it cuts executives, and contract talks open in June."
+   "motive": "Contract talks open in June, and a repayment of this size cuts nurse shifts before it cuts executives. You also promised the nurses who wrote the letter that something would change. You can back a leadership change, but not a $110 million check."
   },
   {
    "seat": "fund",
    "name": "Ruth Kessler",
    "title": "Fund partner",
    "home": "Meridian Health Partners (owns 10%)",
-   "motive": "Your fund owns 10% and your bonus is paid on year-end value, nine months away. You dislike surprises and a full repayment is a big one, but you have also seen a cover-up cost more than a repayment made today."
+   "motive": "Your fund owns 10% and your bonus rides on year-end value. Privately, the lender told you the covenant trips at $75 million of repayment but it would accept a three-year plan. A quiet fix looks safest to you, unless a lump sum is forced."
   },
   {
    "seat": "founder_friend",
    "name": "Dr. Arthur Penn",
    "title": "Founder's friend",
    "home": "Dr. Evelyn Marsh, the founder (residency classmate)",
-   "motive": "Evelyn Marsh was your residency classmate and gave you this board seat, and she reminded you of that last week. Her office hired the consultant, and you do not know how much she knew. Voting to put her on leave would cost you her trust, and a full disclosure would send agents to her office first."
+   "motive": "Dr. Marsh gave you this seat, and her office hired the consultant. Self-reporting sends agents to her office first, and putting her on leave ends her career. You want the coding defended, or at least corrected without anyone being named."
   },
   {
    "seat": "community",
    "name": "Imani Brooks",
    "title": "Community seat",
    "home": "Patients at the bedside",
-   "motive": "You are the Chief Nursing Officer, and the nurses' letter came to your desk. You filed it, thinking a few coders were the problem, and a reporter called you Monday. You wonder whether your silence made you part of it, and you would rather say so first."
+   "motive": "A reporter called you Monday about the nurses' letter, and you hold a hospital board seat for rural patients who drive two hours to Valley. You would rather Valley say it first, even at a cost, than read it in the paper."
   },
   {
    "seat": "audit_chair",
    "name": "Gloria Feng",
    "title": "Audit chair",
    "home": "Valley audit committee (retired hospital CFO)",
-   "motive": "Your committee reviewed the coding reports the attorney signed, and the CFO told you the numbers tied out. You never tested them yourself. You want outside reviewers in before anyone says a figure aloud, because your own approval may be one of the things they find."
+   "motive": "Your committee reviewed the coding reports and the CFO told you they tied out, but you never tested them. Outside reviewers would start with your approvals. An interim leader who reviews the CFO first looks better to you than an open audit."
   }
  ],
  "briefing": {
@@ -55,7 +55,7 @@
    "The coding guidance came from a consultant hired by Dr. Marsh's office and paid a share of the added revenue, who called it aggressive but defensible. The overpayment may be $40 million to $110 million, and no one has checked individual charts.",
    "Valley keeps a second, internal cost report that does not match the one it filed with Medicare. Counsel says there may be legitimate reasons, and that agents will ask about the mismatch first.",
    "Nurses sent the Chief Nursing Officer a letter saying they were pressured to code patients as sicker. It was filed, never reached the board, and a reporter called about it Monday.",
-   "Profit is about $180 million a year, so repaying $110 million would cut a year of earnings by more than half and could trip a bond covenant. Regulators have gone easier on firms that came forward first. The stock is $31, down from $36."
+   "Profit is about $180 million a year, so repaying $110 million would cut a year of earnings by more than half and could trip a bond covenant. Disclosing early may lower penalties, or it may not. The stock is $31, down from $36."
   ]
  },
  "decision": {
@@ -63,23 +63,23 @@
   "options": [
    {
     "n": 1,
-    "title": "Disclose and repay",
-    "text": "Report the coding pattern to Medicare now, offer to repay, and bring in outside reviewers."
+    "title": "Self-report and repay",
+    "text": "Tell Medicare now, offer repayment and bring in outside reviewers; the bill could reach $110 million and strain the bond covenant."
    },
    {
     "n": 2,
-    "title": "Fix quietly",
-    "text": "Change the coding guidance quietly, keep past payments as they are, and tell the government only what it asks."
+    "title": "Correct guidance, answer questions",
+    "text": "Change the coding guidance now and answer agents' questions as asked; the mismatched cost report may later look like concealment."
    },
    {
     "n": 3,
-    "title": "Defend the coding",
-    "text": "Keep the guidance, call it an honest reading of unclear rules, and hire a litigation team."
+    "title": "Contest the claims",
+    "text": "Keep the guidance, call it an honest reading of unclear rules and hire litigators; fees run high and a cooperating doctor could change the case."
    },
    {
     "n": 4,
-    "title": "Reset the leadership",
-    "text": "Put Dr. Marsh and the CFO on leave and let an interim leader decide what to disclose."
+    "title": "Leadership leave first",
+    "text": "Put Dr. Marsh and the CFO on leave and let an interim leader decide; the government waits sixty days and Valley loses its founder."
    }
   ]
  },
@@ -90,36 +90,36 @@
  "questions": [
   "Why did pneumonia coding jump from 11% to 34%?",
   "The nurses' letter never reached the board. Who failed?",
-  "Regulators go easier on firms that come forward. Would you repay before anyone checks the charts?",
-  "Disclose or defend? What tipped your vote?"
+  "Regulators sometimes reward early disclosure and sometimes do not. Would you repay before anyone checks the charts, and what would change your answer?",
+  "Which option did you vote for, and what tipped it?"
  ],
  "press": [
   {
    "n": 1,
    "headline": "Valley Health Reports Its Own Billing Pattern to Medicare",
-   "story": "The board said it will repay the difference once a sample chart review is done, with outside counsel reporting to directors. Analysts warned that a repayment near the top of the range could strain the bond covenant.",
+   "story": "The board said it will repay once a sample chart review is done, with outside counsel reporting to directors. Analysts warned that a repayment near the top of the range would breach the bond covenant, and the nurses' union said shift cuts are under discussion at both hospitals.",
    "stock": {
     "symbol": "VLYH",
     "from": 31,
-    "to": 29.8,
-    "pct": -4
+    "to": 27.9,
+    "pct": -10
    }
   },
   {
    "n": 2,
-   "headline": "Valley Health Rewrites Coding Rules and Says Little",
-   "story": "Valley changed its coding guidance but told agents only what they asked for. The regional paper says the nurses' letter and a second cost report are the next questions.",
+   "headline": "Valley Health Rewrites Coding Rules and Answers Questions as Asked",
+   "story": "Valley changed its guidance and told agents only what they asked. Lenders were relieved that no repayment is planned, but the regional paper says the nurses' letter and a second cost report are the next questions.",
    "stock": {
     "symbol": "VLYH",
     "from": 31,
-    "to": 28.2,
-    "pct": -9
+    "to": 29.1,
+    "pct": -6
    }
   },
   {
    "n": 3,
    "headline": "Valley Health Calls Billing Pattern an Honest Reading of Unclear Rules",
-   "story": "The board kept its consultant, hired litigators and will cooperate only as the law requires. Lenders were relieved that no repayment is planned, but a lawyer for one of Valley's doctors is said to be talking to the agents.",
+   "story": "The board kept its consultant and hired litigators. Lenders were relieved that no repayment is planned, but a lawyer for one of Valley's doctors is said to be talking to the agents.",
    "stock": {
     "symbol": "VLYH",
     "from": 31,
@@ -130,12 +130,12 @@
   {
    "n": 4,
    "headline": "Valley Health Founder and Finance Chief Placed on Leave",
-   "story": "An interim leader will run the system and decide what to disclose after a sixty-day review. Investors welcomed the break but asked why the government must wait two months for an answer.",
+   "story": "An interim leader will run the system and decide what to disclose after a sixty-day review. Investors welcomed the break but asked why the government must wait two months, and several senior doctors said they are considering leaving with the founder.",
    "stock": {
     "symbol": "VLYH",
     "from": 31,
-    "to": 30.1,
-    "pct": -3
+    "to": 28.5,
+    "pct": -8
    }
   }
  ],

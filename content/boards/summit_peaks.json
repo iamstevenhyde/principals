@@ -10,42 +10,42 @@
    "name": "Marisa Kell",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You have had the engineer's full warning message for a week, and the board has only heard that it exists. Showing it risks the CEO's trust, and holding it risks your seat when the congressional committee asks who knew what."
+   "motive": "You have held the engineer's full warning for a week. It says the grip fails only under sustained cold below minus 10 C, true at just three of the 41 lifts, and nobody else has read that. Releasing it risks the CEO's trust, and holding it risks your seat."
   },
   {
    "seat": "labor",
    "name": "Tomas Reyes",
    "title": "Labor director",
    "home": "Lift & Lodge Workers Local 12",
-   "motive": "Your union builds and runs the lifts, and a lift operator died on Sunday. A shutdown means layoffs in Alder Creek, and your own pension sits in the fund those layoffs would hit. Your members will blame you if you did not push for safety."
+   "motive": "Your union builds and runs the lifts, and an operator died Sunday. A full shutdown means layoffs, and your pension sits in the fund they would hit. You want the dangerous lifts shut and the safe ones working, not a blanket closure."
   },
   {
    "seat": "fund",
    "name": "Grace Whitlow",
    "title": "Fund partner",
    "home": "Granite Peak Capital (owns 8%)",
-   "motive": "Your fund owns 8% and your bonus depends on a share price the buybacks keep up. Pausing payouts could push the stock lower, but regulators punish companies that look like they are stalling. Your partners want an answer by Monday."
+   "motive": "Your fund owns 8% and your bonus depends on a share price the buybacks support. A full stop drops the stock, and regulators punish stalling. You would rather let regulators set the timetable and keep the lifts open until they do."
   },
   {
    "seat": "founder_friend",
    "name": "Hal Brennan",
    "title": "Founder's friend",
    "home": "Dana Strand, the founder (college roommate)",
-   "motive": "Dana Strand is your college roommate, and you skied the first Alder Creek lift with her. She believes the CEO and does not want a leadership fight. She put you on this board, and you must decide whether to carry her view into the room or tell her she is wrong."
+   "motive": "Dana Strand is your college roommate and believes the CEO. She put you on this board and does not want a leadership fight. Splitting the roles would read as a verdict on her pick, so you would carry her view and keep the lifts open."
   },
   {
    "seat": "community",
    "name": "June Okafor",
    "title": "Community seat",
    "home": "Alder Creek (Mayor)",
-   "motive": "You are Mayor of Alder Creek, where the second fall happened, and you went to two of the funerals. The town lives on Summit's jobs and taxes, and you face re-election in the fall. Half the town wants the lifts shut, and the other half wants its paychecks."
+   "motive": "You are Mayor of Alder Creek and went to two funerals. The town lives on Summit's jobs and taxes, and you face re-election in the fall. A three-week committee keeps paychecks while showing the town someone is looking, so you favor it."
   },
   {
    "seat": "audit_chair",
    "name": "Ines Calder",
    "title": "Audit chair",
    "home": "Summit audit committee (former state inspector)",
-   "motive": "You led the risk review that rated lift risk low, and the engineer's warning about the design shows that review missed something. Any outside review or new safety committee would read your work first. Coming forward now could end your career, and being found out later would end it worse."
+   "motive": "You led the risk review that rated lift risk low. A full stop brings an outside review that reads your work first, and a new safety committee would too. You prefer the regulators set the pace, and you would not volunteer for either."
   }
  ],
  "briefing": {
@@ -62,23 +62,23 @@
   "options": [
    {
     "n": 1,
-    "title": "Stop everything",
-    "text": "Close every Series 7 lift, halt production, and bring in an outside safety review before anything reopens."
+    "title": "Stop all Series 7 lifts",
+    "text": "Close every Series 7 lift and halt production for an outside safety review; about $1 billion in supplier payments and thousands of jobs are at risk."
    },
    {
     "n": 2,
-    "title": "Fix and keep running",
-    "text": "Close Alder Creek and any lift regulators order closed, keep building, and say the fix will make it safe."
+    "title": "Close Alder Creek only",
+    "text": "Close Alder Creek and any lift regulators order closed, and keep building while the fix is finished; families' lawyers will cite a decision made after two falls."
    },
    {
     "n": 3,
-    "title": "Keep running and defend",
-    "text": "Keep every lift open, keep building, wait for regulators to set the timetable, and defend the company in public."
+    "title": "Keep running, defend",
+    "text": "Keep every lift open and wait for regulators; a third fall, a license loss or voided insurance could end the company."
    },
    {
     "n": 4,
-    "title": "Change the leadership",
-    "text": "Separate the Chair and CEO roles and let a new safety committee decide after a three-week review."
+    "title": "Split Chair and CEO",
+    "text": "Separate the roles and let a new safety committee decide after three weeks; every lift stays open in the meantime."
    }
   ]
  },
@@ -96,12 +96,12 @@
   {
    "n": 1,
    "headline": "Summit Peaks Grounds All Series 7 Lifts",
-   "story": "Summit closed every Series 7 lift and suspended dividends and buybacks pending an independent safety review. Suppliers face about $1 billion in lost orders, and a rival lift maker is already calling Summit's customers.",
+   "story": "Summit closed every Series 7 lift and suspended dividends and buybacks pending an independent safety review. Suppliers face about $1 billion in lost orders, thousands of jobs are at risk, and a rival lift maker is already calling Summit's customers.",
    "stock": {
     "symbol": "SMPK",
     "from": 380,
-    "to": 350,
-    "pct": -8
+    "to": 334.4,
+    "pct": -12
    }
   },
   {
@@ -111,19 +111,19 @@
    "stock": {
     "symbol": "SMPK",
     "from": 380,
-    "to": 327,
-    "pct": -14
+    "to": 330.6,
+    "pct": -13
    }
   },
   {
    "n": 3,
    "headline": "Summit Peaks Defends Its Record as Lifts Keep Running",
-   "story": "Summit left every Series 7 lift open and kept building, so no jobs were cut this week. Within days the state regulator ordered closures anyway, and insurers said coverage may be void.",
+   "story": "Summit left every Series 7 lift open and kept building, so no jobs were cut this week and the stock held up better than feared. Within days the state regulator ordered closures anyway, and insurers said coverage may be void.",
    "stock": {
     "symbol": "SMPK",
     "from": 380,
-    "to": 308,
-    "pct": -19
+    "to": 342.0,
+    "pct": -10
    }
   },
   {
@@ -133,8 +133,8 @@
    "stock": {
     "symbol": "SMPK",
     "from": 380,
-    "to": 346,
-    "pct": -9
+    "to": 338.2,
+    "pct": -11
    }
   }
  ],

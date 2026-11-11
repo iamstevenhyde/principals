@@ -10,42 +10,42 @@
    "name": "Carla Whitfield",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You are outside counsel and have seen the complaint numbers. You know that calling it a few bad employees is the line a regulator will examine, and you want your advice in writing. Heartland is your firm's biggest client, and your partners would rather you not become a witness."
+   "motive": "You are outside counsel and have seen the complaint numbers. Heartland is your firm's biggest client, and refunding every fee puts an admission in writing. You prefer fixing the process with confirmation calls and keeping admissions out of the record."
   },
   {
    "seat": "labor",
    "name": "Denise Kowalski",
    "title": "Labor director",
    "home": "Meatcutters Local 88",
-   "motive": "You speak for the plant workers, and some of your members' cousins are the field staff who were fired. You think the people at the bottom took the blame for targets set at the top, but if the stock falls and the plant loses cattle, your members lose hours."
+   "motive": "You speak for plant workers. A rancher boycott or a sales drop means fewer hours on the line, and the fired field staff were your members' cousins. You want the abuse stopped without the profit division collapsing, so you favor stronger checks."
   },
   {
    "seat": "fund",
    "name": "Marcus Feld",
    "title": "Fund partner",
    "home": "Cornbelt Partners (owns 9%)",
-   "motive": "Your fund owns 9% and you told your investors the program count was why you bought. A drop in a headline metric can hurt the price, and a fraud story can wipe out a company. You do not want to learn which one this is from a newspaper."
+   "motive": "Your fund owns 9% and told investors the program count was why you bought. Privately, your lender told you the credit line is priced off that count: below 3.0 the rate steps up a point, about $9 million a year. Ending targets costs real money."
   },
   {
    "seat": "founder_friend",
    "name": "Gus Halvorsen",
    "title": "Founder's friend",
    "home": "Walt Dreyer, the founder (hunting partner of 30 years)",
-   "motive": "Walt Dreyer has been your hunting partner for thirty years. He is proud of the culture he thinks the program count measures, he hired Karen Mueller himself, and he will not believe the complaints without proof. If you vote to end the targets or move her out before there is proof, he will take it as a vote against him."
+   "motive": "Walt Dreyer has been your hunting partner for thirty years and hired Karen Mueller himself. He will not believe the complaints without proof. Voting to end targets or move her out would read as a vote against him, so you want time."
   },
   {
    "seat": "community",
    "name": "Luanne Pruitt",
    "title": "Community seat",
    "home": "Prairie Ranchers' Co-op (President)",
-   "motive": "You lead the co-op whose members found fees on their checks, and you were elected to protect them. Heartland is also the only buyer within a day's haul for many ranchers, your own herd included. You want an apology and a refund, and you need the plant to stay open."
+   "motive": "You lead the ranchers' co-op whose members found fees on their checks. You want the refund and an apology, but Heartland is the only buyer within a day's haul and a boycott would hurt your own herd too."
   },
   {
    "seat": "audit_chair",
    "name": "Howard Lindqvist",
    "title": "Audit chair",
    "home": "Heartland audit committee (retired accountant)",
-   "motive": "You signed the last three audits, and the program count was a figure you reviewed. Calling this a few bad employees protects your record, while calling it a design flaw means you missed it. You want a review that finds a process failure, not a person, and not you."
+   "motive": "You signed the last three audits and reviewed the program count. Ending the targets says the metric you approved was the problem, and removing Mueller blames one person. A six-month study keeps the questions pointed away from your signature."
   }
  ],
  "briefing": {
@@ -54,7 +54,7 @@
    "Reps are paid a bonus for each add-on program, such as hauling, feed credit or insurance, that a rancher or grocer joins, under the slogan \"five programs per account.\" The average has risen from 2.1 to 4.6, and analysts and lenders treat it as proof of customer loyalty.",
    "A newspaper plans a story in ten days about reps who enrolled ranchers in fee-charging programs without their knowledge. The ethics hotline logged 650 enrollment complaints in two years, and 230 field staff were fired, mostly at the lowest levels.",
    "Karen Mueller runs the sales division, which brings in 60% of profit. She calls it a handful of cheaters and says the targets are fair, and her own bonus rides on the count.",
-   "Dropping the targets could cut the program count by half in two years and the stock ($52) by 15% or more. Keeping them risks fines and lawsuits, and regulators have been gentler with firms that changed course before the story ran.",
+   "Dropping the targets could cut the program count by half in two years and the stock ($52) by 15% or more. Keeping them risks fines and lawsuits if the newspaper story lands first.",
    "Improper fees are estimated at $4 million to $40 million. Ranchers are angry, and a boycott by a quarter of them would leave the plant short of cattle."
   ]
  },
@@ -63,23 +63,23 @@
   "options": [
    {
     "n": 1,
-    "title": "End the targets",
-    "text": "Drop the bonus, refund every disputed fee, and have an outside firm review all enrollments."
+    "title": "End targets and refund",
+    "text": "Drop the bonus, refund every disputed fee and bring in an outside firm; the program count and the stock are expected to fall."
    },
    {
     "n": 2,
-    "title": "Keep the targets and police them",
-    "text": "Keep the bonus, add confirmation calls to ranchers, and fire anyone caught."
+    "title": "Keep targets, add checks",
+    "text": "Keep the bonus, add confirmation calls to ranchers and fire anyone caught; ranchers may say it blames the bottom of the ladder."
    },
    {
     "n": 3,
-    "title": "Review before deciding",
-    "text": "Change nothing now, hire an outside firm to report in six months, and say we take it seriously."
+    "title": "Study first",
+    "text": "Change nothing now and hire an outside firm to report in six months; the newspaper story runs in ten days with no answer."
    },
    {
     "n": 4,
-    "title": "Change the people",
-    "text": "Move Karen Mueller out of sales and let an interim head decide on the targets later."
+    "title": "Replace the sales head",
+    "text": "Move Karen Mueller out of sales and let an interim head decide on targets; the division brings in 60% of profit."
    }
   ]
  },
@@ -91,24 +91,24 @@
   "Why pay reps per program signed?",
   "Heartland fired 230 staff. Why didn't that fix it?",
   "Karen Mueller: keep or replace?",
-  "You're Walt's friend. Do you vote against Karen?"
+  "You are Walt's friend. What does loyalty to him require here?"
  ],
  "press": [
   {
    "n": 1,
    "headline": "Heartland Beef Ends Sales Targets and Refunds Ranchers",
-   "story": "The company dropped its five-programs bonus and will refund every disputed fee after an outside review. Analysts cut growth forecasts, and ranchers called the apology overdue but welcome.",
+   "story": "The company dropped its five-programs bonus and will refund every disputed fee after an outside review. Ranchers called the apology overdue but welcome, while the lender raised the credit line rate and the plant cut two shifts as sales fell.",
    "stock": {
     "symbol": "HBEF",
     "from": 52,
-    "to": 45.8,
-    "pct": -12
+    "to": 46.3,
+    "pct": -11
    }
   },
   {
    "n": 2,
    "headline": "Heartland Beef Adds Confirmation Calls, Keeps Sales Bonus",
-   "story": "Reps will phone ranchers to confirm each sign-up, and anyone caught will be fired. The ranchers' co-op says firing more low-level staff misses the people who set the targets.",
+   "story": "Reps will phone ranchers to confirm each sign-up, and anyone caught will be fired. The ranchers' co-op says firing more low-level staff misses the people who set the targets, and a state regulator asked for the complaint log.",
    "stock": {
     "symbol": "HBEF",
     "from": 52,
@@ -130,7 +130,7 @@
   {
    "n": 4,
    "headline": "Heartland Beef Moves Top Sales Executive Out",
-   "story": "Karen Mueller leaves the division, and an interim head will decide on targets after ninety days. Analysts noted the division brings in 60% of profit and asked who will hold the numbers.",
+   "story": "Karen Mueller leaves the division, and an interim head will decide on targets after ninety days. Analysts noted the division brings in 60% of profit, and two regional managers resigned within the week.",
    "stock": {
     "symbol": "HBEF",
     "from": 52,

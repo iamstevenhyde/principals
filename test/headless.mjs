@@ -89,7 +89,7 @@ try {
   const bi = await admin.evaluate(() => Object.keys(window.__host.state.boards).indexOf('valley_health'));
   await admin.click(`[data-rb="${bi}"]`); await admin.waitForTimeout(1500);
   const t = await proj.textContent('#app');
-  sawPress = t.includes('VLYH') && t.includes('%'); sawValleyCase = t.includes('Columbia/HCA'); sawQs = t.includes('Disclose or defend');
+  sawPress = t.includes('VLYH') && t.includes('%'); sawValleyCase = t.includes('Columbia/HCA'); sawQs = t.includes('what tipped it');
   await proj.screenshot({ path: join(shots, '10_projector_one_screen_debrief.png') });
   ok(sawValleyCase, 'debrief reveals the real case (Columbia/HCA)');
   ok(sawPress, 'projector shows newspaper headline and stock move before the real case');

@@ -67,7 +67,7 @@ function render(st) {
   const boards = Object.values(st.boards);
   const focus = document.activeElement && document.activeElement.id;
   const html = `
-  <div class="row"><h1 style="flex:1">Principals: host <span class="pill">${esc(st.code)}</span></h1><span class="clock" id="hclk"></span></div>
+  <div class="row"><h1 style="flex:1">Principals: host <span class="pill">${esc(st.code)}</span></h1><span class="clock" id="dclk" style="margin-right:12px"></span><span class="clock" id="hclk"></span></div>
   <div class="card row ctl">
     <b>Phase:</b> ${esc(st.phase)}
     <a href="${q('projector.html?g=' + st.code)}" target="_blank">Open projector</a>
@@ -87,7 +87,7 @@ function render(st) {
      | ${ds.map(x => esc(x.name)).join(', ')}</div>`; }).join('')}</div>` : ''}
   ${st.phase === 'reveal' ? `<div class="card row ctl"><b>Debrief: one screen per board. Projector shows</b>${Object.values(st.boards).map((b, i) => `<button class="${(st.revealStep || 0) === i ? 'primary' : ''}" data-rb="${i}">${esc(b.content.short || b.content.name)}</button>`).join('')}<span class="mute small">Arrow keys also switch boards.</span></div>` : ''}
   <p class="small mute">Keep this tab open: it runs the game. ${host.lastError ? '<span class="err">' + esc(host.lastError) + '</span>' : ''}</p>`;
-  const paint = () => { const c = document.getElementById('hclk'); if (c) c.textContent = fmtClock(left); };
+  const paint = () => { const c = document.getElementById('hclk'); if (c) c.textContent = fmtClock(left); const d = document.getElementById('dclk'); if (d) { const dl = (st.phase === 'play' && st.clock && left != null) ? Math.max(0, 300000 - (st.clock.total - left)) : null; d.textContent = dl == null ? '' : (dl > 0 ? 'Discuss ' + fmtClock(dl) : 'Voting open'); } };
   if (html === lastHtml) { paint(); return; }
   lastHtml = html; app.innerHTML = html; paint();
   const on = (id, f) => { const el = document.getElementById(id); if (el) el.onclick = f; };

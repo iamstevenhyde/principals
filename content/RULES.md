@@ -5,9 +5,9 @@ Principals, one-round design (Nov 2026): one decision round, six boards, no scor
 ## Board file (content/boards/*.json)
 
 - `id`, `name`, `short` (one word, used on the debrief), `industry`, `blurb`.
-- `directors`: six entries, one per seat in this order: `attorney`, `labor`, `fund`, `founder_friend`, `community`, `audit_chair` (label "Audit chair"). Each has `seat`, `name`, `title`, `home` (who they speak for) and `motive` (the private role card, 55 to 80 words, "you" voice, a personal stake that pulls against the board's interest).
+- `directors`: six entries, one per seat in this order: `attorney`, `labor`, `fund`, `founder_friend`, `community`, `audit_chair` (label "Audit chair"). Each has `seat`, `name`, `title`, `home` (who they speak for) and `motive` (the private role card, about 40 to 50 words, "you" voice, a personal stake that pulls against the board's interest).
 - `briefing`: `{intro, facts[]}`. `intro` is the setting. `facts` are the bullets. Facts may pull in opposite directions and many are unconfirmed on purpose. All figures inside are fictional for the disguised firm.
-- `decision`: `{lead, options[]}`. `options` are `{n, title, text}`, numbered 1 to 4, with `text` a single plain line of 12 to 19 words. None is clearly right.
+- `decision`: `{lead, options[]}`. `options` are `{n, title, text}`, numbered 1 to 4, with `text` a single plain line of about 20 to 28 words that names the option and its own real cost. All four titles are neutral. None is clearly right, and each board needs at least two seats with a private reason to oppose the most transparent option, one seat that gains from each other option, and one private fact that changes which option is least bad.
 - `press`: one entry per option, `{n, headline, story, stock{symbol, from, to, pct}}`, written ahead of time and shown after the vote as the morning-after newspaper and stock screen. `ticker` gives the symbol and starting price.
 - `reveal`: `{case, text}`. The real case. Shown only in the debrief.
 - `questions`: four debrief questions, shown only in the debrief.
@@ -21,7 +21,7 @@ The sentence "The board is small, so every director sits on several committees" 
 ## Phases
 
 1. Lobby. Students join on phones. The host assigns each to a board seat (or Assign automatically) and marks the Chair. Anyone unplaced when the host starts is dealt a seat. Six seats per board (room for 36); with more than six students on a board, extras share a seat (a second player on the same role card). Fewer than six drops seats in the order in config/scoring.js.
-2. Play (default 15 minutes, host-settable). Each phone has three tabs: Briefing (one screen), My card (private), Vote. There is no chat; the board talks face to face. Everyone votes for one numbered option and can change it until the Chair locks. The projector shows each board's "n of m have voted" and the choice once locked.
+2. Play (default 15 minutes, host-settable). The host screen also shows a 5-minute "Discuss" countdown from the start of play, then "Voting open"; it is advisory and never locks the vote. Each phone has three tabs: Briefing (one screen), My card (private), Vote. There is no chat; the board talks face to face. Everyone votes for one numbered option and can change it until the Chair locks. The projector shows each board's "n of m have voted" and the choice once locked.
 3. Reveal (debrief). The host presses Next screen (or arrow keys). Then each board gets ONE screen with everything at once: the morning-after newspaper and stock move on the left, "what happened" (the real case) and "discuss" (the four questions) on the right. The host picks which board is on the projector; there is no Back/Next.
 
 ## The vote

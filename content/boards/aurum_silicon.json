@@ -10,42 +10,42 @@
    "name": "Lorna Whitcombe",
    "title": "Attorney",
    "home": "The state bar",
-   "motive": "You advise the board, and the CEO told his staff before he told you. The company's statement says there is no reason to believe secrets were lost, and you cannot find what that rests on. You want no statement the board cannot back, and you want to keep this client."
+   "motive": "You advise the board, and the CEO told his staff before he told you. The statement that no secrets were lost rests on nothing you can find. A special committee would hire its own counsel and replace you, so you want the review kept with your firm."
   },
   {
    "seat": "labor",
    "name": "Marcus Oyelaran",
    "title": "Labor director",
    "home": "Aurum Employees Council",
-   "motive": "You speak for 26,000 employees. Most of their savings sit in Aurum stock, which has dropped, and most of them love the CEO. If he steps aside, the best engineers will start taking calls from rivals. They also ask you why his two children were hired, and you have never had an answer."
+   "motive": "You speak for 26,000 employees whose savings sit in Aurum stock. Forty senior engineers told you privately they will leave if Nakamura goes, and rivals are calling. You can accept a review but not a firing, and you cannot say why the children were hired."
   },
   {
    "seat": "fund",
    "name": "Dmitri Albrecht",
    "title": "Fund partner",
    "home": "Larkspur Ventures (owns 3%)",
-   "motive": "Your fund backed Aurum in its first year, and the 3% it still holds is most of the fund. In nineteen years on this board you never pressed the CEO on succession, because he said no one else could do the job. You also never wanted to be the director who forced out the founder."
+   "motive": "Your 3% is most of your fund, and in nineteen years you never pressed the CEO on succession. A named successor lets you tell investors there is a plan without a firing. A special committee would ask why you stayed quiet that long."
   },
   {
    "seat": "founder_friend",
    "name": "Rosalind Tran",
    "title": "Founder's friend",
    "home": "Kai Nakamura, the CEO (co-founder, friend of thirty years)",
-   "motive": "Kai Nakamura asked you to speak for him in the room. He told you that stepping aside would end the company he built, but he has not told you everything about that trade show in 2024. You want to protect him, and you want to know what you are protecting."
+   "motive": "Kai asked you to speak for him. Privately he told you he will resign with a ninety-day handover if asked, but only if it looks like his choice. Nobody else knows this. He will fight a demotion and may walk out."
   },
   {
    "seat": "community",
    "name": "Joon-ho Baek",
    "title": "Community seat",
    "home": "Pacific Security Forum (former counterintelligence official)",
-   "motive": "You were put on this board to speak for the public interest, and you know how foreign services recruit executives. The company's word that nothing leaked is not evidence. But a chipmaker with no CEO also weakens the country, and you do not want to be blamed for that."
+   "motive": "You were put here for the public interest, and you know how foreign services recruit executives. His word that nothing leaked is not evidence. You want him out of anything touching export controls now, even if it costs the stock."
   },
   {
    "seat": "audit_chair",
    "name": "Vivian Ostrow",
    "title": "Audit chair",
    "home": "Aurum audit committee (retired accounting partner)",
-   "motive": "Your committee approved the sales controls that let more than $4 billion of chips go to one buyer, and investigators will ask who reviewed them. A special committee of outside directors would start with yours. You would rather the review stay with a law firm the board hires and the questions stay on the CEO."
+   "motive": "Your committee approved the sales controls that let $4 billion of chips go to one buyer. A special committee would start with your files. You want the review kept with a law firm the board hires, and you do not want a new chair."
   }
  ],
  "briefing": {
@@ -62,23 +62,23 @@
   "options": [
    {
     "n": 1,
-    "title": "Keep him during the review",
-    "text": "Nakamura stays as CEO while an outside firm investigates, and the board reports its findings in sixty days."
+    "title": "Keep him through review",
+    "text": "Nakamura stays as CEO while an outside firm investigates for sixty days; Congress and customers may read it as shielding him."
    },
    {
     "n": 2,
-    "title": "Step aside",
-    "text": "Nakamura steps aside with pay and a senior director runs the company as interim CEO until findings are in."
+    "title": "Step aside now",
+    "text": "Nakamura steps aside with pay and a senior director becomes interim CEO; key executives and engineers have said they may follow him out."
    },
    {
     "n": 3,
     "title": "Name a successor now",
-    "text": "Name a chief operating officer today as successor-in-waiting, and keep Nakamura as CEO while the review runs."
+    "text": "Name a COO as successor today and keep Nakamura as CEO during the review; the COO is untested and the probe stays with the board."
    },
    {
     "n": 4,
     "title": "Independent chair and probe",
-    "text": "Appoint an independent chair and a special committee to run the investigation, with Nakamura reporting to it."
+    "text": "Appoint an independent chair and a special committee to investigate with Nakamura reporting to it; he may refuse the demotion and leave."
    }
   ]
  },
@@ -100,14 +100,14 @@
    "stock": {
     "symbol": "AURM",
     "from": 180,
-    "to": 169.2,
-    "pct": -6
+    "to": 163.8,
+    "pct": -9
    }
   },
   {
    "n": 2,
    "headline": "Aurum CEO Steps Aside, Interim Named",
-   "story": "A senior director took over as interim CEO. Customers asked who is in charge of product decisions, and several executives said they would leave if the founder did not return.",
+   "story": "A senior director took over as interim CEO. Customers asked who is in charge of product decisions, and forty senior engineers said they would leave if the founder did not return.",
    "stock": {
     "symbol": "AURM",
     "from": 180,
@@ -118,23 +118,23 @@
   {
    "n": 3,
    "headline": "Aurum Names Chief Operating Officer",
-   "story": "The new COO will run daily operations and is first in line to succeed Nakamura, who stays on as CEO. Analysts liked the succession signal but asked why it took a scandal to get one.",
-   "stock": {
-    "symbol": "AURM",
-    "from": 180,
-    "to": 171,
-    "pct": -5
-   }
-  },
-  {
-   "n": 4,
-   "headline": "Aurum Adds Independent Chair, Special Committee Takes Over Probe",
-   "story": "A committee of outside directors will run the investigation and Nakamura will report to it. Some investors called it overdue, while the founder's allies called it a demotion and Nakamura was said to be weighing whether to stay.",
+   "story": "The new COO will run daily operations and is first in line to succeed Nakamura, who stays as CEO. Analysts liked the succession signal but asked why it took a scandal, and the committees said a successor does not answer their questions.",
    "stock": {
     "symbol": "AURM",
     "from": 180,
     "to": 169.2,
     "pct": -6
+   }
+  },
+  {
+   "n": 4,
+   "headline": "Aurum Adds Independent Chair, Special Committee Takes Over Probe",
+   "story": "A committee of outside directors will run the investigation and Nakamura will report to it. The founder's allies called it a demotion, and Nakamura was said to be weighing whether to stay while a rival began recruiting his engineers.",
+   "stock": {
+    "symbol": "AURM",
+    "from": 180,
+    "to": 165.6,
+    "pct": -8
    }
   }
  ],
